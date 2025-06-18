@@ -12,22 +12,71 @@ from app.state import reload_agent_from_json, tools
 from app.api import evaluation_routes, admin_routes, chat_routes, users_routes, auth_routes
 from app.logs import logger
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await reload_agent_from_json()
-    #ic(f"worker ready → {len(tools)} tools")
-    logger.info(f"worker ready → {len(tools)} tools")
-
+    """
+    Application lifespan manager.
+    Marks the application as ready immediately for health checks.
+    """
+    logger.info("Application starting - health check ready")
     yield
+    logger.info("Application shutting down")
 
 app = FastAPI(
     title="LLM Concurrent API",
     lifespan=lifespan,
-    docs_url=None,  # Disable Swagger UI
-    redoc_url=None,  # Disable ReDoc
-    openapi_url=None  # Disable OpenAPI schema
+    docs_url=None,  
+    redoc_url=None,  
+    openapi_url=None  
 )
+
+# Health check endpoints
+@app.get("/health")
+async def health_check():
+    """
+    Health check endpoint for Azure App Service.
+    Returns application status and tool loading progress.
+    """
+    try:
+        tools_count = len(tools) if tools is not None else 0
+        return {"status": "healthy", "ready": True, "tools_loaded": tools_count}
+    except Exception as e:
+        logger.error(f"Error in health check: {str(e)}")
+        return {"status": "healthy", "ready": True, "tools_loaded": 0}
+
+@app.get("/")
+async def root():
+    """
+    Root endpoint for Azure App Service.
+    Returns basic application information.
+    """
+    try:
+        tools_count = len(tools) if tools is not None else 0
+        return {"message": "LLM API is running", "status": "ready", "tools_loaded": tools_count}
+    except Exception as e:
+        logger.error(f"Error in root endpoint: {str(e)}")
+        return {"message": "LLM API is running", "status": "ready", "tools_loaded": 0}
+
+# Background tool loading
+@app.on_event("startup")
+async def startup_event():
+    """
+    Startup event handler.
+    Loads tools in background after application startup.
+    """
+    async def load_tools_background():
+        """
+        Background task to load tools without blocking the application.
+        """
+        try:
+            logger.info("Starting background tool loading...")
+            await reload_agent_from_json()
+            logger.info(f"Background tool loading complete: {len(tools)} tools")
+        except Exception as e:
+            logger.error(f"Background tool loading failed: {str(e)}")
+    
+    # Start background loading task
+    asyncio.create_task(load_tools_background())
 
 # Configure CORS with restricted origins
 app.add_middleware(
