@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+pydantic
+python-dotenv
+llama-index
+llama-index-llms-azure-openai==0.3.2
+icecream
+gunicorn
