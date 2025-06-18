@@ -21,15 +21,24 @@ async def lifespan(app: FastAPI):
 
     yield
 
-app = FastAPI(title="LLM Concurrent API",lifespan=lifespan)
+app = FastAPI(
+    title="LLM Concurrent API",
+    lifespan=lifespan,
+    docs_url=None,  # Disable Swagger UI
+    redoc_url=None,  # Disable ReDoc
+    openapi_url=None  # Disable OpenAPI schema
+)
 
-# Configure CORS
+# Configure CORS with restricted origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  
+    allow_origins=[
+        "https://ranpge-test.skema.edu",
+        "https://bottomup-ranpge-test.skema.edu"
+    ],
     allow_credentials=True,
-    allow_methods=["*"],  
-    allow_headers=["*"],  
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["*"],
 )
 
 # mount routers
