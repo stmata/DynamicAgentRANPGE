@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from icecream import ic
 import uvicorn
+import asyncio
 from app.state import reload_agent_from_json, tools
 from app.api import evaluation_routes, admin_routes, chat_routes, users_routes, auth_routes
 from app.logs import logger
@@ -19,7 +20,24 @@ async def lifespan(app: FastAPI):
     Marks the application as ready immediately for health checks.
     """
     logger.info("Application starting - health check ready")
+    
+    # Background tool loading
+    async def load_tools_background():
+        """
+        Background task to load tools without blocking the application.
+        """
+        try:
+            logger.info("Starting background tool loading...")
+            await reload_agent_from_json()
+            logger.info(f"Background tool loading complete: {len(tools)} tools")
+        except Exception as e:
+            logger.error(f"Background tool loading failed: {str(e)}")
+    
+    # Start background loading task
+    asyncio.create_task(load_tools_background())
+    
     yield
+    
     logger.info("Application shutting down")
 
 app = FastAPI(
@@ -56,27 +74,6 @@ async def root():
     except Exception as e:
         logger.error(f"Error in root endpoint: {str(e)}")
         return {"message": "LLM API is running", "status": "ready", "tools_loaded": 0}
-
-# Background tool loading
-@app.on_event("startup")
-async def startup_event():
-    """
-    Startup event handler.
-    Loads tools in background after application startup.
-    """
-    async def load_tools_background():
-        """
-        Background task to load tools without blocking the application.
-        """
-        try:
-            logger.info("Starting background tool loading...")
-            await reload_agent_from_json()
-            logger.info(f"Background tool loading complete: {len(tools)} tools")
-        except Exception as e:
-            logger.error(f"Background tool loading failed: {str(e)}")
-    
-    # Start background loading task
-    asyncio.create_task(load_tools_background())
 
 # Configure CORS with restricted origins
 app.add_middleware(
