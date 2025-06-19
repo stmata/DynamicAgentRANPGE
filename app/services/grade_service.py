@@ -62,11 +62,17 @@ class GradeService:
                 results.append(result)
 
             # Open‐ended entry = length 3
-            else:
+            elif len(entry) == 3:
                 result = await GradeService._process_open_question(
                     entry, user_ans, idx, missed_open
                 )
                 results.append(result)
+            else:
+                # Handle invalid entry format
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"Invalid question format at index {idx}. Expected 7 elements for MCQ or 3 elements for open question, got {len(entry)}. Entry: {entry}"
+                )
 
         # Build study guide
         study_guide = await GradeService._build_study_guide(missed_mcq, missed_open)

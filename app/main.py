@@ -9,7 +9,7 @@ app = FastAPI(
     description="Grades MCQ & open-ended responses and returns detailed feedback + study guide",
     docs_url=None,  
     redoc_url=None,  
-    openapi_url=None 
+    openapi_url=None  
 )
 
 # Configure CORS with restricted origins
