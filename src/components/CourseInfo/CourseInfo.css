@@ -1,0 +1,108 @@
+.courseInfo-section {
+  background-color: var(--white);
+  padding: 30px;
+  box-shadow: var(--shadow-light);
+  transition: var(--transition-medium);
+  text-align: center; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.courseInfo-title {
+  font-size: 26px;
+  margin-bottom: 15px;
+  color: var(--text-dark);
+  font-weight: 600;
+}
+ 
+.courseInfo-description {
+  color: #666;
+  line-height: 1.7;
+  font-size: 15px;
+  max-width: 100%;
+  text-align: justify;
+  margin: 0 auto;
+}
+ 
+
+.courseInfo-stats {
+  display: flex;
+  margin-top: 20px;
+  gap: 25px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+ 
+.courseInfo-stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--gray);
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #555;
+  box-shadow: var(--shadow-light);
+  transition: var(--transition-fast);
+}
+ 
+.courseInfo-stat:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--enhanced-shadow-light);
+}
+ 
+.courseInfo-stat i {
+  color: #e73d3c;
+  font-size: 16px;
+}
+ 
+ /* Dark mode styles */
+.courseInfo-section.dark-mode {
+  background-color: var(--dark-bg);
+  box-shadow: var(--shadow-dark);
+}
+ 
+.courseInfo-section.dark-mode .courseInfo-title {
+  color: var(--dark-text);
+}
+ 
+.courseInfo-section.dark-mode .courseInfo-description {
+  color: #aaa;
+}
+ 
+.courseInfo-section.dark-mode .courseInfo-stat {
+  background-color: var(--dark-gray);
+  color: #ddd;
+  box-shadow: var(--shadow-dark);
+}
+ 
+.courseInfo-section.dark-mode .courseInfo-stat:hover {
+  box-shadow: var(--enhanced-shadow-dark);
+}
+ 
+@media (max-width: 768px) {
+  .courseInfo-section {
+    padding: 20px;
+}
+   
+.courseInfo-title {
+  font-size: 22px;
+}
+   
+.courseInfo-stats {
+  gap: 15px;
+ }
+}
+ 
+@media (max-width: 576px) {
+  .courseInfo-stats {
+    flex-direction: column;
+    gap: 10px;
+}
+   
+.courseInfo-stat {
+    width: fit-content;
+  }
+}
