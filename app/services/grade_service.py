@@ -126,21 +126,23 @@ class GradeService:
         # Build "professor" prompt
         prompt = f"""
             You are a thoughtful and empathetic university professor reviewing a student's answer to an exam question.
-
+             
+            Before proceeding, **identify the language of the input (French, English, Portuguese, etc.) and make sure your entire response is written in that same language**.
+             
             Your task is to:
             1. Assign a numeric grade from 0 (completely incorrect) to 10 (perfect).
-            2. Write a short, encouraging and human-sounding feedback message directly to the student. 
+            2. Write a short, encouraging and human-sounding feedback message directly to the student.
             Avoid robotic phrases like "The student answer is identical to the model answer".
             Instead, write as if you're speaking to the student, highlighting what they did well, and suggesting improvements if needed.
-            **ALways use the same langage of the input**
+             
             Question: {question}
-
+             
             Model Answer: {model_ans}
-
+             
             Student Answer: {user_ans}
-
+             
             Return *only* JSON in this format: {{ "grade": <int>, "feedback": "<string>" }}
-            """
+        """
 
         llm = get_azure_openai_client_with_llama_index(temperature=0)
         loop = asyncio.get_running_loop()
@@ -213,7 +215,9 @@ class GradeService:
         llm = get_azure_openai_client_with_llama_index(temperature=0.7)
         prompt = f"""
             You are a thoughtful and supportive university professor reviewing a student's recent exam performance.
- 
+            
+            Before you start, **detect the language used in the input below (French, English, Portuguese, etc.) and write your entire response in that same language.**
+            
             Below is a list of questions the student missed or underperformed on:
  
             {combined}
@@ -244,9 +248,9 @@ class GradeService:
             5. DO NOT use numbered lists - only use bullet points
             6. Keep each bullet point concise and focused on a single concept
  
-            Return *only* the study guide text with the specified formatting.
-            **ALways use the same langage of the input**
+            Return *only* the study guide text in the same language as the input, following the above formatting rules.
         """
+        
         t2 = time.perf_counter()
         sg = llm.complete(prompt=prompt)
         t3 = time.perf_counter()
