@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './i18n';
@@ -24,6 +24,14 @@ import EvaluationCaseScren from './pages/EvaluationCaseScren';
  * @returns {React.ReactElement} App component
  */
 function App() {
+  useEffect(() => {
+    const imgs = document.querySelectorAll('img');
+    imgs.forEach((img) => {
+      if (!img.hasAttribute('loading')) {
+        img.setAttribute('loading', 'lazy');
+      }
+    });
+  }, []);
   return (
     <I18nextProvider i18n={i18n}>
       <ThemeProvider>
