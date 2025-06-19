@@ -21,7 +21,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Base directory for storing indexes (use local app/ instead of Azure restricted root)
-BASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "indexes")
+BASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "data")
 
 # admin_upload → call this to persist metadata
 async def store_tool(payload: dict) -> None:

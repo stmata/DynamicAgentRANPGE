@@ -7,21 +7,14 @@ from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 from dotenv import load_dotenv
 from app.logs import logger
+from app.services.database.redis_service import redis_service
 
 load_dotenv()
 SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
 FROM_EMAIL = os.getenv("FROM_EMAIL")
 
 def generate_verification_code(length=6):
-    """
-    Generate a random verification code containing uppercase letters and digits.
-    
-    Args:
-        length (int): The length of the verification code to generate. Defaults to 6.
-        
-    Returns:
-        str: A randomly generated verification code
-    """
+    """Generate a random verification code containing uppercase letters and digits."""
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=length))
 
 class EmailService:
@@ -30,47 +23,24 @@ class EmailService:
     and managing email verification for the SKEMA Business School RAN-PGE Prep App.
     """
     def __init__(self):
-        """
-        Initialize the EmailService with SendGrid configuration and verification code storage.
-        Sets up email credentials from environment variables and initializes in-memory storage
-        for verification codes with thread safety.
-        """
+        """Initialize the EmailService with SendGrid configuration and Redis for verification codes."""
         self.sendgrid_api_key = SENDGRID_API_KEY
         self.from_email = FROM_EMAIL
-        self.verification_codes = {}
         self.company_name = "SKEMA Business School"
-        self._lock = threading.Lock()
-    
-    def cleanup_expired_codes(self):
-        """
-        Remove expired verification codes from memory storage.
-        Codes are considered expired after 120 seconds (2 minutes).
-        Thread-safe implementation.
-        """
-        current_time = time.time()
-        expired_emails = []
         
-        with self._lock:
-            for email, (code, timestamp) in self.verification_codes.items():
-                if (current_time - timestamp) > 120:
-                    expired_emails.append(email)
-            
-            for email in expired_emails:
-                del self.verification_codes[email]
-                logger.debug(f"Expired verification code removed for email: {email}")
+        # Use the centralized Redis service
+        self.redis_service = redis_service
+        
+        # Fallback in-memory storage if Redis is not available
+        if not self.redis_service.is_connected():
+            logger.warning("⚠️ Redis not available, falling back to in-memory storage for verification codes")
+            self.verification_codes = {}
+            self._lock = threading.Lock()
+        else:
+            logger.info("✅ EmailService using Redis for verification codes")
     
     def send_email(self, subject, body, to_email):
-        """
-        Send an HTML email using SendGrid API.
-        
-        Args:
-            subject (str): The subject line of the email
-            body (str): The HTML content of the email body
-            to_email (str): The recipient's email address
-            
-        Returns:
-            bool: True if email was sent successfully, False otherwise
-        """
+        """Send an HTML email using SendGrid API."""
         try:
             message = Mail(
                 from_email=self.from_email,
@@ -81,7 +51,6 @@ class EmailService:
 
             sg = SendGridAPIClient(api_key=self.sendgrid_api_key)
             response = sg.send(message)
-            logger.info(response)
             logger.info(f"Email sent successfully to {to_email}")
             
             return True
@@ -91,18 +60,8 @@ class EmailService:
             return False
     
     def send_verification_code(self, email: str):
-        """
-        Generate and send a verification code email to the specified email address.
-        The code is stored in memory with a timestamp for validation purposes.
-        
-        Args:
-            email (str): The email address to send the verification code to
-            
-        Returns:
-            bool: True if the verification email was sent successfully, False otherwise
-        """
+        """Generate and send a verification code email to the specified email address."""
         code = generate_verification_code()
-        timestamp = time.time()
         
         subject = "SKEMA Business School - Verification Code for RAN-PGE Prep App"
         
@@ -161,30 +120,80 @@ class EmailService:
         email_sent = self.send_email(subject=subject, body=body, to_email=email)
         
         if email_sent:
-            with self._lock:
-                self.verification_codes[email] = (code, timestamp)
-            logger.info(f"Verification code generated and stored for email: {email}")
+            self._store_verification_code(email, code)
             return True
         else:
             logger.error(f"Failed to send verification code email to: {email}")
             return False
+    
+    def _store_verification_code(self, email: str, code: str):
+        """Store verification code in Redis or fallback to memory."""
+        if self.redis_service.is_connected():
+            try:
+                verification_data = {
+                    "code": code,
+                    "email": email,
+                    "created_at": time.time()
+                }
+                success = self.redis_service.set_with_ttl(
+                    f"verification_code:{email}", 
+                    verification_data, 
+                    120  # 120 seconds TTL
+                )
+                if success:
+                    logger.info(f"Verification code stored in Redis for email: {email}")
+                else:
+                    raise Exception("Failed to store in Redis")
+            except Exception as e:
+                logger.error(f"Failed to store verification code in Redis: {str(e)}")
+                self._store_in_memory(email, code)
+        else:
+            self._store_in_memory(email, code)
+    
+    def _store_in_memory(self, email: str, code: str):
+        """Fallback to in-memory storage."""
+        with self._lock:
+            self.verification_codes[email] = (code, time.time())
+            logger.info(f"Verification code stored in memory for email: {email}")
 
     def verify_code(self, email, code):
-        """
-        Verify a submitted verification code against the stored code for the given email.
-        Automatically cleans up expired codes before verification and removes the code
-        upon successful verification.
-        
-        Args:
-            email (str): The email address associated with the verification code
-            code (str): The verification code to validate
-            
-        Returns:
-            bool: True if the code is valid and matches, False otherwise
-        """
+        """Verify a submitted verification code against the stored code."""
         logger.info(f"Attempting to verify code for email: {email}")
         
-        self.cleanup_expired_codes()
+        if self.redis_service.is_connected():
+            return self._verify_code_redis(email, code)
+        else:
+            return self._verify_code_memory(email, code)
+    
+    def _verify_code_redis(self, email: str, code: str) -> bool:
+        """Verify code using Redis storage."""
+        try:
+            verification_data = self.redis_service.get(f"verification_code:{email}", deserialize_json=True)
+            if not verification_data:
+                logger.warning(f"No verification code found in Redis for email: {email}")
+                return False
+            
+            stored_code = verification_data["code"]
+            
+            if stored_code == code:
+                # Delete the code after successful verification
+                self.redis_service.delete(f"verification_code:{email}")
+                logger.info(f"Verification code successfully verified for email: {email}")
+                return True
+            else:
+                logger.warning(f"Invalid verification code provided for email: {email}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Error verifying code in Redis: {str(e)}")
+            # Fallback to memory verification if available
+            if hasattr(self, 'verification_codes'):
+                return self._verify_code_memory(email, code)
+            return False
+    
+    def _verify_code_memory(self, email: str, code: str) -> bool:
+        """Verify code using in-memory storage."""
+        self._cleanup_expired_codes()
         
         with self._lock:
             if email not in self.verification_codes:
@@ -206,3 +215,35 @@ class EmailService:
             else:
                 logger.warning(f"Invalid verification code provided for email: {email}")
                 return False
+    
+    def _cleanup_expired_codes(self):
+        """Remove expired verification codes from memory storage."""
+        if not hasattr(self, 'verification_codes'):
+            return
+            
+        current_time = time.time()
+        expired_emails = []
+        
+        with self._lock:
+            for email, (code, timestamp) in self.verification_codes.items():
+                if (current_time - timestamp) > 120:
+                    expired_emails.append(email)
+            
+            for email in expired_emails:
+                del self.verification_codes[email]
+                logger.debug(f"Expired verification code removed for email: {email}")
+
+# Lazy singleton for multiworker compatibility
+_email_service_instance = None
+
+def get_email_service() -> EmailService:
+    """
+    Get the global EmailService instance using lazy singleton pattern.
+    Thread-safe for multiworker environments.
+    """
+    global _email_service_instance
+    if _email_service_instance is None:
+        _email_service_instance = EmailService()
+    return _email_service_instance
+
+email_service = get_email_service()

@@ -20,25 +20,12 @@ from app.services.external.tools_service import store_tool
 from app.services.database.topic_manager import background_topic_registration
 from app.services.database.mongo_utils import get_module_topics, get_service
 from app.models.schemas.topic_models import TopicResponse, TopicsListResponse, TopicRequest
-from app.services.external.auth_service import AuthService
 from app.logs import logger
 
-async def get_auth_service() -> AuthService:
-    """
-    Dependency function to provide an instance of AuthService.
-    
-    Returns:
-        AuthService: A new instance of the authentication service.
-    """
-    return AuthService()
-
-async def get_current_user_from_auth_service(auth_service: AuthService = Depends(get_auth_service)):
-    return await auth_service.get_current_user()
 
 router = APIRouter(
     prefix="/api/admin",
-    tags=["admin"],
-    dependencies=[Depends(get_current_user_from_auth_service)]
+    tags=["admin"]
 )
 
 

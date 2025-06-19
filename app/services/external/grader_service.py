@@ -112,3 +112,19 @@ class GraderService:
         except Exception as e:
             logger.error(f"Unexpected grader error: {str(e)}")
             raise Exception(f"Grader service error: {str(e)}")
+
+
+# Lazy singleton for multiworker compatibility
+_grader_service_instance = None
+
+def get_grader_service() -> GraderService:
+    """
+    Get the global GraderService instance using lazy singleton pattern.
+    Thread-safe for multiworker environments.
+    """
+    global _grader_service_instance
+    if _grader_service_instance is None:
+        _grader_service_instance = GraderService()
+    return _grader_service_instance
+
+grader_service = get_grader_service()

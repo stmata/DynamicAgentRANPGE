@@ -8,51 +8,21 @@ from dotenv import load_dotenv
 from app.models.schemas.evaluation_models import EvaluationRequest, MixedEvaluationRequest, CaseRequest, CaseResponse
 from app.models.entities.user import EvaluationSubmissionRequest, CaseEvaluationSubmissionRequest, AddEvaluationScore
 from app.services.evaluation.evaluation_service import evaluate_standard, evaluate_mixed, evaluate_case
-from app.services.external.auth_service import AuthService
-from app.services.external.grader_service import GraderService
+from app.services.external.auth_service import auth_service
+from app.services.external.grader_service import grader_service
 from app.repositories.user_repository import UserCollection
 from app.logs import logger
 
-# Load environment variables (e.g. AZURE_OPENAI_MODEL)
 load_dotenv()
 
 # ─── Dependency injection ─────────────────────────────────
-
-async def get_auth_service() -> AuthService:
-    """
-    Dependency to get an instance of AuthService.
-    Returns:
-        AuthService: new instance of authentication service.
-    """
-    return AuthService()
-
-async def get_user_collection() -> UserCollection:
-    """
-    Dependency to get an instance of UserCollection repository.
-    Returns:
-        UserCollection: new instance of user repository.
-    """
-    return UserCollection()
-
-async def get_grader_service() -> GraderService:
-    """
-    Dependency to get an instance of GraderService.
-    Returns:
-        GraderService: new instance of grader service.
-    """
-    return GraderService()
-
-async def get_current_user_from_auth_service(auth_service: AuthService = Depends(get_auth_service)):
-    return await auth_service.get_current_user()
-
-async def get_current_user_id(auth_service: AuthService = Depends(get_auth_service)) -> str:
-    return await auth_service.get_current_user_id()
+user_collection = UserCollection()
 
 
 router = APIRouter(
     prefix="/api/evaluation",
     tags=["evaluation"],
-    dependencies=[Depends(get_current_user_from_auth_service)]
+    dependencies=[Depends(auth_service.get_current_user)]
 )
 
 # ─── Standard Evaluation endpoint ────────────────────────
@@ -166,9 +136,7 @@ async def generate_practical_case(request: CaseRequest):
 @router.post("/submit-and-save")
 async def submit_evaluation_and_save(
     evaluation_data: EvaluationSubmissionRequest,
-    user_id: str = Depends(get_current_user_id),
-    grader_service: GraderService = Depends(get_grader_service),
-    user_collection: UserCollection = Depends(get_user_collection)
+    user_id: str = Depends(auth_service.get_current_user_id)
 
 ) -> Dict[str, Any]:
     """
@@ -224,9 +192,7 @@ async def submit_evaluation_and_save(
 @router.post("/submit-case-and-save")
 async def submit_case_evaluation_and_save(
     evaluation_data: CaseEvaluationSubmissionRequest,
-    user_id: str = Depends(get_current_user_id),
-    grader_service: GraderService = Depends(get_grader_service),
-    user_collection: UserCollection = Depends(get_user_collection)
+    user_id: str = Depends(auth_service.get_current_user_id)
 ) -> Dict[str, Any]:
     """
     Submit case evaluation to grader and automatically save the score

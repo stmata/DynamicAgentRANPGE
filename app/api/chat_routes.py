@@ -13,27 +13,16 @@ from app.repositories.message_repository import MessageCollection
 from app.services.chat.chat_service import get_chat_service
 from app.models.schemas.evaluation_models import UserQuery
 from app.services.chat.chat_service import handle_chat_request
-from app.services.external.auth_service import AuthService
+from app.services.external.auth_service import auth_service
 import json
 
 logger = logging.getLogger(__name__)
 
-async def get_auth_service() -> AuthService:
-    """
-    Dependency function to provide an instance of AuthService.
-    
-    Returns:
-        AuthService: A new instance of the authentication service.
-    """
-    return AuthService()
-
-async def get_current_user_from_auth_service(auth_service: AuthService = Depends(get_auth_service)):
-    return await auth_service.get_current_user()
 
 router = APIRouter(
     prefix="/api",
     tags=["chat"],
-    dependencies=[Depends(get_current_user_from_auth_service)]
+    dependencies=[Depends(auth_service.get_current_user)]
 )
 
 def is_valid_uuid(uuid_string: str) -> bool:

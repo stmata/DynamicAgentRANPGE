@@ -1,20 +1,11 @@
 from fastapi import APIRouter, HTTPException, Depends
 from typing import Dict
 
-from app.services.external.auth_service import AuthService
+from app.services.external.auth_service import auth_service
 from app.models.entities.user import UserCreate, UserResponse, UserUpdate
 from app.repositories.user_repository import UserCollection
 
 # ─── Dépendances ────────────────────────────────
-
-async def get_auth_service() -> AuthService:
-    """
-    Dependency to get an instance of AuthService.
-    Returns:
-        AuthService: new instance of the authentication service.
-    """
-    return AuthService()
-
 async def get_user_collection() -> UserCollection:
     """
     Dependency to get an instance of UserCollection repository.
@@ -23,17 +14,11 @@ async def get_user_collection() -> UserCollection:
     """
     return UserCollection()
 
-async def get_current_user(auth_service: AuthService = Depends(get_auth_service)):
-    """
-    Dependency to get the current authenticated user ID.
-    Raises 401 if user is not authenticated.
-    """
-    return await auth_service.get_current_user()
 
 router = APIRouter(
     prefix="/api/users",
     tags=["users"],
-    dependencies=[Depends(get_current_user)] 
+    dependencies=[Depends(auth_service.get_current_user)]
 )
 
 @router.post("", response_model=UserResponse, status_code=201)
