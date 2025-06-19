@@ -1,5 +1,5 @@
 """
-app/services/json_server_utils.py
+app/services/external/tools_service.py
 ──────────────────────────────────────────────
 Adapter so that the rest of the code still calls:
   • store_tool(payload)
@@ -20,6 +20,9 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Base directory for storing indexes (use local app/ instead of Azure restricted root)
+BASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "indexes")
+
 # admin_upload → call this to persist metadata
 async def store_tool(payload: dict) -> None:
     await store_tool_doc(payload)
@@ -39,14 +42,15 @@ async def load_tools_from_json_server() -> List[QueryEngineTool]:
         try:
             # Hierarchical local path
             base = os.path.splitext(rec["file_name"])[0]
-            idx_dir = os.path.join(
-                "data",
+            idx_dir = os.path.normpath(os.path.join(
+                BASE_DIR,
                 rec["program"],
                 rec["level"],
                 rec["course"],
                 rec["module"],
                 f"dynamic_index_{base}"
-            )
+            ))
+
 
             # if missing, download & unzip from Azure
             if not os.path.isdir(idx_dir):
@@ -93,7 +97,7 @@ async def load_tools_from_json_server() -> List[QueryEngineTool]:
                             # Unzip the file
                             with zipfile.ZipFile(tmp, "r") as zf:
                                 zf.extractall(idx_dir)
-                            logger.info(f"Extraction completed to {idx_dir}")
+                            logger.info(f"✅ Extracted index to: {idx_dir}")
                             
                             # Clean up
                             os.remove(tmp)

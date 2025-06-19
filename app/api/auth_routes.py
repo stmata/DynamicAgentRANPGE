@@ -8,22 +8,49 @@ from app.models.schemas.auth_models import (
     TokenResponse,
     LogoutResponse
 )
-from app.services.external.auth_service import auth_service
-from app.services.external.email_service import email_service
+from app.services.external.auth_service import AuthService
+from app.services.external.email_service import EmailService
 from app.repositories.user_repository import UserCollection
 from app.logs import logger
 
-
 router = APIRouter(prefix="/api/auth", tags=["authentication"])
 
-# Dependency to get user collection
-async def get_user_collection():
+async def get_user_collection() -> UserCollection:
+    """
+    Dependency function to provide an instance of UserCollection repository.
+    
+    Returns:
+        UserCollection: A new instance of the user repository.
+    """
     return UserCollection()
+
+async def get_auth_service() -> AuthService:
+    """
+    Dependency function to provide an instance of AuthService.
+    
+    Returns:
+        AuthService: A new instance of the authentication service.
+    """
+    return AuthService()
+
+async def get_email_service() -> EmailService:
+    """
+    Dependency function to provide an instance of EmailService.
+    
+    Returns:
+        EmailService: A new instance of the email sending service.
+    """
+    return EmailService()
+
+async def get_current_user_id(auth_service: AuthService = Depends(get_auth_service)):
+    return await auth_service.get_current_user()
+
 
 @router.post("/send-verification-code")
 async def send_verification_code(
     request: EmailRequest,
-    user_collection: UserCollection = Depends(get_user_collection)
+    user_collection: UserCollection = Depends(get_user_collection),
+    email_service: EmailService = Depends(get_email_service)
 ):
     """Send verification code to user email. Creates user if doesn't exist."""
     try:
@@ -63,7 +90,9 @@ async def send_verification_code(
 @router.post("/verify-code", response_model=VerificationResponse)
 async def verify_code(
     request: VerificationRequest,
-    user_collection: UserCollection = Depends(get_user_collection)
+    user_collection: UserCollection = Depends(get_user_collection),
+    auth_service: AuthService = Depends(get_auth_service),
+    email_service: EmailService = Depends(get_email_service)
 ):
     """Verify the code and generate authentication tokens."""
     try:
@@ -99,7 +128,10 @@ async def verify_code(
         raise HTTPException(status_code=500, detail="An error occurred during verification")
 
 @router.post("/refresh-token", response_model=TokenResponse)
-async def refresh_token(request: RefreshTokenRequest):
+async def refresh_token(
+    request: RefreshTokenRequest,
+    auth_service: AuthService = Depends(get_auth_service)
+    ):
     """Refresh access token using refresh token."""
     try:
         new_tokens = auth_service.refresh_access_token(request.refresh_token)
@@ -116,7 +148,10 @@ async def refresh_token(request: RefreshTokenRequest):
         raise HTTPException(status_code=500, detail="An error occurred while refreshing token")
 
 @router.post("/logout", response_model=LogoutResponse)
-async def logout(current_user_id: str = Depends(auth_service.get_current_user)):
+async def logout(
+    current_user_id: str = Depends(get_current_user_id),
+    auth_service: AuthService = Depends(get_auth_service)
+    ):
     """Logout user by revoking all tokens."""
     try:
         success = auth_service.revoke_all_tokens(current_user_id)
@@ -132,7 +167,7 @@ async def logout(current_user_id: str = Depends(auth_service.get_current_user)):
 
 @router.get("/me")
 async def get_current_user_info(
-    current_user_id: str = Depends(auth_service.get_current_user),
+    current_user_id: str = Depends(get_current_user_id),
     user_collection: UserCollection = Depends(get_user_collection)
 ):
     """Get current authenticated user information."""

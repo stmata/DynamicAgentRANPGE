@@ -319,6 +319,3 @@ class AuthService:
         """
         logger.debug("Token cleanup not needed - Azure Redis handles TTL automatically")
         return 0
-
-# Global instance
-auth_service = AuthService()

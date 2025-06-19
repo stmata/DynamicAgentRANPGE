@@ -112,5 +112,3 @@ class GraderService:
         except Exception as e:
             logger.error(f"Unexpected grader error: {str(e)}")
             raise Exception(f"Grader service error: {str(e)}")
-
-grader_service = GraderService() 

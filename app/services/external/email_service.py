@@ -206,6 +206,3 @@ class EmailService:
             else:
                 logger.warning(f"Invalid verification code provided for email: {email}")
                 return False
-
-# Global instance
-email_service = EmailService()

@@ -5,12 +5,36 @@ from app.services.external.auth_service import AuthService
 from app.models.entities.user import UserCreate, UserResponse, UserUpdate
 from app.repositories.user_repository import UserCollection
 
-auth_service = AuthService()
-router = APIRouter(prefix="/api/users", tags=["users"], dependencies=[Depends(auth_service.get_current_user)])
+# ─── Dépendances ────────────────────────────────
 
-# Dependency to get user collection
-async def get_user_collection():
+async def get_auth_service() -> AuthService:
+    """
+    Dependency to get an instance of AuthService.
+    Returns:
+        AuthService: new instance of the authentication service.
+    """
+    return AuthService()
+
+async def get_user_collection() -> UserCollection:
+    """
+    Dependency to get an instance of UserCollection repository.
+    Returns:
+        UserCollection: new instance of the user repository.
+    """
     return UserCollection()
+
+async def get_current_user(auth_service: AuthService = Depends(get_auth_service)):
+    """
+    Dependency to get the current authenticated user ID.
+    Raises 401 if user is not authenticated.
+    """
+    return await auth_service.get_current_user()
+
+router = APIRouter(
+    prefix="/api/users",
+    tags=["users"],
+    dependencies=[Depends(get_current_user)] 
+)
 
 @router.post("", response_model=UserResponse, status_code=201)
 async def create_user(

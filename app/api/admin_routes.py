@@ -23,9 +23,24 @@ from app.models.schemas.topic_models import TopicResponse, TopicsListResponse, T
 from app.services.external.auth_service import AuthService
 from app.logs import logger
 
-auth_service = AuthService()
+async def get_auth_service() -> AuthService:
+    """
+    Dependency function to provide an instance of AuthService.
+    
+    Returns:
+        AuthService: A new instance of the authentication service.
+    """
+    return AuthService()
 
-router = APIRouter(prefix="/api/admin",tags=["admin"], dependencies=[Depends(auth_service.get_current_user)])
+async def get_current_user_from_auth_service(auth_service: AuthService = Depends(get_auth_service)):
+    return await auth_service.get_current_user()
+
+router = APIRouter(
+    prefix="/api/admin",
+    tags=["admin"],
+    dependencies=[Depends(get_current_user_from_auth_service)]
+)
+
 
 @router.post("/upload/{program}/{level}/{course}/{module}")
 async def admin_upload_file(
