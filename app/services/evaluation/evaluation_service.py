@@ -482,12 +482,12 @@ async def populate_references_parallel(questions: List[List[Any]]) -> None:
 
 
 # ─── Public API Functions ────────────────────────────────
-
 async def evaluate_standard(
     topics: List[str], 
     eval_type: str, 
     num_questions: int,
-    language: str = "French"
+    language: str = "French",
+    course_filter: str = None
 ) -> Dict[str, Any]:
     """
     Public API for standard evaluation (mcq OR open).
@@ -496,12 +496,13 @@ async def evaluate_standard(
         topics: List of topics for question generation
         eval_type: Either 'mcq' or 'open'
         num_questions: Total number of questions to generate
+        course_filter: Optional course name to filter tools
         
     Returns:
         Dict with 'questions' key containing the generated questions
     """
-    # 1) Ensure agent is loaded
-    await state.reload_agent_from_json()
+    # 1) Ensure agent is loaded (with course filter if provided)
+    await state.reload_agent_from_json(course_filter)
     if state.agent is None:
         raise HTTPException(500, "Agent initialization failed")
     
@@ -510,7 +511,6 @@ async def evaluate_standard(
     
     return {"questions": questions}
 
-
 async def evaluate_mixed(
     topics: List[str], 
     num_questions: int,
@@ -518,7 +518,8 @@ async def evaluate_mixed(
     open_weight: float = 0.5,
     language: str = "French",
     is_positioning: bool = False,
-    modules_topics: Dict[str, List[str]] = None
+    modules_topics: Dict[str, List[str]] = None,
+    course_filter: str = None
 ) -> Dict[str, Any]:
     """
     Public API for mixed evaluation (mcq AND open).
@@ -531,6 +532,7 @@ async def evaluate_mixed(
         language: Language for question generation
         is_positioning: Whether this is a positioning evaluation
         modules_topics: Dict of topics by module (for positioning evaluation)
+        course_filter: Optional course name to filter tools
         
     Returns:
         Dict with 'questions' key containing the mixed questions
@@ -546,8 +548,8 @@ async def evaluate_mixed(
     if is_positioning and not modules_topics:
         raise HTTPException(400, "modules_topics is required for positioning evaluation")
 
-    # 3) Ensure agent is loaded
-    await state.reload_agent_from_json()
+    # 3) Ensure agent is loaded (with course filter if provided)
+    await state.reload_agent_from_json(course_filter)
     if state.agent is None:
         raise HTTPException(500, "Agent initialization failed")
 
@@ -568,12 +570,13 @@ async def evaluate_case(
     topics: List[str], 
     level: str,
     course_context: str | None = None,
-    language: str = "French"
+    language: str = "French",
+    course_filter: str = None
 ) -> Dict[str, Any]:
     """
     Generate a single practical case for a list of topics.
     """
-    await state.reload_agent_from_json()
+    await state.reload_agent_from_json(course_filter)
     if state.agent is None:
         raise HTTPException(500, "Agent initialization failed")
 

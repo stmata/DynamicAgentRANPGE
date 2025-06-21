@@ -10,6 +10,7 @@ class CaseRequest(BaseModel):
     level: str
     course_context: Optional[str] = None
     language: str = "French"
+    course_filter: Optional[str] = Field(default=None, description="Optional course name to filter agent tools")
 
 class CaseResponse(BaseModel):
     """Response model for generated educational cases."""
@@ -36,6 +37,7 @@ class EvaluationRequest(BaseModel):
     eval_type: Literal['mcq', 'open']
     topics: List[str]
     num_questions: int = Field(default=1, ge=1, description="Number of questions to generate")
+    course_filter: Optional[str] = Field(default=None, description="Optional course name to filter agent tools")
 
     @field_validator('topics')
     @classmethod
@@ -53,6 +55,7 @@ class MixedEvaluationRequest(BaseModel):
     language: str = Field(default="French", description="Language for question generation")
     is_positioning: bool = Field(default=False, description="Whether this is a positioning evaluation")
     modules_topics: Optional[Dict[str, List[str]]] = Field(default=None, description="Topics organized by module for positioning evaluation")
+    course_filter: Optional[str] = Field(default=None, description="Optional course name to filter agent tools")
 
     @field_validator('topics')
     @classmethod

@@ -125,6 +125,7 @@ class EvaluationSubmissionRequest(BaseModel):
     course: str
     module: str
     evaluation_type: str
+    language: str = Field(default="French", description="Language for evaluation grading")
 
 
 class CaseEvaluationSubmissionRequest(BaseModel):
@@ -137,3 +138,4 @@ class CaseEvaluationSubmissionRequest(BaseModel):
     level: str
     topics: List[str]
     module: str
+    language: str = Field(default="French", description="Language for case evaluation grading")

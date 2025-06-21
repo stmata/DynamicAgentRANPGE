@@ -108,6 +108,11 @@ class AsyncMongoDBService:
         """Return all tool records."""
         cursor = self.tools.find({})
         return await cursor.to_list(length=None)
+    
+    async def fetch_tools_by_course(self, course: str) -> List[Dict]:
+        """Return tool records for specific course only."""
+        cursor = self.tools.find({"course": course})
+        return await cursor.to_list(length=None)
 
     async def upsert_module_topics(self, program: str, level: str, course: str, module: str, new_topics: List[str]) -> None:
         """Insert or update module topics."""
@@ -705,6 +710,10 @@ async def store_tool_doc(doc: Dict) -> None:
 async def fetch_all_tools() -> List[Dict]:
     service = await get_service()
     return await service.fetch_all_tools()
+
+async def fetch_tools_by_course(course: str) -> List[Dict]:
+    service = await get_service()
+    return await service.fetch_tools_by_course(course)
 
 async def upsert_module_topics(program: str, level: str, course: str, module: str, new_topics: List[str]) -> None:
     service = await get_service()

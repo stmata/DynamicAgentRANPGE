@@ -3,53 +3,14 @@ class Prompt:
     
     @staticmethod
     def mqc_gen_prompt(context: str, topic: str, num_questions: int, language: str = "French") -> str:
-        """
-            Generates a prompt to instruct an AI to create multiple-choice questions based on a given context.
-
-            Args:
-                context (str): The text content from which the questions should be generated.
-                topic (str): The topic to be used as the focus for the questions.
-                num_questions (int): The number of multiple-choice questions to generate.
-                language (str): Output language for the questions (default is "French").
-
-            Returns:
-                str: A formatted prompt string for the AI to generate multiple-choice questions in French.
-        """
-        # prompt = f"""
-        #             You are an instructional AI. Using *ONLY* the context below, generate {num_questions} multiple-choice questions on "{topic}".
-
-        #             Context:
-        #             {context}
-
-        #             For each question:
-        #             Instructions:
-        #             - All questions and answers must be written in **{language}**.
-        #             - For each question, provide exactly 4 plausible answer choices.
-        #             - Clearly mark the correct one.
-        #             - The **correct answer must always be given as the full text**, not as a label like "c1" or "option B".
-        #             - The **references must always be given from the context**.
-        #             - Randomize the order of the answer choices for each question so the correct answer does not always appear in the same position.
-        #             - Do NOT include any explanation or analysis.
-        #             - Do NOT use any external knowledge—stick strictly to the context.
-        #             - Format the output strictly as valid JSON.
-                    
-        #             Format exactly:
-        #             {{  
-        #             "questions":[  
-        #                 [question, c1, c2, c3, c4, correct, references], …
-        #             ]
-        #             }}
-        #             Important:
-        #             - Output must be valid JSON.
-        #             - Do not return anything else outside the JSON object.
-        #        """
         forbidden_phrases = {
             "French": [
                 "selon le texte", "d'après le document", "selon le contexte", 
                 "selon l'image", "d'après le passage", "selon l'extrait",
                 "d'après le texte", "selon le document", "d'après le contexte",
                 "selon le passage", "d'après l'extrait", "selon l'image",
-                "dans le texte", "dans le document", "dans le contexte"
+                "dans le texte", "dans le document", "dans le contexte",
+                "mentionné dans le contexte", "mentionnée dans le texte", "comme indiqué"
             ],
             "English": [
                 "according to the text", "based on the document", "according to the context",
@@ -68,35 +29,43 @@ class Prompt:
         phrases_list = ", ".join([f'"{phrase}"' for phrase in phrases_to_avoid])
 
         prompt = f"""
-            You are a **university professor** specializing in pedagogy and assessment. Using ONLY the context provided, generate exactly {num_questions} multiple-choice questions on the topic "{topic}".
+        You are a **university-level instructional designer**. Using ONLY the context provided, generate exactly {num_questions} **conceptual multiple-choice questions** on the topic "{topic}".
 
-            Instructions:
-            - All output must be written in **{language}**.
-            - **CRITICAL**: DO NOT use phrases like {phrases_list} in the questions.
-            - Each question must have exactly 4 answer choices.
-            - The correct answer must be the **full answer text**, not a letter or label.
-            - The correct answer must be randomly placed among the 4 choices.
-            - For each question, also include a **reference** extracted from the context.
-            - You MUST return the result as **strictly valid JSON**.
-            - DO NOT return any explanations, comments, or introductory text.
-            - DO NOT use key-value dictionaries. Instead, format each question as a **list** with 7 items:
-            [question, choice1, choice2, choice3, choice4, correct_answer, reference]
+        Objectives:
+        - The questions must assess the learner’s understanding of **concepts**, **mechanisms**, or **reasoning**, **not recall** of specific phrases, clauses, companies, or named entities.
+        - Focus on **transferable knowledge** the learner should understand after studying the topic, not on memorization of text.
 
-            Use the exact format below:
-            {{
-            "questions": [
-                ["question1", "choice1", "choice2", "choice3", "choice4", "correct_answer", "reference"],
-                ...
+        Instructions:
+        - Write everything in **{language}**.
+        - DO NOT use or reference:
+            - Authors, company names, or examples **mentioned** in the text.
+            - Any phrases such as {phrases_list}.
+            - Questions that test memory of who did what, or which clause was used by which actor.
+        - Instead, rephrase any such content into generalized or abstracted **conceptual** questions (e.g., "What is the role of X in Y?" instead of "What clause did Z use to do Y?").
+        - Each question must have exactly 4 answer choices.
+        - The correct answer must be written as full text (not a label), and randomly positioned among the choices.
+        - Each question must be accompanied by a short **reference excerpt from the context** that supports the correct answer (but do NOT cite or reference the excerpt in the question).
+        - Output must be **strictly valid JSON** with no extra text or comments.
+        - DO NOT return any explanations, comments, or introductory text.
+        - DO NOT use key-value dictionaries. Instead, format each question as a **list** with 7 items:
+        [question, choice1, choice2, choice3, choice4, correct_answer, reference]
+
+        Use the exact format below:
+        {{
+        "questions": [
+            ["question1", "choice1", "choice2", "choice3", "choice4", "correct_answer", "reference"],
+            ...
             ]
-            }}
+        }}
 
-            Context:
-            \"\"\"
-            {context}
-            \"\"\"
+        Context:
+        \"\"\"
+        {context}
+        \"\"\"
         """
         
         return prompt
+
     
     @staticmethod
     def open_gen_prompt(context: str, topic: str, num_questions: int, language: str = "French") -> str:

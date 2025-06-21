@@ -11,7 +11,7 @@ import os, zipfile, tempfile, asyncio
 from typing import List
 from llama_index.core.tools import QueryEngineTool, ToolMetadata
 from llama_index.core import StorageContext, load_index_from_storage
-from app.services.database.mongo_utils import store_tool_doc, fetch_all_tools
+from app.services.database.mongo_utils import store_tool_doc
 from app.services.external.azure_utils import _blob_service, _container_client
 from icecream import ic
 import logging
@@ -28,13 +28,21 @@ async def store_tool(payload: dict) -> None:
     await store_tool_doc(payload)
 
 # state.reload_agent_from_json → calls this to rebuild tools[]
-async def load_tools_from_json_server() -> List[QueryEngineTool]:
+async def load_tools_from_json_server(course_filter: str = None) -> List[QueryEngineTool]:
     """
-    1) Fetch all records from Mongo
+    1) Fetch all records from Mongo (or filtered by course)
     2) For each, ensure index exists locally (or download+unzip from Azure)
     3) load index + wrap as QueryEngineTool
     """
-    records = await fetch_all_tools()
+    if course_filter:
+        from app.services.database.mongo_utils import fetch_tools_by_course
+        records = await fetch_tools_by_course(course_filter)
+        logger.info(f"Loading tools for course: {course_filter} - Found {len(records)} tools")
+    else:
+        from app.services.database.mongo_utils import fetch_all_tools
+        records = await fetch_all_tools()
+        logger.info(f"Loading all tools - Found {len(records)} tools")
+    
     ic(records)
     result: List[QueryEngineTool] = []
 

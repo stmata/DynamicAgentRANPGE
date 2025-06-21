@@ -38,7 +38,7 @@ async def evaluate(req: EvaluationRequest) -> Dict[str, Any]:
     - Automatic reference fetching and formatting
     
     Args:
-        req: EvaluationRequest with eval_type, topics, num_questions
+        req: EvaluationRequest with eval_type, topics, num_questions, course_filter
         
     Returns:
         Dict containing 'questions' key with generated questions and references
@@ -50,7 +50,8 @@ async def evaluate(req: EvaluationRequest) -> Dict[str, Any]:
         result = await evaluate_standard(
             topics=req.topics,
             eval_type=req.eval_type,
-            num_questions=req.num_questions
+            num_questions=req.num_questions,
+            course_filter=req.course_filter
         )
         
         logger.info(f"evaluate ➤ success: generated {len(result['questions'])} questions")
@@ -80,7 +81,7 @@ async def evaluate_mixed_endpoint(req: MixedEvaluationRequest) -> Dict[str, Any]
     - Positioning evaluation support with module distribution
     
     Args:
-        req: MixedEvaluationRequest with topics, num_questions, mcq_weight, open_weight
+        req: MixedEvaluationRequest with topics, num_questions, mcq_weight, open_weight, language, is_positioning, modules_topics, course_filter
         
     Returns:
         Dict containing 'questions' key with mixed questions and references
@@ -106,7 +107,8 @@ async def evaluate_mixed_endpoint(req: MixedEvaluationRequest) -> Dict[str, Any]
             open_weight=req.open_weight,
             language=req.language,
             is_positioning=req.is_positioning,
-            modules_topics=req.modules_topics
+            modules_topics=req.modules_topics,
+            course_filter=req.course_filter
         )
         
         logger.info(f"evaluate-mixed ➤ success: generated {len(result['questions'])} mixed questions")
@@ -128,7 +130,8 @@ async def generate_practical_case(request: CaseRequest):
         topics=request.topics,
         level=request.level,
         course_context=request.course_context,
-        language=request.language
+        language=request.language,
+        course_filter=request.course_filter
     )
     return result
 
@@ -155,7 +158,8 @@ async def submit_evaluation_and_save(
         grader_result = await grader_service.grade_evaluation(
             user_id=user_id,
             questions=evaluation_data.questions,
-            responses=evaluation_data.responses
+            responses=evaluation_data.responses,
+            language=evaluation_data.language
         )
         
         final_score = grader_result.get("final_score")
@@ -213,7 +217,8 @@ async def submit_case_evaluation_and_save(
             user_response=evaluation_data.user_response,
             course=evaluation_data.course,
             level=evaluation_data.level,
-            topics=evaluation_data.topics
+            topics=evaluation_data.topics,
+            language=evaluation_data.language
         )
         
         final_score = grader_result.get("score")

@@ -69,9 +69,9 @@ async def process_chat_with_persistence(
     )
 
 # ── Agent rebuild (PRESERVE EXISTING) ──
-async def reload_agent_from_json() -> None:
+async def reload_agent_from_json(course_filter: str = None) -> None:
     """
-    1.  GET /tools  from json‑server
+    1.  GET /tools  from json‑server (optionally filtered by course)
     2.  Build QueryEngineTool list
     3.  Instantiate ReActAgent
     Executes inside _lock so only 1 thread/task rebuilds at once.
@@ -83,7 +83,7 @@ async def reload_agent_from_json() -> None:
         from app.config import get_azure_openai_client_with_llama_index
         # Refresh tool list
         tools.clear()
-        tools.extend(await load_tools_from_json_server())
+        tools.extend(await load_tools_from_json_server(course_filter))
 
         # Re‑create agent
         agent = ReActAgent.from_tools(
@@ -93,4 +93,8 @@ async def reload_agent_from_json() -> None:
         )
         agent.update_prompts({"agent_worker:system_prompt": react_system_prompt})
         agent.reset()
-        print(f"[state] reload complete – {len(tools)} tools")
+        
+        if course_filter:
+            print(f"[state] reload complete for course '{course_filter}' – {len(tools)} tools")
+        else:
+            print(f"[state] reload complete – {len(tools)} tools")

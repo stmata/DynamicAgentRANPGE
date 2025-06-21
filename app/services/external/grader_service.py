@@ -11,12 +11,13 @@ class GraderService:
     def __init__(self):
         self.base_url = GRADER_API_URL
         self.timeout = 300.0
-    
+
     async def grade_evaluation(
         self,
         user_id: str,
         questions: List[Any],
-        responses: List[str]
+        responses: List[str],
+        language: str = "French"
     ) -> Dict[str, Any]:
         """
         Submit evaluation to grader for standard grading
@@ -25,6 +26,7 @@ class GraderService:
             user_id: User ID
             questions: List of questions
             responses: List of user responses
+            language: Language for grading (default: french)
             
         Returns:
             Grading results from grader API
@@ -36,7 +38,8 @@ class GraderService:
         payload = {
             "userID": user_id,
             "questions": questions,
-            "responses": responses
+            "responses": responses,
+            "language": language
         }
         
         try:
@@ -45,7 +48,7 @@ class GraderService:
                 response.raise_for_status()
                 result = response.json()
                 
-                logger.info(f"Grade evaluation successful for user: {user_id}")
+                logger.info(f"Grade evaluation successful for user: {user_id}, language: {language}")
                 return result
                 
         except httpx.HTTPStatusError as e:
@@ -65,7 +68,8 @@ class GraderService:
         user_response: str,
         course: str,
         level: str,
-        topics: List[str]
+        topics: List[str],
+        language: str = "French"
     ) -> Dict[str, Any]:
         """
         Submit case evaluation to grader for case-based grading
@@ -77,6 +81,7 @@ class GraderService:
             course: Course name
             level: Academic level
             topics: List of topics covered
+            language: Language for grading (default: french)
             
         Returns:
             Case grading results from grader API
@@ -91,7 +96,8 @@ class GraderService:
             "user_response": user_response,
             "course": course,
             "level": level,
-            "topics": topics
+            "topics": topics,
+            "language": language
         }
         
         try:
@@ -100,7 +106,7 @@ class GraderService:
                 response.raise_for_status()
                 result = response.json()
                 
-                logger.info(f"Grade case evaluation successful for user: {user_id}")
+                logger.info(f"Grade case evaluation successful for user: {user_id}, language: {language}")
                 return result
                 
         except httpx.HTTPStatusError as e:
