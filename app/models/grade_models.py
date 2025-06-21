@@ -4,7 +4,7 @@ Grade evaluation models
 This module contains all Pydantic models used for grade evaluation endpoints.
 """
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Any, Dict
 
 
@@ -13,6 +13,7 @@ class GradeRequest(BaseModel):
     userID: str
     questions: List[List[Any]]
     responses: List[str]
+    language: str = Field(default="French", description="Language for grading responses")
 
 
 class GradeResponse(BaseModel):
@@ -36,6 +37,7 @@ class CaseGradeRequest(BaseModel):
     course: str
     level: str
     topics: List[str]
+    language: str = Field(default="French", description="Language for grading responses")
 
 
 class CaseGradeResponse(BaseModel):

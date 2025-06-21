@@ -64,7 +64,7 @@ class GradeService:
             # Open‐ended entry = length 3
             elif len(entry) == 3:
                 result = await GradeService._process_open_question(
-                    entry, user_ans, idx, missed_open
+                    entry, user_ans, idx, missed_open, req.language
                 )
                 results.append(result)
             else:
@@ -75,7 +75,7 @@ class GradeService:
                 )
 
         # Build study guide
-        study_guide = await GradeService._build_study_guide(missed_mcq, missed_open)
+        study_guide = await GradeService._build_study_guide(missed_mcq, missed_open, req.language)
         
         # Calculate final score
         final_score = GradeService._calculate_final_score(results)
@@ -118,7 +118,8 @@ class GradeService:
         entry: List[Any], 
         user_ans: str, 
         idx: int, 
-        missed_open: List[Dict]
+        missed_open: List[Dict],
+        language: str
     ) -> Dict[str, Any]:
         """Process an open-ended question"""
         question, model_ans, refs = entry
@@ -127,7 +128,10 @@ class GradeService:
         prompt = f"""
             You are a thoughtful and empathetic university professor reviewing a student's answer to an exam question.
              
-            Before proceeding, **identify the language of the input (French, English, Portuguese, etc.) and make sure your entire response is written in that same language**.
+            IMPORTANT: You must write your entire response in {language}. This includes all instructions, grading, and feedback. Do not use any other language.
+
+            Check at the end that your response is fully in {language}.
+
              
             Your task is to:
             1. Assign a numeric grade from 0 (completely incorrect) to 10 (perfect).
@@ -189,7 +193,7 @@ class GradeService:
         return result
 
     @staticmethod
-    async def _build_study_guide(missed_mcq: List[Dict], missed_open: List[Dict]) -> str:
+    async def _build_study_guide(missed_mcq: List[Dict], missed_open: List[Dict], language:str) -> str:
         """Build study guide based on missed questions"""
         if not missed_mcq and not missed_open:
             return "🎉 You got all questions—and open responses—perfect! Well done."
@@ -215,8 +219,6 @@ class GradeService:
         llm = get_azure_openai_client_with_llama_index(temperature=0.7)
         prompt = f"""
             You are a thoughtful and supportive university professor reviewing a student's recent exam performance.
-            
-            Before you start, **detect the language used in the input below (French, English, Portuguese, etc.) and write your entire response in that same language.**
             
             Below is a list of questions the student missed or underperformed on:
  
@@ -247,8 +249,12 @@ class GradeService:
             4. Ensure there's a blank line between paragraphs and sections
             5. DO NOT use numbered lists - only use bullet points
             6. Keep each bullet point concise and focused on a single concept
+
+            IMPORTANT: You must write the ENTIRE response in {language}, including all section titles, bullet points, and content.
+
+            At the end, verify that ALL parts are in {language}.
  
-            Return *only* the study guide text in the same language as the input, following the above formatting rules.
+            Return *only* the study guide text, following the above formatting rules.
         """
         
         t2 = time.perf_counter()
@@ -301,6 +307,7 @@ class GradeService:
         pedagogical_objectives = case_data.get("pedagogical_objectives", [])
         expected_elements = case_data.get("expected_elements_of_response", [])
         evaluation_criteria = case_data.get("evaluation_criteria", [])
+        language = req.language
         
         # Build comprehensive context for LLM
         case_context = f"""
@@ -367,6 +374,11 @@ class GradeService:
         7. Identify 2-4 specific areas for improvement
 
         IMPORTANT: Be fair but rigorous. A response that only partially addresses the requirements should not receive a high score, even if well-written.
+
+        You must write the ENTIRE response — including all field values and list items — in {language}.
+
+        Before returning the JSON, double-check that ALL content is written correctly in {language}, especially feedback, strengths, and improvements.
+
 
         Return *only* JSON in this exact format:
         {{
