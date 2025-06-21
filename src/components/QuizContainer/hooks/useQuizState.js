@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { useEvaluation } from '../../../hooks/useEvaluation';
 import { useAuth } from '../../../contexts/AuthContext';
+import { determineCourseFilter } from '../../../utils/helpers'; 
 import { formatQuestionsFromEvaluation, prepareSubmissionData, applySubmissionResults } from '../utils/questionFormatter';
 
 /**
@@ -13,7 +14,7 @@ import { formatQuestionsFromEvaluation, prepareSubmissionData, applySubmissionRe
  * @returns {Object} Quiz state and functions
  */
 export const useQuizState = (moduleId, courseTitle, moduleTopics, isPositionnement) => {
-  const { getTopicsForModule, getModulesForCourse } = useAuth();
+  const { getTopicsForModule, getModulesForCourse, selectedCourse } = useAuth();
   const {
     loading: evaluationLoading,
     error: evaluationError,
@@ -94,13 +95,16 @@ export const useQuizState = (moduleId, courseTitle, moduleTopics, isPositionneme
       
       const numQuestions = isPositionnement ? 15 : 5;
       
+      const courseFilter = determineCourseFilter(isPositionnement, selectedCourse, courseTitle);
+      
       const evaluation = await generateMixedEvaluation(
         topicsToUse,
         numQuestions,
         0.6,
         0.4,
         isPositionnement,
-        modulesTopics
+        modulesTopics,
+        courseFilter
       );
       
       if (evaluation && evaluation.questions) {

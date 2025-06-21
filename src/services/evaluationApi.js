@@ -8,24 +8,26 @@ class EvaluationApi {
   /**
    * Generate standard evaluation (MCQ or Open questions)
    */
-  async generateStandardEvaluation(evalType, topics, numQuestions) {
+  async generateStandardEvaluation(evalType, topics, numQuestions, courseFilter = null) {
     return fetchWrapper.post(API_ENDPOINTS.EVALUATION.STANDARD, {
       eval_type: evalType,
       topics,
       num_questions: numQuestions,
+      course_filter: courseFilter
     });
   }
 
   /**
    * Generate mixed evaluation (both MCQ and Open questions)
    */
-  async generateMixedEvaluation(topics, numQuestions, mcqWeight, openWeight, language = 'French', isPositioning = false, modulesTopics = null) {
+  async generateMixedEvaluation(topics, numQuestions, mcqWeight, openWeight, language = 'French', isPositioning = false, modulesTopics = null, courseFilter = null) {
     const payload = {
       topics,
       num_questions: numQuestions,
       mcq_weight: mcqWeight,
       open_weight: openWeight,
-      language
+      language,
+      course_filter: courseFilter
     };
   
     if (isPositioning) {
@@ -38,12 +40,13 @@ class EvaluationApi {
   /**
    * Generate practical business case evaluation
    */
-  async generateCaseEvaluation(topics, level, courseContext = null, language = 'French') {
+  async generateCaseEvaluation(topics, level, courseContext = null, language = 'French', courseFilter = null) {
     return fetchWrapper.post(API_ENDPOINTS.EVALUATION.CASE, {
       topics,
       level,
       course_context: courseContext,
-      language
+      language,
+      course_filter: courseFilter
     });
   }
 
@@ -57,7 +60,7 @@ class EvaluationApi {
    * @param {string} evaluationType - Type of evaluation (mcq, open, mixed)
    * @returns {Promise<{grading_result: Object, score_saved: boolean, final_score: number, user_updated: boolean}>} - Complete response with grading results
    */
- async submitEvaluation( questions, responses, course, module, topics, evaluationType) {
+async submitEvaluation(questions, responses, course, module, topics, evaluationType, language = 'French') {
   return fetchWrapper.post(API_ENDPOINTS.EVALUATION.SUBMIT_MCQ_OPEN, {
     questions: questions,
     responses: responses,
@@ -65,6 +68,7 @@ class EvaluationApi {
     course: course,
     module: module,
     evaluation_type: evaluationType,
+    language: language
   });
 }
 
@@ -78,7 +82,7 @@ class EvaluationApi {
    * @param {string} module - Module name
    * @returns {Promise<{score: number, feedback: string, detailed_analysis: Object}>} - Case grading results
    */
-  async submitCaseEvaluation(caseData, userResponse, course, level, topics, module) {
+  async submitCaseEvaluation(caseData, userResponse, course, level, topics, module, language = 'French') {
     return fetchWrapper.post(API_ENDPOINTS.EVALUATION.SUBMIT_CASE, {
       case_data: caseData,
       user_response: userResponse,
@@ -86,6 +90,7 @@ class EvaluationApi {
       level: level,
       topics: topics,
       module: module,
+      language: language
     });
   }
 

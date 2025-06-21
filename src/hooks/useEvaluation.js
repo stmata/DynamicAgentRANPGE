@@ -29,7 +29,7 @@ export const useEvaluation = () => {
   /**
    * Generate standard evaluation (MCQ or Open questions)
    */
-  const generateStandardEvaluation = useCallback(async (evalType, topics, numQuestions) => {
+  const generateStandardEvaluation = useCallback(async (evalType, topics, numQuestions, courseFilter = null) => {
     if (!topics || topics.length === 0) {
       throw new Error('Topics are required');
     }
@@ -45,7 +45,8 @@ export const useEvaluation = () => {
       generatePromiseRef.current = evaluationApi.generateStandardEvaluation(
         evalType, 
         topics, 
-        numQuestions
+        numQuestions,
+        courseFilter
       );
       
       const response = await generatePromiseRef.current;
@@ -82,7 +83,7 @@ export const useEvaluation = () => {
   /**
    * Generate mixed evaluation (MCQ and Open questions)
    */
-  const generateMixedEvaluation = useCallback(async (topics, numQuestions, mcqWeight = 0.5, openWeight = 0.5, isPositioning = false, modulesTopics = null) => {
+  const generateMixedEvaluation = useCallback(async (topics, numQuestions, mcqWeight = 0.5, openWeight = 0.5, isPositioning = false, modulesTopics = null, courseFilter = null) => {
     if (!topics || topics.length === 0) {
       throw new Error('Topics are required');
     }
@@ -112,7 +113,8 @@ export const useEvaluation = () => {
         openWeight,
         language,
         isPositioning,
-        modulesTopics
+        modulesTopics,
+        courseFilter
       );
       
       const response = await generatePromiseRef.current;
@@ -151,7 +153,7 @@ export const useEvaluation = () => {
   /**
    * Generate case-based evaluation
    */
-  const generateCaseEvaluation = useCallback(async (topics, level, courseContext = null) => {
+  const generateCaseEvaluation = useCallback(async (topics, level, courseContext = null, courseFilter = null) => {
     if (!topics || topics.length === 0) {
       throw new Error('Topics are required');
     }
@@ -174,7 +176,8 @@ export const useEvaluation = () => {
         topics, 
         level, 
         courseContext,
-        language
+        language,
+        courseFilter
       );
       
       const response = await generatePromiseRef.current;
@@ -255,13 +258,16 @@ export const useEvaluation = () => {
       setError(null);
       setLoading(true);
       
+      const language = getCurrentLanguage();
+  
       const response = await evaluationApi.submitEvaluation(
         questions,
         responses,
         course,
         module,
         topics,
-        evaluationType
+        evaluationType,
+        language
       );
 
       const gradingResults = response.grading_result;
@@ -285,7 +291,7 @@ export const useEvaluation = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [getCurrentLanguage]);
 
   /**
    * Submit case evaluation for grading
@@ -327,13 +333,16 @@ export const useEvaluation = () => {
       setError(null);
       setLoading(true);
       
+      const language = getCurrentLanguage();
+  
       const gradingResults = await evaluationApi.submitCaseEvaluation(
         caseData,
         userResponse,
         course,
         level,
         topics,
-        module
+        module,
+        language
       );
       
       // Dispatch event to notify other components about successful case submission
@@ -356,7 +365,7 @@ export const useEvaluation = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [getCurrentLanguage]);
 
 
   /**

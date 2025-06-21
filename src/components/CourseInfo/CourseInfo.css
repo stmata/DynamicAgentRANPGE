@@ -8,6 +8,7 @@
   flex-direction: column;
   align-items: center;
 }
+
 .courseInfo-title {
   font-size: 26px;
   margin-bottom: 15px;
@@ -23,7 +24,6 @@
   text-align: justify;
   margin: 0 auto;
 }
- 
 
 .courseInfo-stats {
   display: flex;
@@ -52,13 +52,40 @@
   transform: translateY(-2px);
   box-shadow: var(--enhanced-shadow-light);
 }
+
+/* Styles pour l'élément cliquable */
+.courseInfo-stat-clickable {
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.courseInfo-stat-clickable:hover {
+  background-color: #e73d3c;
+  color: white;
+  transform: translateY(-3px);
+  box-shadow: var(--enhanced-shadow-light);
+}
+
+.courseInfo-stat-clickable:active {
+  transform: translateY(-1px);
+}
+
+.courseInfo-stat-clickable:focus {
+  outline: 2px solid #e73d3c;
+  outline-offset: 2px;
+}
+
+.courseInfo-stat-clickable i {
+  color: white;
+  transition: color var(--transition-fast);
+}
  
 .courseInfo-stat i {
   color: #e73d3c;
   font-size: 16px;
 }
  
- /* Dark mode styles */
+/* Dark mode styles */
 .courseInfo-section.dark-mode {
   background-color: var(--dark-bg);
   box-shadow: var(--shadow-dark);
@@ -81,28 +108,44 @@
 .courseInfo-section.dark-mode .courseInfo-stat:hover {
   box-shadow: var(--enhanced-shadow-dark);
 }
+
+/* Dark mode styles pour l'élément cliquable */
+.courseInfo-section.dark-mode .courseInfo-stat-clickable:hover {
+  background-color: #e73d3c;
+  color: white;
+  box-shadow: var(--enhanced-shadow-dark);
+}
+
+.courseInfo-section.dark-mode .courseInfo-stat-clickable:focus {
+  outline: 2px solid #e73d3c;
+  outline-offset: 2px;
+}
+
+.courseInfo-section.dark-mode .courseInfo-stat-clickable:hover i {
+  color: white;
+}
  
 @media (max-width: 768px) {
   .courseInfo-section {
     padding: 20px;
-}
+  }
    
-.courseInfo-title {
-  font-size: 22px;
-}
+  .courseInfo-title {
+    font-size: 22px;
+  }
    
-.courseInfo-stats {
-  gap: 15px;
- }
+  .courseInfo-stats {
+    gap: 15px;
+  }
 }
  
 @media (max-width: 576px) {
   .courseInfo-stats {
     flex-direction: column;
     gap: 10px;
-}
+  }
    
-.courseInfo-stat {
+  .courseInfo-stat {
     width: fit-content;
   }
 }

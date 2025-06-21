@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import './CourseInfo.css';
 
 /**
@@ -22,9 +23,17 @@ const CourseInfo = ({
   const { t } = useTranslation();
   const { isDarkMode } = useTheme();
   const { getCourseScore } = useAuth();
+  const navigate = useNavigate();
   
   const courseScore = getCourseScore(courseName);
   const formattedRating = courseScore === null ? "00/00" : `${courseScore}/100`;
+
+  /**
+   * Handle navigation to course modules
+   */
+  const handleModulesClick = () => {
+    navigate(`/course-modules?course=${encodeURIComponent(courseName)}`);
+  };
 
   return (
     <div className={`courseInfo-section ${isDarkMode ? 'dark-mode' : ''}`}>
@@ -34,7 +43,18 @@ const CourseInfo = ({
       {(modules || courseScore !== undefined) && (
         <div className="courseInfo-stats">
           {modules && (
-            <div className="courseInfo-stat">
+            <div 
+              className="courseInfo-stat courseInfo-stat-clickable" 
+              onClick={handleModulesClick}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleModulesClick();
+                }
+              }}
+            >
               <i className="fas fa-book"></i>
               <span>{modules} {t('courseModules.modules')}</span>
             </div>

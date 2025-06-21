@@ -36,7 +36,7 @@ const EvaluationCase = ({ moduleId, courseTitle }) => {
   
   const { openSettings } = useSettings();
   const { isDarkMode } = useTheme();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   
   const {
     messages,
@@ -134,9 +134,16 @@ const EvaluationCase = ({ moduleId, courseTitle }) => {
   /**
    * Handle user logout
    */
-  const handleLogout = () => {
-    setIsProfileOpen(false);
-    alert(t('navbar.logout'));
+  const handleLogout = async () => {
+    try {
+      await logout(); 
+      setIsProfileOpen(false);
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      setIsProfileOpen(false);
+      navigate('/login');
+    }
   };
 
   return (

@@ -21,6 +21,26 @@ export const hashUserId = async (userId) => {
 };
 
 /**
+ * Determines the appropriate course_filter based on the context
+ * @param {boolean} isPositioning - Indicates if this is a positioning test
+ * @param {string} selectedCourse - Currently selected course
+ * @param {string} courseFromParams - Course from the URL parameters
+ * @returns {string|null} The course name to use as a filter, or null
+ */
+export const determineCourseFilter = (isPositioning, selectedCourse, courseFromParams) => {
+  if (isPositioning && selectedCourse) {
+    return selectedCourse;
+  }
+  
+  if (!isPositioning && (courseFromParams || selectedCourse)) {
+    return courseFromParams || selectedCourse;
+  }
+  
+  return null;
+};
+
+
+/**
  * Transform backend courses data to frontend structure (legacy format)
  */
 export const transformCoursesData = (backendData) => {

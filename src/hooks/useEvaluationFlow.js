@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { useEvaluation } from './useEvaluation';
-import { EVALUATION_CONFIG } from '../utils/constants';
+import { determineCourseFilter } from '../utils/helpers';
+//import { EVALUATION_CONFIG } from '../utils/constants';
 
 const EVALUATION_STATES = {
   WELCOME: 'welcome',
@@ -25,7 +26,7 @@ export const useEvaluationFlow = (moduleId, courseTitle) => {
   const [isInputDisabled, setIsInputDisabled] = useState(false);
   const [currentEvaluationData, setCurrentEvaluationData] = useState(null);
   
-  const { getTopicsForModule, user } = useAuth();
+  const { getTopicsForModule, user, selectedCourse } = useAuth();
   const { 
     generateCaseEvaluation, 
     submitCaseEvaluation,
@@ -96,10 +97,13 @@ export const useEvaluationFlow = (moduleId, courseTitle) => {
 
       const level = determineLevelFromCourse(courseTitle);
       
+      const courseFilter = determineCourseFilter(false, selectedCourse, courseTitle);
+
       const evaluation = await generateCaseEvaluation(
         topics, 
         level, 
-        courseTitle
+        courseTitle,
+        courseFilter
       );
       
       // Store the complete evaluation data for later use in correction
@@ -175,7 +179,7 @@ export const useEvaluationFlow = (moduleId, courseTitle) => {
       
       if (gradingData.detailed_analysis) {
         if (gradingData.detailed_analysis.strengths && gradingData.detailed_analysis.strengths.length > 0) {
-          correctionContent += `**Points forts:**\n`;
+          correctionContent += `**${t('pdf.evaluation.strengths')}:**\n`;
           gradingData.detailed_analysis.strengths.forEach((strength) => {
             correctionContent += `✅ ${strength}\n`;
           });
@@ -183,7 +187,7 @@ export const useEvaluationFlow = (moduleId, courseTitle) => {
         }
         
         if (gradingData.detailed_analysis.improvements && gradingData.detailed_analysis.improvements.length > 0) {
-          correctionContent += `**Points d'amélioration:**\n`;
+          correctionContent += `**${t('pdf.evaluation.improvements')}:**\n`;
           gradingData.detailed_analysis.improvements.forEach((improvement) => {
             correctionContent += `📈 ${improvement}\n`;
           });
