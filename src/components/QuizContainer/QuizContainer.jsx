@@ -133,6 +133,7 @@ const QuizContainer = ({ moduleId, courseTitle, moduleTopics, isPositionnement }
         updateQuestionUI={updateQuestionUI}
         onSubmit={handleSubmit}
         onViewGuide={handleViewGuide}
+        allQuestionsAnswered={unattemptedCount === 0}
       />
 
       <QuestionContent

@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
  * @param {Function} updateQuestionUI - Update current question
  * @param {Function} onSubmit - Submit quiz handler
  * @param {Function} onViewGuide - View guide handler
+ * @param {boolean} allQuestionsAnswered - Whether all questions are answered
  */
 const QuizSidebar = ({
   questions,
@@ -26,7 +27,8 @@ const QuizSidebar = ({
   isLoading,
   updateQuestionUI,
   onSubmit,
-  onViewGuide
+  onViewGuide,
+  allQuestionsAnswered
 }) => {
   const { t } = useTranslation();
   const [useResponsiveGrid, setUseResponsiveGrid] = useState(false);
@@ -133,7 +135,7 @@ const QuizSidebar = ({
         <button 
           className="btn btn-submit" 
           onClick={isSubmitted ? onViewGuide : onSubmit}
-          disabled={isLoading}
+          disabled={isLoading || (!isSubmitted && !allQuestionsAnswered)}
         >
           <i className={isSubmitted ? "fas fa-book-open" : "fas fa-paper-plane"}></i>
           <span>{isSubmitted ? t('evaluation.viewGuide') : t('evaluation.submit')}</span>
