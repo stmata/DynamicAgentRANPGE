@@ -151,7 +151,7 @@ class GradeService:
             Return *only* JSON in this format: {{ "grade": <int>, "feedback": "<string>" }}
         """
 
-        llm = get_azure_openai_client_with_llama_index(temperature=0)
+        llm = get_azure_openai_client_with_llama_index(temperature=0.3)
         loop = asyncio.get_running_loop()
 
         t0 = time.perf_counter()
