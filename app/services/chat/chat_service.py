@@ -183,7 +183,8 @@ class ChatService:
             Dictionary with response text and references
         """
         # Check if agent is available
-        if state.agent is None:
+        agent = await state.get_agent_for_course(None)
+        if agent is None:
             raise HTTPException(500, "ReactAgent not initialized. Please restart the server or upload a new document.")
         
         # Build prompt with context
@@ -196,7 +197,7 @@ class ChatService:
         loop = asyncio.get_running_loop()
         
         def do_agent_query():
-            return state.agent.query(full_prompt)
+            return agent.query(full_prompt)
         
         try:
             agent_result = await loop.run_in_executor(None, do_agent_query)
@@ -397,7 +398,8 @@ async def handle_chat_request(session_id: str, user_question: str) -> Dict[str, 
     logger.info(f"[legacy_chat] Processing request for session {session_id}")
     
     # Check if agent is available
-    if state.agent is None:
+    agent = await state.get_agent_for_course(None)
+    if agent is None:
         raise HTTPException(500, "ReactAgent not initialized. Please restart the server or upload a new document.")
     
     # Get or create session history
@@ -419,7 +421,7 @@ async def handle_chat_request(session_id: str, user_question: str) -> Dict[str, 
     loop = asyncio.get_running_loop()
     
     def do_agent_query():
-        return state.agent.query(full_prompt)
+        return agent.query(full_prompt)
     
     try:
         agent_result = await loop.run_in_executor(None, do_agent_query)

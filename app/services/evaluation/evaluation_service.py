@@ -114,15 +114,20 @@ class PositioningTopicManager:
     
 # ─── Utility Functions ───────────────────────────────────
 
-async def fetch_references_for_question(question: str) -> List[str]:
+async def fetch_references_for_question(question: str, course_filter: str = None) -> List[str]:
     """
     Fetch raw references for a single question.
     Returns list of "File.pdf:chunk_X" format.
     """
+    # Get the cached agent
+    agent = state.get_cached_agent(course_filter)
+    if agent is None:
+        raise HTTPException(500, "No agent available for reference fetching")
+    
     loop = asyncio.get_running_loop()
     
     def call_agent():
-        return state.agent.query(question)
+        return agent.query(question)
     
     t0 = time.perf_counter()
     result = await loop.run_in_executor(_evaluation_pool, call_agent)
@@ -246,15 +251,20 @@ async def generate_single_question(topic: str, eval_type: str, context: str, lan
     return parse_llm_response(llm_result, topic)
 
 
-async def get_context_for_topic(topic: str) -> str:
+async def get_context_for_topic(topic: str, course_filter: str = None) -> str:
     """
     Fetch relevant context chunks for a topic using vector search.
     Returns concatenated context string.
     """
+    # Get the cached agent
+    agent = state.get_cached_agent(course_filter)
+    if agent is None:
+        raise HTTPException(500, "No agent available for context search")
+        
     loop = asyncio.get_running_loop()
     
     def do_search():
-        return state.agent.query(f"Provide relevant context for topic: {topic}")
+        return agent.query(f"Provide relevant context for topic: {topic}")
     
     t0 = time.perf_counter()
     try:
@@ -302,7 +312,8 @@ async def generate_single_case(topics: List[str], level: str, context: str | Non
 async def generate_questions_batch(
     topics_and_types: List[Tuple[str, str]], 
     semaphore: asyncio.Semaphore,
-    language: str = "French"
+    language: str = "French",
+    course_filter: str = None
 ) -> List[List[Any]]:
     """
     Generate a batch of questions in parallel with concurrency control.
@@ -311,7 +322,7 @@ async def generate_questions_batch(
     async def generate_with_semaphore(topic: str, eval_type: str):
         async with semaphore:
             # Get context for this topic
-            context = await get_context_for_topic(topic)
+            context = await get_context_for_topic(topic, course_filter)
             # Generate question
             return await generate_single_question(topic, eval_type, context, language)
     
@@ -336,7 +347,8 @@ async def orchestrate_standard_evaluation(
     topics: List[str], 
     eval_type: str, 
     num_questions: int,
-    language: str = "French"
+    language: str = "French",
+    course_filter: str = None
 ) -> List[List[Any]]:
     """
     Orchestrate standard evaluation (single type: mcq OR open).
@@ -360,7 +372,7 @@ async def orchestrate_standard_evaluation(
     all_question_batches = []
     for i in range(0, len(topics_and_types), EVALUATION_BATCH_SIZE):
         batch = topics_and_types[i:i + EVALUATION_BATCH_SIZE]
-        batch_results = await generate_questions_batch(batch, semaphore, language)
+        batch_results = await generate_questions_batch(batch, semaphore, language, course_filter)
         all_question_batches.extend(batch_results)
     
     # 5) Flatten results (each batch_result is a list of questions)
@@ -372,7 +384,7 @@ async def orchestrate_standard_evaluation(
     
     # 6) Fetch and format references for all questions in parallel
     if all_questions:
-        await populate_references_parallel(all_questions)
+        await populate_references_parallel(all_questions, course_filter)
     
     return all_questions
 
@@ -384,7 +396,8 @@ async def orchestrate_mixed_evaluation(
     open_weight: float,
     language: str = "French",
     is_positioning: bool = False,
-    modules_topics: Dict[str, List[str]] = None
+    modules_topics: Dict[str, List[str]] = None,
+    course_filter: str = None
 ) -> List[List[Any]]:
     """
     Orchestrate mixed evaluation (both mcq AND open questions).
@@ -398,6 +411,7 @@ async def orchestrate_mixed_evaluation(
         language: Language for question generation
         is_positioning: Whether this is a positioning evaluation
         modules_topics: Dict of topics by module (for positioning evaluation)
+        course_filter: Course filter for agent selection
     """
     logger.info(f"[orchestrate_mixed] Starting mixed evaluation: {num_questions} questions (positioning: {is_positioning})")
 
@@ -435,7 +449,7 @@ async def orchestrate_mixed_evaluation(
     all_question_batches = []
     for i in range(0, len(topics_and_types), EVALUATION_BATCH_SIZE):
         batch = topics_and_types[i:i + EVALUATION_BATCH_SIZE]
-        batch_results = await generate_questions_batch(batch, semaphore, language)
+        batch_results = await generate_questions_batch(batch, semaphore, language, course_filter)
         all_question_batches.extend(batch_results)
     
     # 8) Flatten results
@@ -447,12 +461,12 @@ async def orchestrate_mixed_evaluation(
     
     # 9) Fetch and format references for all questions in parallel
     if all_questions:
-        await populate_references_parallel(all_questions)
+        await populate_references_parallel(all_questions, course_filter)
     
     return all_questions
 
 
-async def populate_references_parallel(questions: List[List[Any]]) -> None:
+async def populate_references_parallel(questions: List[List[Any]], course_filter: str = None) -> None:
     """
     Populate references for all questions in parallel.
     Modifies questions in-place by updating the last index with formatted references.
@@ -464,7 +478,7 @@ async def populate_references_parallel(questions: List[List[Any]]) -> None:
     
     # 2) Fetch raw references concurrently
     t0 = time.perf_counter()
-    tasks = [fetch_references_for_question(text) for text in question_texts]
+    tasks = [fetch_references_for_question(text, course_filter) for text in question_texts]
     raw_refs_list = await asyncio.gather(*tasks)
     t1 = time.perf_counter()
     
@@ -501,13 +515,11 @@ async def evaluate_standard(
     Returns:
         Dict with 'questions' key containing the generated questions
     """
-    # 1) Ensure agent is loaded (with course filter if provided)
-    await state.reload_agent_from_json(course_filter)
-    if state.agent is None:
+    agent = await state.get_agent_for_course(course_filter)
+    if agent is None:
         raise HTTPException(500, "Agent initialization failed")
     
-    # 2) Generate questions
-    questions = await orchestrate_standard_evaluation(topics, eval_type, num_questions, language)
+    questions = await orchestrate_standard_evaluation(topics, eval_type, num_questions, language, course_filter)
     
     return {"questions": questions}
 
@@ -537,23 +549,19 @@ async def evaluate_mixed(
     Returns:
         Dict with 'questions' key containing the mixed questions
     """
-    # 1) Validate weights
     if not (0 <= mcq_weight <= 1 and 0 <= open_weight <= 1):
         raise HTTPException(400, "Weights must be between 0 and 1")
     
     if abs((mcq_weight + open_weight) - 1.0) > 0.001:
         raise HTTPException(400, "MCQ and Open weights must sum to 1.0")
     
-    # 2) Validate positioning parameters
     if is_positioning and not modules_topics:
         raise HTTPException(400, "modules_topics is required for positioning evaluation")
 
-    # 3) Ensure agent is loaded (with course filter if provided)
-    await state.reload_agent_from_json(course_filter)
-    if state.agent is None:
+    agent = await state.get_agent_for_course(course_filter)
+    if agent is None:
         raise HTTPException(500, "Agent initialization failed")
 
-    # 4) Generate mixed questions
     questions = await orchestrate_mixed_evaluation(
         topics, 
         num_questions, 
@@ -561,7 +569,8 @@ async def evaluate_mixed(
         open_weight, 
         language,
         is_positioning,
-        modules_topics
+        modules_topics,
+        course_filter
     )
     
     return {"questions": questions}
@@ -576,8 +585,8 @@ async def evaluate_case(
     """
     Generate a single practical case for a list of topics.
     """
-    await state.reload_agent_from_json(course_filter)
-    if state.agent is None:
+    agent = await state.get_agent_for_course(course_filter)
+    if agent is None:
         raise HTTPException(500, "Agent initialization failed")
 
     return await generate_single_case(topics, level, context=course_context, language=language)

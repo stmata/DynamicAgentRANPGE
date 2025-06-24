@@ -34,10 +34,18 @@ class GraderService:
         Raises:
             Exception: If grader API call fails
         """
+        processed_questions = []
+        for question in questions:
+            # MCQ with feedback: remove the last element (feedback)
+            if isinstance(question, list) and len(question) == 8:
+                processed_question = question[:7]  
+                processed_questions.append(processed_question)
+            else:
+                processed_questions.append(question)
         url = f"{self.base_url}/grade"
         payload = {
             "userID": user_id,
-            "questions": questions,
+            "questions": processed_questions,
             "responses": responses,
             "language": language
         }

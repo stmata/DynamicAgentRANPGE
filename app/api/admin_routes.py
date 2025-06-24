@@ -13,7 +13,7 @@ When an admin uploads a file:
 import os, shutil, datetime, tempfile, asyncio
 from fastapi import APIRouter, HTTPException, UploadFile, File, Depends
 from app.utils.parse_utils import file_to_documents
-from app.state import reload_agent_from_json
+from app.state import clear_course_cache
 from app.services.database.indexing_service import summarize_text, get_or_create_index
 from app.services.external.azure_utils import upload_file, upload_index_folder
 from app.services.external.tools_service import store_tool
@@ -86,8 +86,7 @@ async def admin_upload_file(
         "index_azure_url": idx_url
     })
 
-    # 8) one‑time agent reload
-    await reload_agent_from_json()
+    await clear_course_cache(course)
 
     return {"msg": "uploaded", "tool": f"DynamicTool_{base}"}
 

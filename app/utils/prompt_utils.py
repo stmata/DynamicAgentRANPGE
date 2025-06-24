@@ -32,7 +32,7 @@ class Prompt:
         You are a **university-level instructional designer**. Using ONLY the context provided, generate exactly {num_questions} **conceptual multiple-choice questions** on the topic "{topic}".
 
         Objectives:
-        - The questions must assess the learner’s understanding of **concepts**, **mechanisms**, or **reasoning**, **not recall** of specific phrases, clauses, companies, or named entities.
+        - The questions must assess the learner's understanding of **concepts**, **mechanisms**, or **reasoning**, **not recall** of specific phrases, clauses, companies, or named entities.
         - Focus on **transferable knowledge** the learner should understand after studying the topic, not on memorization of text.
 
         Instructions:
@@ -44,16 +44,21 @@ class Prompt:
         - Instead, rephrase any such content into generalized or abstracted **conceptual** questions (e.g., "What is the role of X in Y?" instead of "What clause did Z use to do Y?").
         - Each question must have exactly 4 answer choices.
         - The correct answer must be written as full text (not a label), and randomly positioned among the choices.
-        - Each question must be accompanied by a short **reference excerpt from the context** that supports the correct answer (but do NOT cite or reference the excerpt in the question).
+        - Each question must be accompanied by:
+            - a **short explanation (feedback)** of why the correct answer is right (1-2 sentences max),
+            - and a short **reference excerpt from the context** that supports the correct answer (but DO NOT cite or reference the excerpt in the question),
+
+        Output format:
         - Output must be **strictly valid JSON** with no extra text or comments.
         - DO NOT return any explanations, comments, or introductory text.
-        - DO NOT use key-value dictionaries. Instead, format each question as a **list** with 7 items:
-        [question, choice1, choice2, choice3, choice4, correct_answer, reference]
+        - DO NOT PUT THE REFERENCES INTO BRACKET
+        - DO NOT use key-value dictionaries. Instead, format each question as a **list** with 8 items:
+        [question, choice1, choice2, choice3, choice4, correct_answer, feedback ,reference]
 
-        Use the exact format below:
+        **Use the exact format below**:
         {{
         "questions": [
-            ["question1", "choice1", "choice2", "choice3", "choice4", "correct_answer", "reference"],
+            ["question1", "choice1", "choice2", "choice3", "choice4", "correct_answer", "feedback" ,"reference"],
             ...
             ]
         }}
@@ -62,6 +67,8 @@ class Prompt:
         \"\"\"
         {context}
         \"\"\"
+
+        Do not include any introductory or closing remarks—return only the JSON block.
         """
         
         return prompt
@@ -219,6 +226,7 @@ class Prompt:
             ⚠️ CRITICAL CONSTRAINTS:
             - Use the topics as core pillars for the case.
             - If course context is provided, base everything strictly on it.
+            - Provide the necessary sample data such as numbers, tables, should the use case require simulation of concrete calculations.
             - Return ONLY valid JSON - no markdown blocks, no explanations, no code fences.
             - Do NOT wrap the response in any additional object (like {{"response": ...}}).
             - The JSON must start with {{ and end with }}.
@@ -357,7 +365,8 @@ class Prompt:
 
             ```
             Thought: I cannot answer the question with the provided tools.
-            Answer:  I am afraid, but I have noticed that your question is out ot the scope. Perhaps you are not aware of the context .... YOU MUST USE THE LANGUAGE OF THE INPUT QUESTION
+            Answer:  You may use your knowledge or access the web to answer the question if the question is related to 'Marketing', 'Economics', 'Accounting', 'Geopolitics', or 'Statistics and Math'. Otherwise, say: 'I am afraid, but I have noticed that your question is out ot the scope. Perhaps you are not aware of the context .... YOU MUST USE THE LANGUAGE OF THE INPUT QUESTION'. 
+                     Should the user ask to elaborate on his previous question or something related to it, you must respond based on your previous responses (history) for such type of question is not considered out of scope.  
             ```
 
             ## Additional Rules

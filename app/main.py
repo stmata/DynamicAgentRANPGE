@@ -1,6 +1,6 @@
 """
 FastAPI entry‑point.
-Initialises global agent in every worker on startup.
+No longer initializes agents at startup - uses lazy initialization.
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,45 +9,21 @@ from threading import Event
 import asyncio
 import uvicorn
 
-from app.state import reload_agent_from_json, tools
+from app.state import agents_cache
 from app.api import evaluation_routes, admin_routes, chat_routes, users_routes, auth_routes
 from app.logs import logger
 
-
-# Flag de readiness
 tools_ready = Event()
+tools_ready.set()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """
-    FastAPI lifespan handler.
-    Triggers background loading of the tools/agent on startup without blocking the server.
-    """
-
-    async def init_agent():
-        """
-        Background task to load the ReAct agent and tools.
-        Sets the readiness flag when completed.
-        """
-        try:
-            await reload_agent_from_json()
-            tools_ready.set()
-            logger.info(f"[startup] Tools loaded → {len(tools)} tools")
-        except Exception as e:
-            logger.error(f"[startup] Failed to load tools: {e}")
-
-    # Start the tool loading process in the background
-    asyncio.create_task(init_agent())
-    logger.info("[startup] Agent loading in background...")
-
+    logger.info("[startup] Using lazy agent initialization - server ready")
     yield
 
 app = FastAPI(
     title="LLM Concurrent API",
-    lifespan=lifespan,
-    docs_url=None,  
-    redoc_url=None,  
-    openapi_url=None  
+    lifespan=lifespan 
 )
 
 # Configure CORS
@@ -76,9 +52,7 @@ async def health():
 
 @app.get("/readiness")
 async def readiness():
-    if tools_ready.is_set():
-        return {"status": "ready"}
-    return {"status": "loading"}, 503
+    return {"status": "ready", "cached_agents": list(agents_cache.keys())}
 
 if __name__ == "__main__":                    # dev mode
     uvicorn.run(app, host="0.0.0.0", port=8000, workers=1)
