@@ -24,14 +24,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Configure CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins
-    allow_credentials=True,
-    allow_methods=["*"],  # Allow all methods
-    allow_headers=["*"],  # Allow all headers
-)
 
 # Mount the grader router at root
 app.include_router(grade_router)

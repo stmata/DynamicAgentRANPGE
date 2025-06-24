@@ -138,6 +138,9 @@ class GradeService:
             2. Write a short, encouraging and human-sounding feedback message directly to the student.
             Avoid robotic phrases like "The student answer is identical to the model answer".
             Instead, write as if you're speaking to the student, highlighting what they did well, and suggesting improvements if needed.
+            3. Elaborate on your grade attribution. For instance, should the grade be 7/10, explain why you assign 7. Which parts of the answer were strong and which not strong enough.
+            4. Should an example not be mentionned in a question, it should not be expected in the answer either.
+            5. Assign a grade above zero only if the answer is plausible, congruent and has to do with the question. 
              
             Question: {question}
              
@@ -216,7 +219,7 @@ class GradeService:
         combined = "\n".join(guide_lines)
         
         # Prompt LLM to turn bullets into a concise study plan
-        llm = get_azure_openai_client_with_llama_index(temperature=0.7)
+        llm = get_azure_openai_client_with_llama_index(temperature=0.3)
         prompt = f"""
             You are a thoughtful and supportive university professor reviewing a student's recent exam performance.
             
@@ -227,6 +230,7 @@ class GradeService:
             Write a personal and motivating study guide addressed to the student. Your tone should feel warm, constructive, and encouraging.
  
             Guidelines:
+            - Your recommendation have to stay in the context and domain or field covered in the questions.
             - Do not repeat the same types of suggestions (e.g., don't always list textbook chapters or suggest rewriting answers).
             - Vary the support: sometimes suggest a strategy, sometimes a resource, sometimes a mindset tip.
             - Write directly to the student in a warm and encouraging tone, like you're giving them constructive feedback in a private message.
@@ -237,7 +241,7 @@ class GradeService:
             - Avoid generic conclusions, robotic tone, or naming yourself.
  
             STRICT FORMATTING REQUIREMENTS:
-            1. Start with a personalized introduction paragraph.
+            1. Start with a personalized and motivating introduction paragraph, but do not include any greeting (e.g., "Bonjour") or mention the student's name. The introduction should immediately encourage the student and acknowledge their efforts or progress in a warm and constructive way.
             2. Use exactly these headers, in this order. However, YOU MUST PROVIDE IN THE INPUT LANGUAGE, THAT IS, SHOULD THE TEXT BE IN FRENCH you must say Domaine de concentration instead of Areas to Focus On, Stratégies d'étude recommandées instead of Study Strategies, and Ressources utiles instead of Helpful Resources:
                - '## Areas to Focus On' (main concepts to review)
                - '## Recommended Study Strategies' (specific techniques)
@@ -373,7 +377,9 @@ class GradeService:
         
         7. Identify 2-4 specific areas for improvement
 
-        IMPORTANT: Be fair but rigorous. A response that only partially addresses the requirements should not receive a high score, even if well-written.
+        IMPORTANT: 
+            - Be fair but rigorous. A response that only partially addresses the requirements should not receive a high score, even if well-written.
+            - Should the response not be plausible, intelligible, congruent nor have nothing to do with the question or be empty, assign zero as grade and reply with precision that the response does not address the question.
 
         You must write the ENTIRE response — including all field values and list items — in {language}.
 
@@ -389,7 +395,7 @@ class GradeService:
         }}
         """
 
-        llm = OpenAI(model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"), temperature=0.2)
+        llm = OpenAI(model=os.getenv("AZURE_OPENAI_MODEL_AND_DEPLOYMENT_4o", "gpt-4o"), temperature=0.3)
         loop = asyncio.get_running_loop()
 
         t0 = time.perf_counter()

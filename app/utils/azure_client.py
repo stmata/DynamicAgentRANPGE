@@ -11,7 +11,7 @@ from llama_index.llms.azure_openai import AzureOpenAI
 
 load_dotenv()   # loads OPENAI_API_KEY & OPENAI_MODEL from .env
 
-AZURE_OPENAI_MODEL_AND_DEPLOYMENT_4omini = os.getenv("AZURE_OPENAI_MODEL_AND_DEPLOYMENT_4omini")
+AZURE_OPENAI_MODEL_AND_DEPLOYMENT_4o = os.getenv("AZURE_OPENAI_MODEL_AND_DEPLOYMENT_4o")
 AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
 AZURE_OPENAI_KEY = os.getenv("AZURE_OPENAI_KEY")
 AZURE_OPENAI_API_VERSION = os.getenv("AZURE_OPENAI_API_VERSION")
@@ -19,9 +19,9 @@ AZURE_OPENAI_MODEL = os.getenv("AZURE_OPENAI_MODEL_AND_DEPLOYMENT_4omini")
 
 
 def get_azure_openai_client_with_llama_index(
-    temperature: float = 0.1,
-    engine: str = AZURE_OPENAI_MODEL_AND_DEPLOYMENT_4omini,
-    model: str = AZURE_OPENAI_MODEL_AND_DEPLOYMENT_4omini,
+    temperature: float = 0.3,
+    engine: str = AZURE_OPENAI_MODEL_AND_DEPLOYMENT_4o,
+    model: str = AZURE_OPENAI_MODEL_AND_DEPLOYMENT_4o,
     **kwargs
 ) -> AzureOpenAI:    
     """
