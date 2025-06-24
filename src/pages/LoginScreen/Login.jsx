@@ -23,7 +23,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
   const [step, setStep] = useState(1); 
-  const [timer, setTimer] = useState(60);
+  const [timer, setTimer] = useState(120);
   const [isTimerActive, setIsTimerActive] = useState(false);
   const [localError, setLocalError] = useState('');
   const [redirectPath, setRedirectPath] = useState('/');
@@ -66,7 +66,7 @@ const Login = () => {
     try {
       await sendVerificationCode(normalizedEmail);
       setStep(2);
-      setTimer(60);
+      setTimer(120);
       setIsTimerActive(true);
       console.log(`Verification code sent to ${normalizedEmail}`);
     } catch (err) {

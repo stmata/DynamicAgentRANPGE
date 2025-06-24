@@ -29,11 +29,13 @@ const QuizDialogs = ({
   totalQuestions,
   submissionResults,
   error,
+  isPositionnement,
   setConfirmDialogOpen,
   setSuccessDialogOpen,
   setGuideDialogOpen,
   setErrorDialogOpen,
-  confirmSubmit
+  confirmSubmit,
+  onSuccessDialogClose
 }) => {
   const { t } = useTranslation();
   const { isDarkMode } = useTheme();
@@ -282,7 +284,32 @@ const QuizDialogs = ({
             color: isDarkMode ? 'var(--dark-text)' : 'var(--text-dark)',
             marginTop: '8px'
           }}>
-            {t('evaluation.submitSuccess')}
+            {submissionResults?.final_score !== undefined ? (
+              <>
+                {t('evaluation.submitSuccess')}
+                <br /><br />
+                <div style={{ 
+                  textAlign: 'center', 
+                  fontSize: '1.2em', 
+                  fontWeight: 'bold',
+                  margin: '10px 0'
+                }}>
+                  {t('evaluation.scoreLabel')} {t('evaluation.scoreValue', { score: Math.round(submissionResults.final_score) })}
+                </div>
+                <br />
+                {isPositionnement ? (
+                  submissionResults.final_score >= 57
+                    ? t('evaluation.positioningPassed')
+                    : t('evaluation.positioningFailed')
+                ) : (
+                  submissionResults.final_score >= 57
+                    ? t('evaluation.moduleGood')
+                    : t('evaluation.moduleNeedsWork')
+                )}
+              </>
+            ) : (
+              t('evaluation.submitSuccess')
+            )}
           </DialogContentText>
         </DialogContent>
         <DialogActions sx={{ 
@@ -291,7 +318,12 @@ const QuizDialogs = ({
           padding: '16px 24px'
         }}>
           <Button 
-            onClick={() => setSuccessDialogOpen(false)} 
+            onClick={() => {
+              setSuccessDialogOpen(false);
+              if (onSuccessDialogClose) {
+                onSuccessDialogClose();
+              }
+            }} 
             variant="contained"
             sx={{
               backgroundColor: isDarkMode ? 'var(--primary)' : 'var(--primary)',

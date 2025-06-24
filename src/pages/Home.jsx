@@ -25,7 +25,7 @@ const Home = () => {
     <>
       <ImageSlider />
       <section className="description">
-        <h1>{t('home.title')}</h1>
+        <h2>{t('home.title')}</h2><br/>
         <p>{t('home.description')}</p>
         
         <div className="scroll-indicator" onClick={scrollToContent}>

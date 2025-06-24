@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './CourseInfo.css';
 
 /**
@@ -24,9 +24,13 @@ const CourseInfo = ({
   const { isDarkMode } = useTheme();
   const { getCourseScore } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   
   const courseScore = getCourseScore(courseName);
   const formattedRating = courseScore === null ? "00/00" : `${courseScore}/100`;
+
+  const searchParams = new URLSearchParams(location.search);
+  const isTopicView = searchParams.has('module');
 
   /**
    * Handle navigation to course modules
@@ -56,7 +60,7 @@ const CourseInfo = ({
               }}
             >
               <i className="fas fa-book"></i>
-              <span>{modules} {t('courseModules.modules')}</span>
+              <span>{modules} {t(isTopicView ? 'courseModules.topics' : 'courseModules.modules')}</span>
             </div>
           )}
           

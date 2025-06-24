@@ -1,3 +1,4 @@
+import i18n from "../i18n";
 /**
  * Course service for handling course-related operations
  * Note: Most functions are deprecated in favor of local cache data access
@@ -66,7 +67,7 @@ export const createPositionnementCard = () => {
       fr: "Cette évaluation initiale permet d'identifier vos compétences actuelles afin d'adapter le parcours d'apprentissage à vos besoins. C'est une étape clé pour progresser efficacement."
     },
     isActive: true,
-    modules: "Tous les"
+    modules: i18n.t('courseModules.all')
   };
 };
 

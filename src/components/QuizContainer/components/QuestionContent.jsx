@@ -64,6 +64,36 @@ const QuestionContent = ({
               </div>
             );
           })}
+          
+          {isSubmitted && currentQuestion.feedback && (
+            <>
+              <div className="mcq-feedback">
+                <div className="mcq-feedback-header">
+                  <span className="mcq-feedback-title">{t('evaluation.feedback')}</span>
+                  <span className={`mcq-feedback-grade ${!currentQuestion.isCorrect ? 'incorrect' : ''}`}>
+                    {currentQuestion.isCorrect ? 
+                      t('evaluation.correct') : 
+                      t('evaluation.incorrect')
+                    }
+                  </span>
+                </div>
+                <p className="mcq-feedback-content">{currentQuestion.feedback}</p>
+              </div>
+              
+              {currentQuestion.references && currentQuestion.references.length > 0 && (
+                <div className="mcq-references">
+                  <div className="mcq-references-header">
+                    <span className="mcq-references-title">{t('evaluation.references')}</span>
+                  </div>
+                  <div className="mcq-references-content">
+                    {currentQuestion.references.map((ref, index) => (
+                      <span key={index} className="reference-item">{ref}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </div>
       )}
 

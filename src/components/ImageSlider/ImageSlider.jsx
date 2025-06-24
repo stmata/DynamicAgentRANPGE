@@ -12,33 +12,33 @@ import world from '../../assets/images/world.png';
 const slides = [
   {
     id: 1,
-    image: brazil,
-    alt: "Brazil",
-    campus: "CAMPUS BRAZIL - BELO HORIZONTE"
-  },
-  {
-    id: 2,
-    image: china,
-    alt: "China",
-    campus: "CAMPUS CHINA - SUZHOU"
-  },
-  {
-    id: 3,
     image: france,
     alt: "France",
     campus: "CAMPUS FRANCE - PARIS & LILLE & SOPHIA ANTIPOLIS"
   },
   {
-    id: 4,
-    image: uae,
-    alt: "UAE",
-    campus: "CAMPUS UAE - ABU DHABI"
-  },
-  {
-    id: 5,
+    id: 2,
     image: world,
     alt: "World",
     campus: "WORLDWIDE"
+  },
+  {
+    id: 3,
+    image: brazil,
+    alt: "Brazil",
+    campus: "CAMPUS BRAZIL - BELO HORIZONTE"
+  },
+  {
+    id: 4,
+    image: china,
+    alt: "China",
+    campus: "CAMPUS CHINA - SUZHOU"
+  },
+  {
+    id: 5,
+    image: uae,
+    alt: "UAE",
+    campus: "CAMPUS UAE - ABU DHABI"
   },
   {
     id: 6,

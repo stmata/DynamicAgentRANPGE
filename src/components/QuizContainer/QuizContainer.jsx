@@ -41,6 +41,7 @@ const QuizContainer = ({ moduleId, courseTitle, moduleTopics, isPositionnement }
     goToPrevQuestion,
     goToNextQuestion,
     updateQuestionUI,
+    resetToFirstQuestion,
   } = useQuizState(moduleId, courseTitle, moduleTopics, isPositionnement);
 
   const { timer } = useQuizTimer(isSubmitted, () => setConfirmDialogOpen(true));
@@ -71,6 +72,13 @@ const QuizContainer = ({ moduleId, courseTitle, moduleTopics, isPositionnement }
    */
   const handleViewGuide = () => {
     setGuideDialogOpen(true);
+  };
+
+  /**
+   * Handles success dialog close and resets to first question
+   */
+  const handleSuccessDialogClose = () => {
+    resetToFirstQuestion();
   };
 
   /**
@@ -157,11 +165,13 @@ const QuizContainer = ({ moduleId, courseTitle, moduleTopics, isPositionnement }
         totalQuestions={questions.length}
         submissionResults={submissionResults}
         error={error}
+        isPositionnement={isPositionnement}
         setConfirmDialogOpen={setConfirmDialogOpen}
         setSuccessDialogOpen={setSuccessDialogOpen}
         setGuideDialogOpen={setGuideDialogOpen}
         setErrorDialogOpen={setErrorDialogOpen}
         confirmSubmit={confirmSubmit}
+        onSuccessDialogClose={handleSuccessDialogClose}
       />
     </div>
   );

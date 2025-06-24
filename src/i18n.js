@@ -34,7 +34,7 @@ const resources = {
         title: "RAN-PGE",
         subtitle: "Votre plateforme d'apprentissage personnalisée",
         welcomeHeading: "Ouvrez la porte du savoir",
-        welcomeDescription: "Saisissez votre email académique pour recevoir un code de vérification et commencer votre aventure d'apprentissage.",
+        welcomeDescription: "Saisissez email SKEMA pour recevoir un code de vérification et commencer votre aventure d'apprentissage.",
         emailLabel: "Adresse Email",
         emailPlaceholder: "exemple@email.com",
         requestCodeButton: "Recevoir un code",
@@ -57,7 +57,7 @@ const resources = {
         errorSendingCode: 'Échec de l\'envoi du code de vérification. Veuillez réessayer.',
       },
       home: {
-        title: 'Reprenez Confiance en Vos Compétences',
+        title: 'Suivez ce parcours de prérequis pour préparer votre année académique à SKEMA',
         description: 'Une plateforme de remise à niveau conçue pour vous. Tests personnalisés, contenus adaptés et accompagnement interactif : tout est réuni pour vous aider à progresser à votre rythme. Commencez dès aujourd\'hui votre parcours de réussite.',
         scrollHover: "Accéder aux cours"
       },
@@ -89,6 +89,8 @@ const resources = {
       courseModules: {
         aboutCourse: 'À propos du cours',
         modules: 'modules',
+        topics: 'topics',
+        all: "Tous les",
         averageRating: 'Note moyenne',
         description: 'Ce cours complet vous guidera à travers les concepts fondamentaux de la programmation. Vous apprendrez les bases essentielles, les structures de données, les algorithmes et les bonnes pratiques de programmation. Le cours est conçu pour les débutants qui souhaitent se lancer dans le développement logiciel.',
         generalModule: 'Module Général',
@@ -126,6 +128,12 @@ const resources = {
         viewGuide: "Voir le guide",
         guideTitle: "Guide d'étude",
         guideUnavailable: "Le guide d'étude n'est pas disponible pour cette évaluation.",
+        scoreLabel: "Votre score :",
+        scoreValue: "{{score}}%",
+        positioningPassed: "🎉 Félicitations ! Vous avez validé le test de positionnement ! Vous possédez déjà de solides bases dans ce domaine. Vous pouvez poursuivre avec des contenus plus avancés ou approfondir certains aspects spécifiques.",
+        positioningFailed: "📚 Continuez vos efforts ! Ce test de positionnement indique qu'il serait bénéfique de revoir les fondamentaux avant d'aborder des sujets plus complexes. Prenez le temps d'explorer les ressources du cours pour renforcer vos bases.",
+        moduleGood: "✨ Excellent travail ! Vous maîtrisez bien les concepts de ce module. Cette évaluation d'entraînement confirme votre bonne compréhension du sujet. Continuez ainsi !",
+        moduleNeedsWork: "💪 Bon effort ! Cette évaluation d'entraînement montre qu'il y a encore quelques notions à consolider. N'hésitez pas à revoir les ressources du module et à vous entraîner davantage.",
         moduleNotFound: "Module non trouvé",
         positioning: {
           title: "Test de positionnement",
@@ -299,7 +307,7 @@ const resources = {
         title: "RANPGE",
         subtitle: "Your personalized learning platform",
         welcomeHeading: "Open the door to knowledge",
-        welcomeDescription: "Enter your academic email to receive a verification code and begin your learning adventure.",
+        welcomeDescription: "Enter your SKEMA email to receive a verification code and begin your learning adventure.",
         emailLabel: "Email Address",
         emailPlaceholder: "example@email.com",
         requestCodeButton: "Receive a code",
@@ -322,7 +330,7 @@ const resources = {
         errorSendingCode: 'Failed to send verification code. Please try again.',
       },
       home: {
-        title: 'Rediscover Your Potential with Confidence',
+        title: 'Follow this prerequisites path to prepare your academic year at SKEMA.',
         description: 'A tailored learning platform made just for you. Personalized assessments, adaptive content, and interactive support—all designed to help you progress at your own pace. Start your success journey today.',
         scrollHover: "Continue to courses"
       },      
@@ -331,6 +339,7 @@ const resources = {
       },
       course: {
         modules: 'modules',
+        topics: 'topics',
         start: 'Start',
         comingSoon: 'Coming Soon'
       },
@@ -354,6 +363,8 @@ const resources = {
       courseModules: {
         aboutCourse: 'About the course',
         modules: 'modules',
+        topics: 'topics',
+        all: "All",
         averageRating: 'Average rating',
         description: 'This comprehensive course will guide you through the fundamental concepts of programming. You will learn essential basics, data structures, algorithms, and programming best practices. The course is designed for beginners who want to start in software development.',
         generalModule: 'General Module',
@@ -391,6 +402,14 @@ const resources = {
         viewGuide: "View Guide",
         guideTitle: "Study Guide",
         guideUnavailable: "Study guide is not available for this evaluation.",
+        aboveThresholdPositionnement: "Well done! You scored {{score}}%. You likely have some prior knowledge (or maybe just a bit of luck 😉). Be sure to go through the full course and resources to strengthen your understanding.",
+        aboveThresholdModule: "Well done! You scored {{score}}%. You already have a good grasp of the topics in this module. Feel free to explore the additional resources to deepen your understanding even further.",
+        scoreLabel: "Your score:",
+        scoreValue: "{{score}}%",
+        positioningPassed: "🎉 Congratulations! You passed the placement test! You already have a solid foundation in this area. You can move on to more advanced content or deepen specific aspects.",
+        positioningFailed: "📚 Keep going! This placement test suggests it would be beneficial to review the basics before tackling more complex topics. Take the time to explore the course resources to strengthen your foundation.",
+        moduleGood: "✨ Excellent work! You have a good grasp of the concepts in this module. This practice assessment confirms your solid understanding of the topic. Keep it up!",
+        moduleNeedsWork: "💪 Good effort! This practice assessment shows that there are still a few concepts to solidify. Don’t hesitate to review the module resources and practice further.",
         moduleNotFound: "Module not found",
         positioning: {
           title: "Placement test",

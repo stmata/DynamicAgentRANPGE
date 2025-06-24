@@ -5,24 +5,44 @@
  */
 export const formatQuestionsFromEvaluation = (evaluationQuestions) => {
   return evaluationQuestions.map((question, index) => {
-    if (Array.isArray(question) && question.length > 4) {
-      // MCQ format: [question, choice1, choice2, choice3, choice4, correct_answer, references]
+    if (Array.isArray(question) && question.length >= 7) {
       const [title, ...options] = question;
-      const correctAnswer = question[question.length - 2]; 
-      const references = question[question.length - 1]; 
       
-      return {
-        id: `mcq-${index}`,
-        title,
-        type: "mcq",
-        options: options.slice(0, 4), 
-        rawData: question, 
-        correctAnswer,
-        attempted: false,
-        flagged: false,
-        answer: null,
-        references: Array.isArray(references) ? references : [],
-      };
+      if (question.length === 8) {
+        const correctAnswer = question[5]; 
+        const feedback = question[6]; 
+        const references = question[7]; 
+        
+        return {
+          id: `mcq-${index}`,
+          title,
+          type: "mcq",
+          options: options.slice(0, 4), 
+          rawData: question, 
+          correctAnswer,
+          feedback,
+          attempted: false,
+          flagged: false,
+          answer: null,
+          references: Array.isArray(references) ? references : [],
+        };
+      } else {
+        const correctAnswer = question[question.length - 2]; 
+        const references = question[question.length - 1]; 
+        
+        return {
+          id: `mcq-${index}`,
+          title,
+          type: "mcq",
+          options: options.slice(0, 4), 
+          rawData: question, 
+          correctAnswer,
+          attempted: false,
+          flagged: false,
+          answer: null,
+          references: Array.isArray(references) ? references : [],
+        };
+      }
     } else {
       // Open question format: [question, model_answer, references] 
       const title = Array.isArray(question) ? question[0] : question.question || question;

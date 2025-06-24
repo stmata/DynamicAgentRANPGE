@@ -209,6 +209,13 @@ export const useQuizState = (moduleId, courseTitle, moduleTopics, isPositionneme
     setCurrentQuestionIndex(index);
   };
 
+  /**
+   * Resets the view to the first question
+   */
+  const resetToFirstQuestion = () => {
+    setCurrentQuestionIndex(0);
+  };
+
   // Load evaluation on mount
   useEffect(() => {
     if (!evaluationGenerated && (isPositionnement || (moduleTopics && moduleTopics.length > 0))) {
@@ -247,5 +254,6 @@ export const useQuizState = (moduleId, courseTitle, moduleTopics, isPositionneme
     goToPrevQuestion,
     goToNextQuestion,
     updateQuestionUI,
+    resetToFirstQuestion,
   };
 }; 
