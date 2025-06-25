@@ -9,6 +9,7 @@ import uuid
 from app.services.database.mongo_utils import get_service
 from app.utils import prompt_helpers
 from app.services.external.azure_openai_service import AzureOpenAIService
+from app.services.chat.user_context_service import UserContextService
 
 class MemoryService:
     """Service for managing conversation memories with Llama Index"""
@@ -17,6 +18,7 @@ class MemoryService:
         """Initialize the memory service"""
         self.active_memories = {}
         self.openai_service = AzureOpenAIService()
+        self.user_context_service = UserContextService()
     
     async def create_memory(self, conversation_id: str, user_id: str) -> str:
         """
@@ -144,15 +146,17 @@ class MemoryService:
         memory = await self.get_memory(memory_key)
         return memory.get_all()
     
-    async def get_memory_context(self, memory_key: str) -> str:
+    async def get_memory_context(self, memory_key: str, user_id: str = None, include_user_profile: bool = False) -> str:
         """
         Get memory context as formatted string for LLM input
         
         Args:
             memory_key: Memory key
+            user_id: User ID for enriched context
+            include_user_profile: Whether to include user profile (first message only)
             
         Returns:
-            Formatted memory context
+            Formatted memory context optionally enriched with user data
         """
         try:
             memory = await self.get_memory(memory_key)
@@ -181,7 +185,14 @@ class MemoryService:
                 messages_to_format = first_messages + last_messages
                 formatted_context = self._format_messages(messages_to_format)
 
-            return "Recent Messages:\n" + formatted_context
+            conversation_context = "Recent Messages:\n" + formatted_context
+            
+            if include_user_profile and user_id:
+                user_context = await self.user_context_service.get_user_context_for_agent(user_id)
+                if user_context:
+                    return f"{user_context}\n\n{conversation_context}"
+            
+            return conversation_context
         except Exception as e:
             print(f"Error retrieving memory context: {str(e)}")
             return "No context available."

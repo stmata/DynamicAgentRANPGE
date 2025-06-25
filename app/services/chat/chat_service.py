@@ -51,19 +51,27 @@ class ChatService:
                 raise HTTPException(status_code=400, detail="Invalid user ID format")
             
             user_object_id = ObjectId(user_id)
+            is_new_conversation = False
             
             # Create or get conversation
             if conversation_id is None:
                 conversation_id = str(uuid.uuid4())
                 await self._create_new_conversation(conversation_id, user_object_id, message)
+                is_new_conversation = True
             else:
                 if not await self.conversation_collection.conversation_exists(conversation_id):
                     await self._create_new_conversation(conversation_id, user_object_id, message)
+                    is_new_conversation = True
             
             # Initialize or get memory for conversation
             memory_key = await self.memory_service.initialize_conversation_memory(
                 conversation_id, user_id
             )
+            
+            # Detect if this is the first message in the conversation
+            memory = await self.memory_service.get_memory(memory_key)
+            messages = memory.get_all()
+            is_first_message = len(messages) == 0 or is_new_conversation
             
             # Add user message to memory
             await self.memory_service.add_user_message(memory_key, message)
@@ -73,8 +81,12 @@ class ChatService:
                 conversation_id, "user", message, user_object_id
             )
             
-            # Get conversation context from memory
-            conversation_context = await self.memory_service.get_memory_context(memory_key)
+            # Get conversation context with user profile only for first message
+            conversation_context = await self.memory_service.get_memory_context(
+                memory_key, 
+                user_id, 
+                include_user_profile=is_first_message
+            )
             
             # Process with reactAgent
             agent_response = await self._query_react_agent(message, conversation_context)
