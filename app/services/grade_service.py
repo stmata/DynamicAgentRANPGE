@@ -271,21 +271,22 @@ class GradeService:
     @staticmethod
     def _calculate_final_score(results: List[Dict[str, Any]]) -> int:
         """Calculate final score from results"""
-        total_points = 0
-        earned_points = 0
+        if not results:
+            return 0
+        
+        total_questions = len(results)
+        total_score = 0
 
         for res in results:
             if res["type"] == "mcq":
-                total_points += 1
-                if res["is_correct"]:
-                    earned_points += 1
+                question_score = 100 if res["is_correct"] else 0
             elif res["type"] == "open":
-                total_points += 10
                 grade = res.get("grade", 0)
-                earned_points += grade if isinstance(grade, (int, float)) else 0
+                question_score = (grade / 10) * 100 if isinstance(grade, (int, float)) else 0
+            
+            total_score += question_score
 
-        # Final score on 100
-        return round((earned_points / total_points) * 100) if total_points else 0
+        return round(total_score / total_questions)
 
     @staticmethod
     async def grade_case_evaluation(req: CaseGradeRequest) -> CaseGradeResponse:
@@ -377,9 +378,10 @@ class GradeService:
         
         7. Identify 2-4 specific areas for improvement
 
-        IMPORTANT: 
+        IMPORTANT:
             - Be fair but rigorous. A response that only partially addresses the requirements should not receive a high score, even if well-written.
-            - Should the response not be plausible, intelligible, congruent nor have nothing to do with the question or be empty, assign zero as grade and reply with precision that the response does not address the question.
+            - If the response is identical or nearly identical to the case context — i.e. it copies the case description with no added analysis, reflection, or original ideas — assign a score of 0 and clearly explain that the submission does not constitute a response to the question.
+            - If the response is not plausible, unintelligible, irrelevant, or empty, also assign a score of 0 with a clear explanation.
 
         You must write the ENTIRE response — including all field values and list items — in {language}.
 
@@ -449,3 +451,9 @@ class GradeService:
                 improvements=improvements
             )
         ) 
+
+
+###
+##IMPORTANT: 
+##  - Be fair but rigorous. A response that only partially addresses the requirements should not receive a high score, even if well-written.
+##  - Should the response not be plausible, intelligible, congruent nor have nothing to do with the question or be empty, assign zero as grade and reply with precision that the response does not address the question.
