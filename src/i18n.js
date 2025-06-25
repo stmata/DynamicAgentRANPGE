@@ -99,7 +99,7 @@ const resources = {
         generalModuleDescription: 'Ce module général vous permet d\'interagir avec l\'ensemble du cours. Posez vos questions générales ou testez vos connaissances globales.',
         resources: 'Ressources',
         evaluation_case: 'Cas pratique',
-        evaluation: 'QCM/OVERTE',
+        evaluation: 'Quiz',
         notFound: 'Le cours demandé n\'a pas été trouvé',
         genericDescription: 'Ce cours complet vous offre une formation adaptée à vos besoins. Testez vos connaissances avec des évaluations variées : quiz interactifs, questions ouvertes et cas pratiques professionnels. Développez vos compétences à travers des méthodes d\'évaluation diversifiées et personnalisées.'
       },
@@ -376,7 +376,7 @@ const resources = {
         generalModuleDescription: 'This general module allows you to interact with the entire course. Ask your general questions or test your global knowledge.',
         resources: 'Resources',
         evaluation_case: 'Case Study',
-        evaluation: 'MCQ/OPEN',
+        evaluation: 'Quiz',
         notFound: 'The requested course was not found',
         genericDescription: 'This comprehensive course offers training tailored to your needs. Test your knowledge with diverse evaluations: interactive quizzes, open-ended questions, and professional case studies. Develop your skills through varied and personalized assessment methods.'
       },
