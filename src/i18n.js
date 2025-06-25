@@ -22,6 +22,7 @@ const resources = {
         date: 'Date',
         download: 'Télécharger',
         download_pdf: 'Télécharger en PDF',
+        backToModules: "Retour aux modules",
         count: 'Vu'
       },
       navbar: {
@@ -34,7 +35,7 @@ const resources = {
         title: "RAN-PGE",
         subtitle: "Votre plateforme d'apprentissage personnalisée",
         welcomeHeading: "Ouvrez la porte du savoir",
-        welcomeDescription: "Saisissez email SKEMA pour recevoir un code de vérification et commencer votre aventure d'apprentissage.",
+        welcomeDescription: "Saisissez votre email SKEMA pour recevoir un code de vérification et commencer votre aventure d'apprentissage.",
         emailLabel: "Adresse Email",
         emailPlaceholder: "exemple@email.com",
         requestCodeButton: "Recevoir un code",
@@ -59,6 +60,7 @@ const resources = {
       home: {
         title: 'Suivez ce parcours de prérequis pour préparer votre année académique à SKEMA',
         description: 'Une plateforme de remise à niveau conçue pour vous. Tests personnalisés, contenus adaptés et accompagnement interactif : tout est réuni pour vous aider à progresser à votre rythme. Commencez dès aujourd\'hui votre parcours de réussite.',
+        notice: "Vous pouvez accéder directement aux modules, mais il est fortement recommandé de commencer par le test de positionnement. Il permet d'évaluer votre niveau : un score d'au moins 57 % est nécessaire pour le valider. Les modules sont ensuite là pour vous entraîner librement et renforcer vos compétences.",
         scrollHover: "Accéder aux cours"
       },
       courses: {
@@ -97,7 +99,7 @@ const resources = {
         generalModuleDescription: 'Ce module général vous permet d\'interagir avec l\'ensemble du cours. Posez vos questions générales ou testez vos connaissances globales.',
         resources: 'Ressources',
         evaluation_case: 'Cas pratique',
-        evaluation: 'Évaluation',
+        evaluation: 'QCM/OVERTE',
         notFound: 'Le cours demandé n\'a pas été trouvé',
         genericDescription: 'Ce cours complet vous offre une formation adaptée à vos besoins. Testez vos connaissances avec des évaluations variées : quiz interactifs, questions ouvertes et cas pratiques professionnels. Développez vos compétences à travers des méthodes d\'évaluation diversifiées et personnalisées.'
       },
@@ -124,9 +126,10 @@ const resources = {
         timeUp: "Temps écoulé! Votre évaluation sera soumise automatiquement. Cliquez sur OK pour continuer.",
         modelAnswer: "Réponse suggérée",
         feedback: "Commentaires",
+        references: "References",
         grade: "Note",
-        viewGuide: "Voir le guide",
-        guideTitle: "Guide d'étude",
+        viewGuide: "Voir le plan d'étude",
+        guideTitle: "Plan d'étude",
         guideUnavailable: "Le guide d'étude n'est pas disponible pour cette évaluation.",
         scoreLabel: "Votre score :",
         scoreValue: "{{score}}%",
@@ -138,7 +141,7 @@ const resources = {
         positioning: {
           title: "Test de positionnement",
           titleWithCourse: "Test de positionnement - {{course}}",
-          description: "Cette évaluation permet de déterminer votre niveau actuel pour un apprentissage personnalisé.",
+          description: "Cette évaluation permet de déterminer votre niveau actuel pour un apprentage personnalisé.",
           descriptionWithCourse: "Test de positionnement pour le cours {{course}}. Cette évaluation couvre tous les modules du cours pour déterminer votre niveau actuel dans ce domaine."
         },
         moduleEvaluation: {
@@ -205,7 +208,7 @@ const resources = {
         sendMessage: 'Envoyer un message...',
         greeting: {
           title: 'Bienvenue sur ChatAI!',
-          subtitle: 'Comment puis-je vous aider aujourd\'hui?'
+          subtitle: 'Je suis votre assistant virtuel. Je suis là pour vous aider à répondre aux questions liées aux contenus de RANPGE disponibles dans votre espace K2.'
         },
         sidebar: {
           newChat: 'Nouveau chat',
@@ -295,6 +298,7 @@ const resources = {
         date: 'Date',
         download: 'Download',
         download_pdf: 'Download as PDF',
+        backToModules: "Back to modules",
         count: 'Count'
       },
       navbar: {
@@ -332,6 +336,7 @@ const resources = {
       home: {
         title: 'Follow this prerequisites path to prepare your academic year at SKEMA.',
         description: 'A tailored learning platform made just for you. Personalized assessments, adaptive content, and interactive support—all designed to help you progress at your own pace. Start your success journey today.',
+        notice: "You can access the modules directly, but we strongly recommend starting with the positioning test. It helps assess your level: you need a score of at least 57% to pass it. The modules are then available for self-paced practice and to reinforce your skills.",
         scrollHover: "Continue to courses"
       },      
       courses: {
@@ -371,7 +376,7 @@ const resources = {
         generalModuleDescription: 'This general module allows you to interact with the entire course. Ask your general questions or test your global knowledge.',
         resources: 'Resources',
         evaluation_case: 'Case Study',
-        evaluation: 'Evaluation',
+        evaluation: 'MCQ/OPEN',
         notFound: 'The requested course was not found',
         genericDescription: 'This comprehensive course offers training tailored to your needs. Test your knowledge with diverse evaluations: interactive quizzes, open-ended questions, and professional case studies. Develop your skills through varied and personalized assessment methods.'
       },
@@ -398,9 +403,10 @@ const resources = {
         timeUp: "Time's up! Your evaluation will be submitted automatically. Click OK to continue.",
         modelAnswer: "Suggested answer",
         feedback: "Feedback",
+        references: "References",
         grade: "Grade",
-        viewGuide: "View Guide",
-        guideTitle: "Study Guide",
+        viewGuide: "View study plan",
+        guideTitle: "Study Plan",
         guideUnavailable: "Study guide is not available for this evaluation.",
         aboveThresholdPositionnement: "Well done! You scored {{score}}%. You likely have some prior knowledge (or maybe just a bit of luck 😉). Be sure to go through the full course and resources to strengthen your understanding.",
         aboveThresholdModule: "Well done! You scored {{score}}%. You already have a good grasp of the topics in this module. Feel free to explore the additional resources to deepen your understanding even further.",
@@ -409,7 +415,7 @@ const resources = {
         positioningPassed: "🎉 Congratulations! You passed the placement test! You already have a solid foundation in this area. You can move on to more advanced content or deepen specific aspects.",
         positioningFailed: "📚 Keep going! This placement test suggests it would be beneficial to review the basics before tackling more complex topics. Take the time to explore the course resources to strengthen your foundation.",
         moduleGood: "✨ Excellent work! You have a good grasp of the concepts in this module. This practice assessment confirms your solid understanding of the topic. Keep it up!",
-        moduleNeedsWork: "💪 Good effort! This practice assessment shows that there are still a few concepts to solidify. Don’t hesitate to review the module resources and practice further.",
+        moduleNeedsWork: "💪 Good effort! This practice assessment shows that there are still a few concepts to solidify. Don't hesitate to review the module resources and practice further.",
         moduleNotFound: "Module not found",
         positioning: {
           title: "Placement test",
@@ -423,7 +429,7 @@ const resources = {
         case: {
           welcome: {
             title: "Prepare for your evaluation",
-            startButton: "Start evaluation"
+            startButton: "Start evaluation",
           },
           loading: {
             generating: "Generating your case evaluation...",
@@ -481,7 +487,7 @@ const resources = {
         sendMessage: 'Send a message...',
         greeting: {
           title: 'Welcome to ChatAI!',
-          subtitle: 'How can I help you today?'
+          subtitle: "I am your virtual assistant. I/'m here to help you with any questions related to the RANPGE content available in your K2 space."
         },
         sidebar: {
           newChat: 'New chat',

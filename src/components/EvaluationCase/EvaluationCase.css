@@ -29,10 +29,10 @@
 /* Conteneur pour les actions de l'évaluation terminée */
 .evaluation-completed-actions {
   display: flex;
+  gap: 12px;
   justify-content: center;
-  align-items: center;
-  padding: 1rem;
-  width: 100%;
+  flex-wrap: wrap;
+  padding: 16px;
 }
 
 /* Bouton de téléchargement PDF */
@@ -43,10 +43,10 @@
   padding: 0.9rem 1.8rem;
   border-radius: 12px;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 250;
   cursor: pointer;
   transition: all 0.3s ease;
-  min-width: 180px;
+  min-width: 100px;
   box-shadow: 0 4px 15px rgba(231, 61, 60, 0.3);
   display: flex;
   align-items: center;
@@ -97,10 +97,17 @@
       min-width: 180px;
     }
 
-    .evaluation-download-pdf-btn {
-      padding: 0.8rem 1.5rem;
-      font-size: 0.95rem;
-      min-width: 160px;
+    .evaluation-completed-actions {
+      flex-direction: column;
+      gap: 8px;
+      padding: 12px;
+    }
+    
+    .evaluation-download-pdf-btn,
+    .evaluation-back-to-modules-btn {
+      width: 100%;
+      max-width: none;
+      min-width: auto;
     }
     
     .evaluation-loading-gif {
@@ -124,6 +131,11 @@
     .evaluation-loading-gif {
       width: 120px;
     }
+
+    .evaluation-back-to-modules-btn {
+      padding: 10px 16px;
+      font-size: 13px;
+    }
   }
   
   /* Mode sombre */
@@ -146,3 +158,32 @@
   body.dark-mode .evaluation-download-pdf-btn:hover {
     box-shadow: 0 6px 20px rgba(231, 61, 60, 0.5);
   }
+
+.evaluation-back-to-modules-btn {
+  padding: 12px 24px;
+  border: 2px solid var(--primary-dark);
+  color: var(--primary-dark);
+  background: transparent;
+  border-radius: 8px;
+  font-weight: 300;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: fit-content;
+}
+
+.evaluation-back-to-modules-btn:hover {
+  background: 0 6px 20px rgba(231, 61, 60, 0.4);
+  color: var(--primary-gradient);
+  transform: translateY(-2px);
+}
+
+.evaluation-download-pdf-btn,
+.evaluation-back-to-modules-btn {
+  flex: 1;
+  min-width: 160px;
+  max-width: 300px;
+}

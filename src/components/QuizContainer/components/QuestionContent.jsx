@@ -12,7 +12,7 @@ import QuestionNavigation from './QuestionNavigation';
  * @param {Function} handleTextAreaChange - Handle text area change
  * @param {Function} goToPrevQuestion - Navigate to previous question
  * @param {Function} goToNextQuestion - Navigate to next question
- * @param {Function} toggleFlag - Toggle flag for current question
+ * @param {Function} onBackToModules - Navigate to Module for current course
  */
 const QuestionContent = ({
   currentQuestion,
@@ -23,7 +23,7 @@ const QuestionContent = ({
   handleTextAreaChange,
   goToPrevQuestion,
   goToNextQuestion,
-  toggleFlag
+  onBackToModules
 }) => {
   const { t } = useTranslation();
 
@@ -72,27 +72,27 @@ const QuestionContent = ({
                   <span className="mcq-feedback-title">{t('evaluation.feedback')}</span>
                   <span className={`mcq-feedback-grade ${!currentQuestion.isCorrect ? 'incorrect' : ''}`}>
                     {currentQuestion.isCorrect ? 
-                      t('evaluation.correct') : 
-                      t('evaluation.incorrect')
+                      t('10/10') : 
+                      t('0/10')
                     }
                   </span>
                 </div>
                 <p className="mcq-feedback-content">{currentQuestion.feedback}</p>
               </div>
-              
               {currentQuestion.references && currentQuestion.references.length > 0 && (
-                <div className="mcq-references">
-                  <div className="mcq-references-header">
-                    <span className="mcq-references-title">{t('evaluation.references')}</span>
-                  </div>
-                  <div className="mcq-references-content">
-                    {currentQuestion.references.map((ref, index) => (
-                      <span key={index} className="reference-item">{ref}</span>
-                    ))}
-                  </div>
+              <div className="mcq-references">
+                <div className="mcq-references-header">
+                  <span className="mcq-references-title">{t('evaluation.references')}</span>
                 </div>
+                <div className="mcq-references-content">
+                  {currentQuestion.references.map((ref, index) => (
+                    <span key={index} className="reference-item">{ref}</span>
+              ))}
+                </div>
+              </div>
               )}
             </>
+            
           )}
         </div>
       )}
@@ -128,12 +128,12 @@ const QuestionContent = ({
       )}
 
       <QuestionNavigation
-        currentQuestion={currentQuestion}
+        //currentQuestion={currentQuestion}
         currentQuestionIndex={currentQuestionIndex}
         totalQuestions={totalQuestions}
         goToPrevQuestion={goToPrevQuestion}
         goToNextQuestion={goToNextQuestion}
-        toggleFlag={toggleFlag}
+        onBackToModules={onBackToModules}
       />
     </div>
   );

@@ -1,4 +1,4 @@
-/* Chat Interface CSS avec correctifs pour les couleurs */
+/* Chat Interface CSS avec correctifs pour les couleurs et problèmes d'affichage */
 
 .chat-container {
   display: flex;
@@ -6,6 +6,8 @@
   overflow: hidden;
   background-color: var(--white);
   color: var(--text-dark);
+  max-width: 100vw; /* S'assurer qu'il ne dépasse pas la largeur de l'écran */
+  transition: all var(--transition-medium);
 }
 
 /* Sidebar */
@@ -221,7 +223,7 @@
   margin: 5px 0;
 }
 
-/* Main Content */
+/* Main Content - Corrigé pour éviter les débordements */
 .chat-main-content {
   flex-grow: 1;
   display: flex;
@@ -230,6 +232,8 @@
   height: 100vh;
   transition: var(--transition-medium);
   background-color: var(--white);
+  min-width: 0; /* Important : empêche le débordement */
+  overflow: hidden; /* Empêche le contenu de déborder */
 }
 
 .chat-header {
@@ -237,15 +241,17 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  padding: 0 30px;
+  padding: 0 20px; /* Réduire le padding pour plus d'espace */
   background-color: var(--white);
   z-index: 5;
   position: sticky;
   top: 0;
+  min-width: 0; /* Empêche le débordement */
 }
 
 .chat-profile-dropdown {
   position: relative;
+  flex-shrink: 0; /* Empêche la compression */
 }
 
 .chat-profile-btn {
@@ -280,7 +286,7 @@
   font-size: 8px;
 }
 
-/* Menu du profil */
+/* Menu du profil - Corrigé pour rester visible */
 .chat-profile-menu {
   position: absolute;
   top: 50px;
@@ -290,7 +296,9 @@
   border-radius: var(--border-radius-md);
   box-shadow: var(--enhanced-shadow-light);
   padding: 5px 0;
-  z-index: 10;
+  z-index: 1000; /* Z-index plus élevé */
+  /* S'assurer qu'il reste dans l'écran */
+  max-width: calc(100vw - 20px);
 }
 
 .chat-menu-item {
@@ -357,16 +365,18 @@
   transform: translateX(24px);
 }
 
-/* Chat content */
+/* Chat content - Corrigé pour une meilleure gestion de l'espace */
 .chat-content {
   flex-grow: 1;
   overflow-y: auto;
-  padding: 20px 30px 120px; /* Padding en bas important pour éviter chevauchement */
+  padding: 20px 15px 120px; /* Réduire le padding horizontal */
   display: flex;
   flex-direction: column;
   gap: 20px;
   scrollbar-width: thin;
   scrollbar-color: rgba(100, 100, 100, 0.3) transparent;
+  min-width: 0; /* Important pour empêcher le débordement */
+  width: 100%; /* S'assurer que la largeur est correcte */
 }
 
 .chat-content::-webkit-scrollbar {
@@ -383,15 +393,22 @@
   border-radius: 20px;
 }
 
+/* Messages - Corrigé pour éviter les débordements */
 .chat-message {
   display: flex;
   gap: 16px;
-  max-width: 70%;
+  width: 100%;
+  max-width: 100%; /* S'assurer qu'ils ne dépassent pas */
 }
 
 .chat-message.user {
   align-self: flex-end;
   flex-direction: row-reverse;
+  max-width: 80%; /* Réduire pour laisser de l'espace */
+}
+
+.chat-message.bot {
+  max-width: 80%; /* Cohérence avec les messages utilisateur */
 }
 
 .chat-avatar {
@@ -422,12 +439,17 @@
   font-weight: bold;
 }
 
+/* Message bubble - Corrigé pour une meilleure gestion de l'espace */
 .chat-message-bubble {
   background-color: var(--gray);
   padding: 15px;
   border-radius: var(--border-radius-md);
   line-height: 1.5;
   box-shadow: var(--shadow-light);
+  max-width: 100%; /* S'assurer qu'il s'adapte au conteneur parent */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  min-width: 0; /* Permet la compression si nécessaire */
 }
 
 /* Markdown content styling */
@@ -520,12 +542,10 @@ body.dark-mode .chat-message-bubble th {
 .chat-message.user .chat-message-bubble {
   background: linear-gradient(to bottom right, rgba(231, 61, 60, 0.1), rgba(184, 1, 45, 0.05));
   border-bottom-right-radius: 4px;
-  max-width: 65%;
 }
 
 .chat-message.bot .chat-message-bubble {
   border-bottom-left-radius: 4px;
-  max-width: 75%;
 }
 
 /* Empty chat greeting */
@@ -559,13 +579,13 @@ body.dark-mode .chat-message-bubble th {
   opacity: 0.7;
 }
 
-/* Textarea fixed at bottom */
+/* Textarea fixed at bottom - Corrigé pour une meilleure responsivité */
 .chat-input-container {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 20px 30px;
+  padding: 20px 15px; /* Réduire le padding horizontal */
   background-color: var(--white);
   z-index: 5;
   display: flex;
@@ -575,14 +595,15 @@ body.dark-mode .chat-message-bubble th {
 .chat-textarea-wrapper {
   position: relative;
   background-color: var(--gray);
-  border: 1px solid rgba(0, 0, 0, 0.08); /* Ajout d'une fine bordure subtile */
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 28px;
   box-shadow: var(--enhanced-shadow-light);
   transition: var(--transition-fast);
-  width: 80%;
+  width: 85%; /* Réduire légèrement pour plus d'espace */
   max-width: 800px;
   display: flex;
   align-items: flex-end;
+  min-width: 0; /* Permet la compression */
 }
 
 .chat-textarea-wrapper:focus-within {
@@ -611,7 +632,7 @@ body.dark-mode .chat-message-bubble th {
 }
 
 .chat-input-textarea::placeholder {
-  color: rgba(0, 0, 0, 0.5); /* Placeholder plus foncé pour une meilleure visibilité */
+  color: rgba(0, 0, 0, 0.5);
 }
 
 .chat-input-actions {
@@ -738,7 +759,26 @@ body.dark-mode .chat-input-textarea::placeholder {
   color: rgba(255, 255, 255, 0.5);
 }
 
-/* Media queries */
+/* Media queries - Améliorés pour une meilleure responsivité */
+@media (max-width: 1024px) {
+  .chat-message.user,
+  .chat-message.bot {
+    max-width: 75%; /* Plus d'espace sur écrans moyens */
+  }
+  
+  .chat-content {
+    padding: 15px 10px 120px;
+  }
+  
+  .chat-header {
+    padding: 0 15px;
+  }
+  
+  .chat-profile-menu {
+    width: 200px; /* Réduire sur écrans plus petits */
+  }
+}
+
 @media (max-width: 768px) {
   .chat-sidebar {
     position: absolute;
@@ -751,17 +791,45 @@ body.dark-mode .chat-input-textarea::placeholder {
     left: 0;
   }
   
-  .chat-message {
-    max-width: 85%;
+  .chat-message.user,
+  .chat-message.bot {
+    max-width: 70%; /* Plus d'espace sur mobile */
+  }
+  
+  .chat-textarea-wrapper {
+    width: 90%; /* Plus large sur mobile */
+  }
+  
+  .chat-content {
+    padding: 10px 8px 120px;
+  }
+  
+  .chat-header {
+    padding: 0 10px;
+  }
+  
+  .chat-profile-menu {
+    width: 180px;
+    right: -10px; /* Décaler légèrement vers la gauche sur mobile */
+  }
+}
+
+@media (max-width: 480px) {
+  .chat-message.user,
+  .chat-message.bot {
+    max-width: 65%;
   }
   
   .chat-textarea-wrapper {
     width: 95%;
   }
-}
-
-@media (max-width: 480px) {
-  .chat-message {
-    max-width: 90%;
+  
+  .chat-profile-menu {
+    width: 160px;
+    right: -20px;
+  }
+  
+  .chat-content {
+    padding: 8px 5px 120px;
   }
 }

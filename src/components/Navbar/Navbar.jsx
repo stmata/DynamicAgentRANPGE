@@ -85,14 +85,6 @@ const Navbar = () => {
     }
   };
 
-  /**
-   * Navigate to chat page
-   */
-  const handleChatNavigation = () => {
-    setIsProfileOpen(false);
-    navigate('/chat');
-  };
-
     /**
      * Navigate to home page
      */
@@ -125,12 +117,6 @@ const Navbar = () => {
                 <span>{t('common.home')}</span>
               </div>
             )}
-            <div className="profile-dropdown-item" onClick={() => {
-              handleChatNavigation();
-            }}>
-              <span className="fas fa-message"></span>
-              <span>{t('navbar.chat')}</span>
-            </div>
             
             <div className="profile-dropdown-item" onClick={() => {
               setIsProfileOpen(false);

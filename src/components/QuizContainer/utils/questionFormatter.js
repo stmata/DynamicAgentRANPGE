@@ -44,7 +44,6 @@ export const formatQuestionsFromEvaluation = (evaluationQuestions) => {
         };
       }
     } else {
-      // Open question format: [question, model_answer, references] 
       const title = Array.isArray(question) ? question[0] : question.question || question;
       const modelAnswer = Array.isArray(question) ? question[1] : question.model_answer || '';
       const references = Array.isArray(question) ? question[2] : question.references || [];
@@ -54,7 +53,7 @@ export const formatQuestionsFromEvaluation = (evaluationQuestions) => {
         title,
         type: "open",
         modelAnswer,
-        rawData: question, // Store original data for submission
+        rawData: question, 
         attempted: false,
         flagged: false,
         answer: "",

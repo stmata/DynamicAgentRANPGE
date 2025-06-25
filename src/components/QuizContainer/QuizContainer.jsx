@@ -6,6 +6,7 @@ import ProgressBar from './components/ProgressBar';
 import QuizSidebar from './components/QuizSidebar';
 import QuestionContent from './components/QuestionContent';
 import QuizDialogs from './components/QuizDialogs';
+import { useNavigate } from 'react-router-dom';
 import './QuizContainer.css';
 
 /**
@@ -17,6 +18,7 @@ import './QuizContainer.css';
  */
 const QuizContainer = ({ moduleId, courseTitle, moduleTopics, isPositionnement }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
@@ -32,11 +34,11 @@ const QuizContainer = ({ moduleId, courseTitle, moduleTopics, isPositionnement }
     isSubmitted,
     submissionResults,
     attemptedCount,
-    flaggedCount,
+    //flaggedCount,
     unattemptedCount,
     progressPercentage,
     saveCurrentAnswer,
-    toggleFlag,
+    //toggleFlag,
     submitQuiz,
     goToPrevQuestion,
     goToNextQuestion,
@@ -44,13 +46,20 @@ const QuizContainer = ({ moduleId, courseTitle, moduleTopics, isPositionnement }
     resetToFirstQuestion,
   } = useQuizState(moduleId, courseTitle, moduleTopics, isPositionnement);
 
-  const { timer } = useQuizTimer(isSubmitted, () => setConfirmDialogOpen(true));
+  const { timer } = useQuizTimer(isSubmitted, isLoading, () => setConfirmDialogOpen(true));
 
   /**
    * Handles quiz submission initiation
    */
   const handleSubmit = () => {
     setConfirmDialogOpen(true);
+  };
+
+  /**
+   * Handles navigation back to course modules
+  */
+  const handleBackToModules = () => {
+    navigate(`/course-modules?course=${encodeURIComponent(courseTitle)}`);
   };
 
   /**
@@ -133,7 +142,7 @@ const QuizContainer = ({ moduleId, courseTitle, moduleTopics, isPositionnement }
         questions={questions}
         currentQuestionIndex={currentQuestionIndex}
         attemptedCount={attemptedCount}
-        flaggedCount={flaggedCount}
+        //flaggedCount={flaggedCount}
         unattemptedCount={unattemptedCount}
         timer={timer}
         isSubmitted={isSubmitted}
@@ -153,7 +162,8 @@ const QuizContainer = ({ moduleId, courseTitle, moduleTopics, isPositionnement }
         handleTextAreaChange={handleTextAreaChange}
         goToPrevQuestion={goToPrevQuestion}
         goToNextQuestion={goToNextQuestion}
-        toggleFlag={toggleFlag}
+        //toggleFlag={toggleFlag}
+        onBackToModules={handleBackToModules}
       />
       
       <QuizDialogs

@@ -6,7 +6,10 @@ import { useTranslation } from 'react-i18next';
  * @param {Array} questions - Array of questions
  * @param {number} currentQuestionIndex - Current question index
  * @param {number} attemptedCount - Number of attempted questions
- * @param {number} flaggedCount - Number of flagged questions
+ **
+ * @param {number} flaggedCount - Number of flagged questions.
+ * Deprecated: This feature was removed per client request and replaced with a back navigation button.
+ **
  * @param {number} unattemptedCount - Number of unattempted questions
  * @param {string} timer - Timer display string
  * @param {boolean} isSubmitted - Whether quiz is submitted
@@ -20,7 +23,7 @@ const QuizSidebar = ({
   questions,
   currentQuestionIndex,
   attemptedCount,
-  flaggedCount,
+  //flaggedCount,
   unattemptedCount,
   timer,
   isSubmitted,
@@ -98,7 +101,8 @@ const QuizSidebar = ({
             {questions.map((question, index) => (
               <div 
                 key={question.id}
-                className={`question-circle ${question.attempted ? 'attempted' : ''} ${question.flagged ? 'flagged' : ''} ${index === currentQuestionIndex ? 'current' : ''}`}
+                //className={`question-circle ${question.attempted ? 'attempted' : ''} ${question.flagged ? 'flagged' : ''} ${index === currentQuestionIndex ? 'current' : ''}`}
+                className={`question-circle ${question.attempted ? 'attempted' : ''} ${index === currentQuestionIndex ? 'current' : ''}`}
                 onClick={() => updateQuestionUI(index)}
               >
                 {index + 1}
@@ -115,10 +119,10 @@ const QuizSidebar = ({
             <span><i className="fas fa-check attempted-icon"></i> {t('evaluation.attempted')}</span>
             <span id="attempted-count">{attemptedCount}</span>
           </div>
-          <div className="summary-item">
+          {/*<div className="summary-item">
             <span><i className="fas fa-flag flagged-icon"></i> {t('evaluation.flagged')}</span>
             <span id="flagged-count">{flaggedCount}</span>
-          </div>
+          </div>*/}
           <div className="summary-item">
             <span><i className="fas fa-question-circle unattempted-icon"></i> {t('evaluation.unattempted')}</span>
             <span id="unattempted-count">{unattemptedCount}</span>

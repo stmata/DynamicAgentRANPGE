@@ -83,7 +83,7 @@ export const useEvaluation = () => {
   /**
    * Generate mixed evaluation (MCQ and Open questions)
    */
-  const generateMixedEvaluation = useCallback(async (topics, numQuestions, mcqWeight = 0.5, openWeight = 0.5, isPositioning = false, modulesTopics = null, courseFilter = null) => {
+  const generateMixedEvaluation = useCallback(async (topics, numQuestions, mcqWeight = 0.8, openWeight = 0.2, isPositioning = false, modulesTopics = null, courseFilter = null) => {
     if (!topics || topics.length === 0) {
       throw new Error('Topics are required');
     }

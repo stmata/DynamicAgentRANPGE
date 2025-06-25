@@ -8,15 +8,15 @@ import { useTranslation } from 'react-i18next';
  * @param {number} totalQuestions - Total number of questions
  * @param {Function} goToPrevQuestion - Navigate to previous question
  * @param {Function} goToNextQuestion - Navigate to next question
- * @param {Function} toggleFlag - Toggle flag for current question
+ * @param {Function} onBackToModules - Navigate to Modules for current course
  */
 const QuestionNavigation = ({
-  currentQuestion,
+  //currentQuestion,
   currentQuestionIndex,
   totalQuestions,
   goToPrevQuestion,
   goToNextQuestion,
-  toggleFlag
+  onBackToModules
 }) => {
   const { t } = useTranslation();
 
@@ -35,11 +35,11 @@ const QuestionNavigation = ({
       <button 
         className="flag-button" 
         id="flag-btn"
-        onClick={toggleFlag}
+        onClick={onBackToModules}
       >
-        <i className="fas fa-flag"></i>
         <span>
-          {currentQuestion?.flagged ? t('evaluation.unflag') : t('evaluation.flag')}
+          {/*currentQuestion?.flagged ? t('evaluation.unflag') : t('evaluation.flag')*/}
+          <span>{t('common.backToModules')}</span>
         </span>
       </button>
       

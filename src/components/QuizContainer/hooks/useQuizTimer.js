@@ -6,11 +6,11 @@ import { useState, useEffect } from 'react';
  * @param {Function} onTimeUp - Callback when timer reaches zero
  * @returns {Object} Timer state and functions
  */
-export const useQuizTimer = (isSubmitted, onTimeUp) => {
+export const useQuizTimer = (isSubmitted, isLoading, onTimeUp) => {
   const [timer, setTimer] = useState('0:30:00');
 
   useEffect(() => {
-    if (isSubmitted) return;
+    if (isSubmitted || isLoading) return;
     
     let timeArray = timer.split(':');
     let hours = parseInt(timeArray[0]);
@@ -40,7 +40,7 @@ export const useQuizTimer = (isSubmitted, onTimeUp) => {
     }, 1000);
     
     return () => clearInterval(interval);
-  }, [timer, isSubmitted, onTimeUp]);
+  }, [timer, isSubmitted, isLoading, onTimeUp]);
 
   return { timer };
 }; 

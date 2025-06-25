@@ -27,6 +27,10 @@ const Home = () => {
       <section className="description">
         <h2>{t('home.title')}</h2><br/>
         <p>{t('home.description')}</p>
+        <div style={{ fontWeight: 'bold', marginTop: '1em' }}>
+          <div>⚠️</div>
+          {t('home.notice')}
+        </div>
         
         <div className="scroll-indicator" onClick={scrollToContent}>
           <div className="scroll-arrow">

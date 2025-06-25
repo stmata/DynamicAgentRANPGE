@@ -17,6 +17,7 @@ import ChatScreen from './pages/ChatScreen';
 import Login from './pages/LoginScreen/Login';
 import ErrorScreen from './pages/ErrorScreen/ErrorScreen';
 import EvaluationCaseScren from './pages/EvaluationCaseScren';
+import FloatingChatButton from './components/FloatingChatButton/FloatingChatButton';
 
 /**
  * Main App component with routing and context providers
@@ -61,6 +62,8 @@ function App() {
                 {/* 404 Error route */}
                 <Route path="*" element={<ErrorScreen />} />
               </Routes>
+              {/* Floating Chat Button - visible on all pages */}
+              <FloatingChatButton />
               <SettingsModal />
             </Router>
           </AuthProvider>

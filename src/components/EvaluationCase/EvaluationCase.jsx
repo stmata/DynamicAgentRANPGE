@@ -146,6 +146,10 @@ const EvaluationCase = ({ moduleId, courseTitle }) => {
     }
   };
 
+  const handleBackToCourseModules = () => {
+    navigate(`/course-modules?course=${encodeURIComponent(courseTitle)}`);
+  };
+
   return (
     <div className="chat-container">
       <main className="chat-main-content">
@@ -196,6 +200,12 @@ const EvaluationCase = ({ moduleId, courseTitle }) => {
                 onClick={handleDownloadEvaluationPDF}
               >
                 📄 {t('common.download_pdf')}
+              </button>
+              <button 
+                className="evaluation-back-to-modules-btn"
+                onClick={handleBackToCourseModules}
+              >
+                ↶ {t('common.backToModules')}
               </button>
             </div>
           </div>
