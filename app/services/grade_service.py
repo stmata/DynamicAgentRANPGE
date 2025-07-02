@@ -13,7 +13,6 @@ import concurrent.futures
 from typing import List, Dict, Any, Tuple
 
 from fastapi import HTTPException
-from llama_index.llms.openai import OpenAI
 from icecream import ic
 
 from ..models.grade_models import (
@@ -139,7 +138,8 @@ class GradeService:
             Avoid robotic phrases like "The student answer is identical to the model answer".
             Instead, write as if you're speaking to the student, highlighting what they did well, and suggesting improvements if needed.
             3. Elaborate on your grade attribution. For instance, should the grade be 7/10, explain why you assign 7. Which parts of the answer were strong and which not strong enough.
-            4. Should an example not be mentionned in a question, it should not be expected in the answer either.
+            4. VERY IMPORTANT: If the exam question does not explicitly ask for examples, DO NOT penalize the student for not providing them. 
+                Likewise, DO NOT suggest in the feedback that the student should have added examples unless the question explicitly asked for them.
             5. Assign a grade above zero only if the answer is plausible, congruent and has to do with the question. 
              
             Question: {question}
@@ -397,7 +397,7 @@ class GradeService:
         }}
         """
 
-        llm = OpenAI(model=os.getenv("AZURE_OPENAI_MODEL_AND_DEPLOYMENT_4o", "gpt-4o"), temperature=0.3)
+        llm = get_azure_openai_client_with_llama_index(temperature=0.3)
         loop = asyncio.get_running_loop()
 
         t0 = time.perf_counter()

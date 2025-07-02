@@ -24,6 +24,5 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 # Mount the grader router at root
 app.include_router(grade_router)
