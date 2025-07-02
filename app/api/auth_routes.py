@@ -1,3 +1,4 @@
+import os
 from fastapi import APIRouter, HTTPException, Request , Depends
 from fastapi.responses import JSONResponse, RedirectResponse
 from app.models.schemas.auth_models import (
@@ -43,6 +44,9 @@ async def azure_callback(
 ):
     """Handle Azure AD OAuth2 callback and complete authentication."""
     try:
+        # Get frontend URL from environment variable
+        frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
+        
         query_params = dict(request.query_params)
         code = query_params.get('code')
         state = query_params.get('state')
@@ -50,19 +54,19 @@ async def azure_callback(
         
         if error:
             logger.error(f"Azure AD returned error: {error}")
-            frontend_error_url = f"http://localhost:5173/login?error=azure_auth_failed"
+            frontend_error_url = f"{frontend_url}/login?error=azure_auth_failed"
             return RedirectResponse(url=frontend_error_url, status_code=302)
         
         if not code or not state:
             logger.error("Missing code or state parameter in Azure callback")
-            frontend_error_url = f"http://localhost:5173/login?error=missing_parameters"
+            frontend_error_url = f"{frontend_url}/login?error=missing_parameters"
             return RedirectResponse(url=frontend_error_url, status_code=302)
         
         azure_user_info = await azure_auth_service.complete_oauth_flow(code, state)
         
         if not azure_user_info:
             logger.error("Failed to complete Azure OAuth flow")
-            frontend_error_url = f"http://localhost:5173/login?error=oauth_failed"
+            frontend_error_url = f"{frontend_url}/login?error=oauth_failed"
             return RedirectResponse(url=frontend_error_url, status_code=302)
         
         email = azure_user_info['email']
@@ -88,11 +92,11 @@ async def azure_callback(
         tokens = auth_service.create_tokens(str(user_info.id))
         if not tokens:
             logger.error("Failed to generate authentication tokens")
-            frontend_error_url = f"http://localhost:5173/login?error=token_generation_failed"
+            frontend_error_url = f"{frontend_url}/login?error=token_generation_failed"
             return RedirectResponse(url=frontend_error_url, status_code=302)
         
         frontend_success_url = (
-            f"http://localhost:5173/?"
+            f"{frontend_url}/?"
             f"access_token={tokens['access_token']}&"
             f"refresh_token={tokens['refresh_token']}&"
             f"token_type={tokens['token_type']}&"
@@ -107,7 +111,7 @@ async def azure_callback(
         raise
     except Exception as e:
         logger.error(f"Error in Azure callback: {str(e)}")
-        frontend_error_url = f"http://localhost:5173/login?error=server_error"
+        frontend_error_url = f"{frontend_url}/login?error=server_error"
         return RedirectResponse(url=frontend_error_url, status_code=302)
 
 
