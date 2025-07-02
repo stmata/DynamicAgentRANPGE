@@ -6,6 +6,7 @@ from pymongo.errors import DuplicateKeyError
 
 from app.models.entities.user import UserModel, UserCreate, UserUpdate, UserResponse, AddEvaluationScore, EvaluationScore
 from app.services.database.mongo_utils import get_service
+from app.services.external.auth_service import get_auth_service
 
 logger = logging.getLogger(__name__)
 
@@ -41,12 +42,14 @@ class UserCollection:
                 user["course_scores"] = {}
         return user
     
-    async def create_user(self, user: UserCreate) -> str:
+    async def create_user(self, user: UserCreate, program: str = "MM", level: str = "M1") -> str:
         """
-        Create new user in database
+        Create new user in database with progression initialization
         
         Args:
             user: Pydantic user creation model
+            program: Program name for progression initialization
+            level: Level name for progression initialization
             
         Returns:
             Created user ID
@@ -61,19 +64,23 @@ class UserCollection:
                 logger.warning(f"Attempt to create user with existing email: {user.email}")
                 raise UserCollectionError(f"User with email {user.email} already exists")
             
+            auth_service = get_auth_service()
+            course_progress = await auth_service.initialize_user_progression("temp_id", program, level)
+            
             user_model = UserModel(
                 username=user.username,
                 email=user.email,
                 created_at=datetime.now(),
                 course_scores={},
                 average_score=0.0,
-                evaluations=[]
+                evaluations=[],
+                course_progress=course_progress or {}
             )
             
             user_data = user_model.dict(exclude={"id"})
             user_id = await service.create_user(user_data)
             
-            logger.info(f"User created with ID: {user_id}")
+            logger.info(f"User created with ID: {user_id} and progression initialized")
             return user_id
             
         except UserCollectionError:

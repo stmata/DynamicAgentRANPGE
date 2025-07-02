@@ -8,8 +8,10 @@ from dotenv import load_dotenv
 from app.models.schemas.evaluation_models import EvaluationRequest, MixedEvaluationRequest, CaseRequest, CaseResponse
 from app.models.entities.user import EvaluationSubmissionRequest, CaseEvaluationSubmissionRequest, AddEvaluationScore
 from app.services.evaluation.evaluation_service import evaluate_standard, evaluate_mixed, evaluate_case
+from app.services.evaluation.csv_evaluation_service import evaluate_mixed_from_csv
 from app.services.external.auth_service import auth_service
 from app.services.external.grader_service import grader_service
+from app.services.evaluation.progression_service import ProgressionService
 from app.repositories.user_repository import UserCollection
 from app.logs import logger
 
@@ -17,6 +19,7 @@ load_dotenv()
 
 # ─── Dependency injection ─────────────────────────────────
 user_collection = UserCollection()
+progression_service = ProgressionService()
 
 
 router = APIRouter(
@@ -121,6 +124,66 @@ async def evaluate_mixed_endpoint(req: MixedEvaluationRequest) -> Dict[str, Any]
         logger.error(f"evaluate-mixed ➤ unexpected error: {e}")
         raise HTTPException(500, f"Mixed evaluation failed: {e}")
 
+# ─── CSV-based Mixed Evaluation endpoint ─────────────────
+
+@router.post("/evaluate-mixed-csv")
+async def evaluate_mixed_csv_endpoint(req: MixedEvaluationRequest) -> Dict[str, Any]:
+    """
+    CSV-based mixed evaluation endpoint with fallback to agent-based generation.
+    
+    Features:
+    - Attempts to load questions from pre-generated CSV files in Azure Blob Storage
+    - Falls back to agent-based generation if CSV files are not available
+    - Supports both MCQ and open questions with configurable weights
+    - Maintains same interface as standard mixed evaluation
+    - Faster performance when CSV files are available
+    - Automatic module-based distribution for positioning evaluations
+    
+    Args:
+        req: MixedEvaluationRequest with modules_topics, num_questions, mcq_weight, open_weight, language, is_positioning, course_filter
+        
+    Returns:
+        Dict containing 'questions' key with mixed questions and 'source' indicating CSV or agent-based generation
+        
+    Example:
+        POST /evaluate-mixed-csv
+        {
+            "modules_topics": {
+                "Fundamentals_of_Marketing": ["topic1", "topic2"],
+                "Understanding_Markets": ["topic3", "topic4"]
+            },
+            "num_questions": 10,
+            "mcq_weight": 0.7,
+            "open_weight": 0.3,
+            "language": "English"
+        }
+    """
+    logger.info(f"evaluate-mixed-csv ➤ start: {req.num_questions} questions (MCQ: {req.mcq_weight}, Open: {req.open_weight})")
+    
+    if not req.modules_topics:
+        raise HTTPException(400, "modules_topics is required for CSV-based evaluation")
+    
+    try:
+        result = await evaluate_mixed_from_csv(
+            modules_topics=req.modules_topics,
+            num_questions=req.num_questions,
+            mcq_weight=req.mcq_weight,
+            open_weight=req.open_weight,
+            language=req.language,
+            is_positioning=req.is_positioning,
+            course_filter=req.course_filter
+        )
+        
+        source = result.get("source", "unknown")
+        logger.info(f"evaluate-mixed-csv ➤ success: generated {len(result['questions'])} mixed questions from {source}")
+        return result
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"evaluate-mixed-csv ➤ unexpected error: {e}")
+        raise HTTPException(500, f"CSV-based mixed evaluation failed: {e}")
+
 @router.post("/evaluate/case", response_model=CaseResponse)
 async def generate_practical_case(request: CaseRequest):
     """
@@ -182,11 +245,35 @@ async def submit_evaluation_and_save(
             else:
                 logger.warning(f"Failed to save score for user: {user_id}")
         
+        # Update progression based on evaluation type
+        progression_updated = False
+        if score_saved and final_score is not None:
+            if evaluation_data.evaluation_type == "positionnement":
+                try:
+                    progression_updated = await progression_service.update_placement_test_result(
+                        user_id, evaluation_data.course, final_score
+                    )
+                    if progression_updated:
+                        logger.info(f"Placement test progression updated for user: {user_id}, course: {evaluation_data.course}")
+                except Exception as e:
+                    logger.warning(f"Failed to update placement test progression for user: {user_id}: {str(e)}")
+            
+            elif evaluation_data.evaluation_type == "module_mixed":
+                try:
+                    progression_updated = await progression_service.update_module_progress(
+                        user_id, evaluation_data.course, evaluation_data.module, final_score
+                    )
+                    if progression_updated:
+                        logger.info(f"Module progression updated for user: {user_id}, course: {evaluation_data.course}, module: {evaluation_data.module}")
+                except Exception as e:
+                    logger.warning(f"Failed to update module progression for user: {user_id}: {str(e)}")
+        
         return {
             "grading_result": grader_result,
             "score_saved": score_saved,
             "final_score": final_score,
-            "user_updated": score_saved
+            "user_updated": score_saved,
+            "progression_updated": progression_updated
         }
         
     except Exception as e:
@@ -230,7 +317,7 @@ async def submit_case_evaluation_and_save(
                 topics=evaluation_data.topics,
                 course=evaluation_data.course,
                 module=evaluation_data.module,
-                evaluation_type="case"
+                evaluation_type="module_case"
             )
             
             updated_user = await user_collection.add_evaluation_score(user_id, score_data)
@@ -251,6 +338,7 @@ async def submit_case_evaluation_and_save(
     except Exception as e:
         logger.error(f"Error in submit_case_evaluation_and_save: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Case evaluation submission failed: {str(e)}")
+
 
 # ─── Health check endpoint ───────────────────────────────
 

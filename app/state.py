@@ -12,6 +12,7 @@ from llama_index.core.tools import QueryEngineTool
 from llama_index.core import PromptTemplate
 from app.utils import prompt_helpers
 
+
 conversation_history: Dict[str, list] = {}
 
 react_system_header_str = prompt_helpers.reset_system_prompt_for_agent() 
@@ -83,15 +84,16 @@ async def _build_agent_for_course(course_filter: str = None) -> None:
             
         from app.services.external.tools_service import load_tools_from_json_server
         from llama_index.core.agent import ReActAgent
-        from app.config import get_azure_openai_client_with_llama_index
-        
+        from app.config import init_llama_index_settings
+
         course_tools = await load_tools_from_json_server(course_filter)
         tools_cache[cache_key] = course_tools
 
         agent = ReActAgent.from_tools(
             course_tools,
-            llm=get_azure_openai_client_with_llama_index(),
-            verbose=False
+            llm=init_llama_index_settings(),
+            verbose=False,
+            max_iterations=20
         )
         agent.update_prompts({"agent_worker:system_prompt": react_system_prompt})
         agent.reset()

@@ -43,7 +43,7 @@ def extract_topics(summary: str) -> List[str]:
 
 
 
-async def background_topic_registration(program, level, course, module, summary):
+async def background_topic_registration(program, level, course, module, summary, module_order=None):
     """
     Asynchronously extracts topics from a summary and stores them in the 'topics' MongoDB collection.
 
@@ -51,15 +51,16 @@ async def background_topic_registration(program, level, course, module, summary)
     It ensures new topics are incrementally added without duplication and logs the result or any errors.
 
     Args:
-        program (str): The program name (e.g., 'msc').
+        program (str): The program name (e.g., 'MM').
         level (str): The academic level (e.g., 'M1').
         course (str): The name of the course.
         module (str): The name of the module.
         summary (str): The document summary from which topics are extracted.
+        module_order (int, optional): The order of the module within the course.
     """
     try:
         topics = extract_topics(summary)
-        await upsert_module_topics(program, level, course, module, topics)
-        logger.info(f"✅ Topics for module '{module}' updated successfully.")
+        await upsert_module_topics(program, level, course, module, topics, module_order)
+        logger.info(f"✅ Topics for module '{module}' updated successfully with order {module_order}")
     except Exception as e:
         logger.error(f"❌ Failed to extract or update topics for module '{module}': {e}")

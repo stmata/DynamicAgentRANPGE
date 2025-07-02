@@ -3,7 +3,7 @@ import os
 from llama_index.core import VectorStoreIndex, StorageContext, load_index_from_storage
 from icecream import ic
 from app.utils import prompt_helpers
-from app.config import get_azure_openai_client_with_llama_index
+from app.config import get_default_llm_for_agents, init_llama_index_settings
 
 '''
 Purpose:
@@ -18,7 +18,7 @@ def summarize_text(text: str) -> str:
     """
     text = text[:127999]
     prompt = prompt_helpers.summary_gen_prompt(text)
-    llm = get_azure_openai_client_with_llama_index()
+    llm = get_default_llm_for_agents()
     response_obj = llm.complete(prompt=prompt)
     result = str(response_obj)
     ic(text[ : 100], prompt[: 20], result[: 30])
@@ -27,6 +27,7 @@ def summarize_text(text: str) -> str:
     return result
 
 def get_or_create_index(docs, index_dir: str):
+    init_llama_index_settings()
     if not os.path.exists(index_dir):
         os.makedirs(index_dir, exist_ok=True)
         index = VectorStoreIndex.from_documents(docs)

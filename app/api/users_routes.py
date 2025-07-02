@@ -2,8 +2,10 @@ from fastapi import APIRouter, HTTPException, Depends
 from typing import Dict
 
 from app.services.external.auth_service import auth_service
+from app.services.external.progression_service import ProgressionService
 from app.models.entities.user import UserCreate, UserResponse, UserUpdate
 from app.repositories.user_repository import UserCollection
+from app.logs import logger
 
 # ─── Dépendances ────────────────────────────────
 async def get_user_collection() -> UserCollection:
@@ -13,6 +15,15 @@ async def get_user_collection() -> UserCollection:
         UserCollection: new instance of the user repository.
     """
     return UserCollection()
+
+async def get_progression_service() -> ProgressionService:
+    """
+    Dependency function to provide an instance of ProgressionService.
+    
+    Returns:
+        ProgressionService: A new instance of the progression service.
+    """
+    return ProgressionService()
 
 
 router = APIRouter(
@@ -134,3 +145,49 @@ async def update_last_login(
     # Update the last login date
     success = await user_collection.update_last_login(user_id)
     return {"success": success}
+
+@router.get("/progression-only", response_model=Dict)
+async def get_user_progression_only(
+    current_user_id: str = Depends(auth_service.get_current_user),
+    user_collection: UserCollection = Depends(get_user_collection)
+):
+    """Get only user progression data without course information."""
+    try:
+        user_info = await user_collection.get_user_by_id(current_user_id)
+        if not user_info:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        return {
+            "course_progress": user_info.course_progress or {},
+            "learning_analytics": user_info.learning_analytics,
+            "progression_initialized": bool(user_info.course_progress)
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting user progression: {str(e)}")
+        raise HTTPException(status_code=500, detail="An error occurred while fetching user progression")
+
+@router.get("/courses-with-progress", response_model=Dict)
+async def get_courses_with_progress(
+    current_user_id: str = Depends(auth_service.get_current_user),
+    user_collection: UserCollection = Depends(get_user_collection),
+    progression_service: ProgressionService = Depends(get_progression_service)
+):
+    """Get all courses with user progression status."""
+    try:
+        user_info = await user_collection.get_user_by_id(current_user_id)
+        if not user_info or not user_info.course_progress:
+            return {"courses": [], "message": "No progression data found"}
+        
+        activation_status = progression_service.get_course_activation_status(user_info.course_progress)
+        
+        return {
+            "courses": user_info.course_progress,
+            "activation_status": activation_status
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting courses with progress: {str(e)}")
+        raise HTTPException(status_code=500, detail="An error occurred while fetching courses with progress")

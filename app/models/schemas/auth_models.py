@@ -1,28 +1,10 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 
-class EmailRequest(BaseModel):
-    """Request model for sending verification code to email."""
-    email: EmailStr
-
-class VerificationRequest(BaseModel):
-    """Request model for verifying email with code."""
-    email: EmailStr
-    code: str
 
 class RefreshTokenRequest(BaseModel):
     """Request model for refreshing access token."""
     refresh_token: str
-
-class VerificationResponse(BaseModel):
-    """Response model for successful email verification."""
-    user_id: str
-    status: bool
-    access_token: Optional[str] = None
-    refresh_token: Optional[str] = None
-    token_type: Optional[str] = None
-    access_token_expires: Optional[float] = None
-    refresh_token_expires: Optional[float] = None
 
 class TokenResponse(BaseModel):
     """Response model for token operations."""

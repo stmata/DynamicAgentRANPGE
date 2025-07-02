@@ -1,16 +1,14 @@
-from fastapi import APIRouter, HTTPException, status, Depends
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, HTTPException, Request , Depends
+from fastapi.responses import JSONResponse, RedirectResponse
 from app.models.schemas.auth_models import (
-    EmailRequest,
-    VerificationRequest,
     RefreshTokenRequest,
-    VerificationResponse,
     TokenResponse,
     LogoutResponse
 )
 from app.services.external.auth_service import auth_service
-from app.services.external.email_service import email_service
 from app.repositories.user_repository import UserCollection
+from app.services.external.azure_auth_service import azure_auth_service
+
 from app.logs import logger
 
 router = APIRouter(prefix="/api/auth", tags=["authentication"])
@@ -25,83 +23,93 @@ async def get_user_collection() -> UserCollection:
     return UserCollection()
 
 
-@router.post("/send-verification-code")
-async def send_verification_code(
-    request: EmailRequest,
+@router.get("/azure/login")
+async def azure_login():
+    """Initiate Azure AD OAuth2 authentication flow."""
+    try:
+        auth_url, state = azure_auth_service.generate_authorization_url()
+        logger.info(f"Redirecting to Azure AD for authentication with state: {state}")
+        return RedirectResponse(url=auth_url, status_code=302)
+        
+    except Exception as e:
+        logger.error(f"Error initiating Azure authentication: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to initiate Azure authentication")
+
+
+@router.get("/azure/callback")
+async def azure_callback(
+    request: Request,
     user_collection: UserCollection = Depends(get_user_collection)
 ):
-    """Send verification code to user email. Creates user if doesn't exist."""
+    """Handle Azure AD OAuth2 callback and complete authentication."""
     try:
-        user_info = await user_collection.get_user_by_email(request.email)
+        query_params = dict(request.query_params)
+        code = query_params.get('code')
+        state = query_params.get('state')
+        error = query_params.get('error')
+        
+        if error:
+            logger.error(f"Azure AD returned error: {error}")
+            frontend_error_url = f"http://localhost:5173/login?error=azure_auth_failed"
+            return RedirectResponse(url=frontend_error_url, status_code=302)
+        
+        if not code or not state:
+            logger.error("Missing code or state parameter in Azure callback")
+            frontend_error_url = f"http://localhost:5173/login?error=missing_parameters"
+            return RedirectResponse(url=frontend_error_url, status_code=302)
+        
+        azure_user_info = await azure_auth_service.complete_oauth_flow(code, state)
+        
+        if not azure_user_info:
+            logger.error("Failed to complete Azure OAuth flow")
+            frontend_error_url = f"http://localhost:5173/login?error=oauth_failed"
+            return RedirectResponse(url=frontend_error_url, status_code=302)
+        
+        email = azure_user_info['email']
+        display_name = azure_user_info['display_name']
+        
+        user_info = await user_collection.get_user_by_email(email)
         
         if not user_info:
             from app.models.entities.user import UserCreate
-            email_prefix = request.email.split('@')[0]
-            if '.' in email_prefix:
-                prenom, nom = email_prefix.split('.', 1)
-                username = f"{prenom.capitalize()} {nom.capitalize()}"
-            else:
-                username = email_prefix.capitalize()
             
-            new_user_data = UserCreate(email=request.email, username=username)
+            username = display_name if display_name else email.split('@')[0].replace('.', ' ').title()
+            
+            new_user_data = UserCreate(email=email, username=username)
             user_id = await user_collection.create_user(new_user_data)
+            
+            logger.info(f"New user created from Azure SSO: {email}")
             user_info = await user_collection.get_user_by_id(user_id)
-        
-        email_sent = email_service.send_verification_code(email=request.email)
-        
-        if email_sent:
-            return {"message": "Verification code sent successfully", "status": True}
+            await user_collection.update_last_login(str(user_info.id))
         else:
-            raise HTTPException(status_code=500, detail="Failed to send verification code")
-
-    except Exception as e:
-        logger.error(f"Error sending verification code: {str(e)}")
-        return JSONResponse(
-            content={
-                "message": "An error occurred while sending the verification code", 
-                "status": False, 
-                "detail": str(e)
-            },
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
-
-@router.post("/verify-code", response_model=VerificationResponse)
-async def verify_code(
-    request: VerificationRequest,
-    user_collection: UserCollection = Depends(get_user_collection)
-):
-    """Verify the code and generate authentication tokens."""
-    try:
-        is_valid = email_service.verify_code(request.email, request.code)
-        
-        if not is_valid:
-            raise HTTPException(status_code=400, detail="Invalid or expired verification code")
-        
-        user_info = await user_collection.get_user_by_email(request.email)
-        if not user_info:
-            raise HTTPException(status_code=404, detail="User not found")
+            await user_collection.update_last_login(str(user_info.id))
+            logger.info(f"Existing user logged in via Azure SSO: {email}")
         
         tokens = auth_service.create_tokens(str(user_info.id))
         if not tokens:
-            raise HTTPException(status_code=500, detail="Failed to generate tokens")
+            logger.error("Failed to generate authentication tokens")
+            frontend_error_url = f"http://localhost:5173/login?error=token_generation_failed"
+            return RedirectResponse(url=frontend_error_url, status_code=302)
         
-        await user_collection.update_last_login(str(user_info.id))
-        
-        return VerificationResponse(
-            user_id=str(user_info.id),
-            status=True,
-            access_token=tokens["access_token"],
-            refresh_token=tokens["refresh_token"],
-            token_type=tokens["token_type"],
-            access_token_expires=tokens["access_token_expires"],
-            refresh_token_expires=tokens["refresh_token_expires"]
+        frontend_success_url = (
+            f"http://localhost:5173/?"
+            f"access_token={tokens['access_token']}&"
+            f"refresh_token={tokens['refresh_token']}&"
+            f"token_type={tokens['token_type']}&"
+            f"access_token_expires={tokens['access_token_expires']}&"
+            f"refresh_token_expires={tokens['refresh_token_expires']}&"
+            f"user_id={str(user_info.id)}"
         )
+        
+        return RedirectResponse(url=frontend_success_url, status_code=302)
         
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error verifying code: {str(e)}")
-        raise HTTPException(status_code=500, detail="An error occurred during verification")
+        logger.error(f"Error in Azure callback: {str(e)}")
+        frontend_error_url = f"http://localhost:5173/login?error=server_error"
+        return RedirectResponse(url=frontend_error_url, status_code=302)
+
 
 @router.post("/refresh-token", response_model=TokenResponse)
 async def refresh_token(
@@ -150,10 +158,23 @@ async def get_current_user_info(
         if not user_info:
             raise HTTPException(status_code=404, detail="User not found")
         
-        return user_info
+        user_dict = user_info.model_dump() if hasattr(user_info, 'dict') else user_info
+        
+        if user_dict.get('created_at'):
+            user_dict['created_at'] = user_dict['created_at'].isoformat()
+        
+        if user_dict.get('last_login'):
+            user_dict['last_login'] = user_dict['last_login'].isoformat()
+        elif user_dict.get('created_at'):
+            user_dict['last_login'] = user_dict['created_at']
+        
+        user_dict["progression_initialized"] = bool(user_dict.get("course_progress"))
+
+        return user_dict
         
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error getting user info: {str(e)}")
         raise HTTPException(status_code=500, detail="An error occurred while fetching user information")
+

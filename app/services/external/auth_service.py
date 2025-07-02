@@ -1,4 +1,3 @@
-import os
 from datetime import datetime, timedelta, timezone
 import json
 from typing import Optional, Dict
@@ -7,8 +6,11 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.logs import logger
 from app.services.database.redis_service import redis_service
-from dotenv import load_dotenv
-load_dotenv()
+from app.services.external.progression_service import ProgressionService
+from app.config import (
+    JWT_SECRET_KEY,
+    JWT_REFRESH_SECRET_KEY
+)
 
 security = HTTPBearer()
 
@@ -21,14 +23,17 @@ class AuthService:
     def __init__(self):
         """Initialize the AuthService with Redis and JWT configuration."""
         # JWT configuration
-        self.SECRET_KEY = os.getenv("JWT_SECRET_KEY")
-        self.REFRESH_SECRET_KEY = os.getenv("JWT_REFRESH_SECRET_KEY")
+        self.SECRET_KEY = JWT_SECRET_KEY
+        self.REFRESH_SECRET_KEY = JWT_REFRESH_SECRET_KEY
         self.ALGORITHM = "HS256"
         self.ACCESS_TOKEN_EXPIRE_MINUTES = 2 * 60
         self.REFRESH_TOKEN_EXPIRE_DAYS = 7
         
         # Use the centralized Redis service
         self.redis_service = redis_service
+        
+        # Initialize progression service
+        self.progression_service = ProgressionService()
         
         if not self.redis_service.is_connected():
             logger.error("❌ AuthService: Redis connection not available")
@@ -250,6 +255,32 @@ class AuthService:
         """Clean up expired tokens - Redis handles this automatically with TTL."""
         logger.debug("Token cleanup not needed - Redis handles TTL automatically")
         return 0
+
+    async def initialize_user_progression(self, user_id: str, program: str = "MM", level: str = "M1") -> Optional[Dict]:
+        """
+        Initialize course progression for a new user
+        
+        Args:
+            user_id: User ID
+            program: Program name (default: 'MM')
+            level: Level name (default: 'M1')
+            
+        Returns:
+            Initialized course progression data or None if failed
+        """
+        try:
+            course_progress = await self.progression_service.initialize_user_progression(program, level)
+            
+            if course_progress:
+                logger.info(f"Initialized progression for user {user_id} with {len(course_progress)} courses")
+                return course_progress
+            else:
+                logger.warning(f"No progression data initialized for user {user_id}")
+                return None
+                
+        except Exception as e:
+            logger.error(f"Error initializing user progression for {user_id}: {str(e)}")
+            return None
 
 # Lazy singleton for multiworker compatibility
 _auth_service_instance = None

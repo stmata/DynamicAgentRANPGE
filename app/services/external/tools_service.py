@@ -9,6 +9,7 @@ and Azure Blob for index retrieval if needed.
 """
 import os, zipfile, tempfile, asyncio
 from typing import List
+from app.config import init_llama_index_settings
 from llama_index.core.tools import QueryEngineTool, ToolMetadata
 from llama_index.core import StorageContext, load_index_from_storage
 from app.services.database.mongo_utils import store_tool_doc
@@ -34,6 +35,7 @@ async def load_tools_from_json_server(course_filter: str = None) -> List[QueryEn
     2) For each, ensure index exists locally (or download+unzip from Azure)
     3) load index + wrap as QueryEngineTool
     """
+    init_llama_index_settings()
     if course_filter:
         from app.services.database.mongo_utils import fetch_tools_by_course
         records = await fetch_tools_by_course(course_filter)

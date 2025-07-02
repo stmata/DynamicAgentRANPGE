@@ -29,6 +29,46 @@ class PyObjectId(ObjectId):
         return ObjectId(value)
 
 
+class PositionnementTestStatus(BaseModel):
+    """
+    Model for positionnement test status and results
+    """
+    status: str = "not_attempted"
+    score: Optional[float] = None
+    date_attempted: Optional[datetime] = None
+    attempts: int = 0
+
+class ModuleStatus(BaseModel):
+    """
+    Model for individual module status and progression
+    """
+    status: str = "locked"
+    unlocked_at: Optional[datetime] = None
+    best_mixed_score: Optional[float] = None
+    mixed_evaluation_passed: bool = False
+    last_activity: Optional[datetime] = None
+    total_attempts: int = 0
+
+class CourseProgress(BaseModel):
+    """
+    Model for overall course progression including positionnement test and modules
+    """
+    positionnement_test: PositionnementTestStatus = PositionnementTestStatus()
+    modules_status: Dict[str, ModuleStatus] = {}
+    total_modules: int = 0
+    unlocked_modules: int = 0
+    completed_modules: int = 0
+    overall_progress: float = 0.0
+
+class LearningAnalytics(BaseModel):
+    """
+    Model for user learning analytics and statistics
+    """
+    total_positionnement_tests: int = 0
+    total_evaluations_completed: int = 0
+    first_course_started: Optional[datetime] = None
+    last_activity_date: Optional[datetime] = None
+
 class EvaluationScore(BaseModel):
     """
     Model for individual evaluation score
@@ -59,6 +99,8 @@ class UserModel(BaseModel):
     course_scores: Dict[str, CourseScore] = {}
     average_score: float = 0.0
     evaluations: List[EvaluationScore] = []
+    course_progress: Optional[Dict[str, CourseProgress]] = {}
+    learning_analytics: Optional[LearningAnalytics] = LearningAnalytics()
 
     class Config:
         validate_by_name = True
@@ -107,7 +149,10 @@ class UserResponse(BaseModel):
     course_scores: Dict[str, CourseScore] = {}
     average_score: float
     total_evaluations: int
-    evaluations: List[EvaluationScore] = []  
+    evaluations: List[EvaluationScore] = []
+    course_progress: Optional[Dict[str, CourseProgress]] = {}
+    learning_analytics: Optional[LearningAnalytics] = None
+    progression_initialized: bool = False
 
     class Config:
         from_attributes = True

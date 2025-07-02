@@ -18,7 +18,7 @@ from app.services.database.indexing_service import summarize_text, get_or_create
 from app.services.external.azure_utils import upload_file, upload_index_folder
 from app.services.external.tools_service import store_tool
 from app.services.database.topic_manager import background_topic_registration
-from app.services.database.mongo_utils import get_module_topics, get_service
+from app.services.database.mongo_utils import get_module_topics, get_service, get_course_modules_with_order
 from app.models.schemas.topic_models import TopicResponse, TopicsListResponse, TopicRequest
 from app.logs import logger
 
@@ -29,9 +29,9 @@ router = APIRouter(
 )
 
 
-@router.post("/upload/{program}/{level}/{course}/{module}")
+@router.post("/upload/{program}/{level}/{course}/{module}/{module_order}")
 async def admin_upload_file(
-    program: str, level: str, course: str, module: str,
+    program: str, level: str, course: str, module: str, module_order: int,
     file: UploadFile = File(...)
 ):
     # 1) write file to a temp path
@@ -58,7 +58,8 @@ async def admin_upload_file(
         level=level,
         course=course,
         module=module,
-        summary=summary
+        summary=summary,
+        module_order=module_order
     ))
 
     # 6) build index locally → zip → upload to Azure Blob
@@ -113,6 +114,7 @@ async def get_topics_for_program_level(program: str, level: str):
                 level=doc.get("level", "unknown"),
                 course=doc.get("course", "unknown"),
                 module=doc.get("module", "unknown"),
+                module_order=doc.get("module_order", 999),
                 topics=doc.get("topics", []),
                 last_updated=doc.get("last_updated")
             ))
@@ -152,6 +154,7 @@ async def get_topics_for_module(course: str, module: str):
             level=doc.get("level", "unknown") if doc else "unknown",
             course=course,
             module=module,
+            module_order=doc.get("module_order", 999) if doc else 999,
             topics=topics,
             last_updated=doc.get("last_updated") if doc else None
         )
@@ -180,6 +183,7 @@ async def get_all_topics():
                 level=doc.get("level", "unknown"),
                 course=doc.get("course", "unknown"),
                 module=doc.get("module", "unknown"),
+                module_order=doc.get("module_order", 999),
                 topics=doc.get("topics", []),
                 last_updated=doc.get("last_updated")
             ))
@@ -217,6 +221,7 @@ async def get_topics_for_course(course: str,):
                 level=doc.get("level", "unknown"),
                 course=doc.get("course", "unknown"),
                 module=doc.get("module", "unknown"),
+                module_order=doc.get("module_order", 999),
                 topics=doc.get("topics", []),
                 last_updated=doc.get("last_updated")
             ))
@@ -259,6 +264,7 @@ async def search_topics_by_request(request: TopicRequest):
             level=doc.get("level", "unknown") if doc else "unknown",
             course=request.course,
             module=request.module,
+            module_order=doc.get("module_order", 999) if doc else 999,
             topics=topics,
             last_updated=doc.get("last_updated") if doc else None
         )
@@ -275,4 +281,32 @@ async def search_topics_by_request(request: TopicRequest):
         raise HTTPException(
             status_code=500, 
             detail="An error occurred while searching topics"
+        )
+
+@router.get("/courses-with-ordered-modules/{program}/{level}")
+async def get_courses_with_ordered_modules(program: str, level: str):
+    """Get all courses with their modules ordered by module_order for frontend course progression."""
+    try:
+        courses_data = await get_course_modules_with_order(program, level)
+        
+        if not courses_data:
+            raise HTTPException(
+                status_code=404, 
+                detail=f"No courses found for program '{program}' level '{level}'"
+            )
+        
+        return {
+            "program": program,
+            "level": level,
+            "courses": courses_data,
+            "total_courses": len(courses_data)
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error retrieving ordered courses for program '{program}' level '{level}': {str(e)}")
+        raise HTTPException(
+            status_code=500, 
+            detail="An error occurred while retrieving ordered courses"
         )

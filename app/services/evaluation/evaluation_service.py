@@ -7,6 +7,7 @@ import asyncio
 import random
 import concurrent.futures
 import gc
+import math
 from typing import List, Dict, Any, Tuple
 from fastapi import HTTPException
 
@@ -192,6 +193,27 @@ def extract_and_parse_json(raw_response: str, context_info: str = "response") ->
         logger.error(f"JSON parse error for '{context_info}': {e}")
         raise HTTPException(502, f"LLM returned invalid JSON for {context_info}: {e}")
 
+def distribute_question_counts(num_questions: int, weights: List[float]) -> List[int]:
+    """
+    Convert weights into integer counts of questions, ensuring the total equals `num_questions`.
+
+    This function proportionally allocates question types based on weights and uses
+    a rounding correction strategy to guarantee the total number of questions is exact.
+    """
+    raw_counts = [w * num_questions for w in weights]
+
+    floored = [math.floor(rc) for rc in raw_counts]
+
+    # Step 3: Calculate how many questions remain to be distributed
+    remainder = num_questions - sum(floored)
+
+    residuals = [(i, raw_counts[i] - floored[i]) for i in range(len(weights))]
+    residuals.sort(key=lambda x: x[1], reverse=True)
+
+    for i in range(remainder):
+        floored[residuals[i][0]] += 1
+
+    return floored
 
 def parse_llm_response(raw_response: str, topic: str) -> List[Any]:
     """
@@ -204,7 +226,10 @@ def parse_llm_response(raw_response: str, topic: str) -> List[Any]:
     if not isinstance(questions, list):
         raise HTTPException(502, f"`questions` missing for '{topic}'")
     
-    return questions
+    if questions:
+        return questions[:1]
+    else:
+        return questions
 
 
 async def generate_single_question(topic: str, eval_type: str, context: str, language: str = "French") -> List[Any]:
@@ -361,9 +386,7 @@ async def orchestrate_mixed_evaluation_optimized(
     Parallel batch processing with pipeline references for 40-50% performance improvement.
     """
     logger.info(f"[orchestrate_mixed_optimized] Starting parallel mixed evaluation: {num_questions} questions (positioning: {is_positioning})")
-
-    num_mcq = int(num_questions * mcq_weight)
-    num_open = num_questions - num_mcq
+    num_mcq, num_open = distribute_question_counts(num_questions, [mcq_weight, open_weight])
     
     logger.info(f"[orchestrate_mixed_optimized] Distribution: {num_mcq} MCQ, {num_open} Open")
     

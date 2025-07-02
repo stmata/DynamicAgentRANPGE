@@ -114,18 +114,23 @@ class AsyncMongoDBService:
         cursor = self.tools.find({"course": course})
         return await cursor.to_list(length=None)
 
-    async def upsert_module_topics(self, program: str, level: str, course: str, module: str, new_topics: List[str]) -> None:
-        """Insert or update module topics."""
+    async def upsert_module_topics(self, program: str, level: str, course: str, module: str, new_topics: List[str], module_order: int = None) -> None:
+        """Insert or update module topics with module order."""
+        update_data = {
+            "program": program,
+            "level": level,
+            "course": course,
+            "module": module,
+            "last_updated": datetime.utcnow().isoformat()
+        }
+        
+        if module_order is not None:
+            update_data["module_order"] = module_order
+        
         await self.topics.update_one(
             {"module": module, "course": course},
             {
-                "$set": {
-                    "program": program,
-                    "level": level,
-                    "course": course,
-                    "module": module,
-                    "last_updated": datetime.utcnow().isoformat()
-                },
+                "$set": update_data,
                 "$addToSet": {
                     "topics": {"$each": new_topics}
                 }
@@ -216,15 +221,22 @@ class AsyncMongoDBService:
         
         result = await self.users.delete_one({"_id": ObjectId(user_id)})
         return result.deleted_count > 0
-
+    
     async def update_last_login(self, user_id: str) -> bool:
-        """Update user last login timestamp."""
+        """Update user last login timestamp and learning analytics activity date."""
         if not ObjectId.is_valid(user_id):
             return False
         
+        now = datetime.now()
         result = await self.users.update_one(
             {"_id": ObjectId(user_id)},
-            {"$set": {"last_login": datetime.now(), "updated_at": datetime.now()}}
+            {
+                "$set": {
+                    "last_login": now, 
+                    "updated_at": now,
+                    "learning_analytics.last_activity_date": now
+                }
+            }
         )
         return result.modified_count > 0
 
@@ -691,6 +703,33 @@ class AsyncMongoDBService:
         except Exception:
             return False
 
+    async def get_modules_by_course_ordered(self, course: str) -> List[Dict]:
+        """Get all modules for a course ordered by module_order."""
+        cursor = self.topics.find({"course": course}).sort("module_order", 1)
+        return await cursor.to_list(length=None)
+        
+    async def get_course_modules_with_order(self, program: str, level: str) -> Dict[str, List[Dict]]:
+        """Get all courses with their modules ordered by module_order."""
+        cursor = self.topics.find({"program": program, "level": level})
+        docs = await cursor.to_list(length=None)
+        
+        courses = {}
+        for doc in docs:
+            course_name = doc.get("course")
+            if course_name not in courses:
+                courses[course_name] = []
+            courses[course_name].append({
+                "module": doc.get("module"),
+                "module_order": doc.get("module_order", 999),
+                "topics": doc.get("topics", [])
+            })
+        
+        # Sort modules by module_order for each course
+        for course_name in courses:
+            courses[course_name].sort(key=lambda x: x.get("module_order", 999))
+        
+        return courses
+
 
 _service_instance = None
 
@@ -715,9 +754,9 @@ async def fetch_tools_by_course(course: str) -> List[Dict]:
     service = await get_service()
     return await service.fetch_tools_by_course(course)
 
-async def upsert_module_topics(program: str, level: str, course: str, module: str, new_topics: List[str]) -> None:
+async def upsert_module_topics(program: str, level: str, course: str, module: str, new_topics: List[str], module_order: int = None) -> None:
     service = await get_service()
-    await service.upsert_module_topics(program, level, course, module, new_topics)
+    await service.upsert_module_topics(program, level, course, module, new_topics, module_order)
 
 async def get_module_topics(course: str, module: str) -> List[str]:
     service = await get_service()
@@ -870,6 +909,14 @@ async def search_conversations(user_id: str, query: str, limit: int = 10) -> Lis
 async def get_conversation_summary(conversation_id: str) -> Optional[Dict]:
     service = await get_service()
     return await service.get_conversation_summary(conversation_id)
+
+async def get_modules_by_course_ordered(course: str) -> List[Dict]:
+    service = await get_service()
+    return await service.get_modules_by_course_ordered(course)
+
+async def get_course_modules_with_order(program: str, level: str) -> Dict[str, List[Dict]]:
+    service = await get_service()
+    return await service.get_course_modules_with_order(program, level)
 
 async def generate_conversation_id() -> str:
     service = await get_service()

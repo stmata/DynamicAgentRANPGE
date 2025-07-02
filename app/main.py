@@ -31,8 +31,7 @@ async def preload_agents():
         logger.info("[preload] Starting background agent preloading...")
         
         await _build_agent_for_course(None)
-        await _build_agent_for_course("AI and ML for Business")
-        await _build_agent_for_course("Marketing Management")
+        await _build_agent_for_course("Marketing RAN")
         await _build_agent_for_course("Économie RAN")
         await _build_agent_for_course("Comptabilité RAN")
         
@@ -41,7 +40,7 @@ async def preload_agents():
         
     except Exception as e:
         logger.error(f"[preload] Error during agent preloading: {str(e)}")
-        tools_ready.set()  
+        tools_ready.set()   
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -69,10 +68,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://ranpge-test.skema.edu",
-        "https://bottomup-ranpge-test.skema.edu"
-        ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],
