@@ -5,7 +5,9 @@ import CourseCard from '../CourseCard/CourseCard';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useAuth } from '../../contexts/AuthContext';
-import { getStaticCourses, createPositionnementCard } from '../../services/courseService';
+import { createPositionnementCard } from '../../services/courseService';
+import combinedCoursesService from '../../services/combinedCoursesService';
+import { useCourses } from '../../hooks/useCourses';
 import './CourseCarousel.css';
 import CourseSelectionDialog from './CourseSelectionDialog';
 
@@ -17,62 +19,66 @@ import CourseSelectionDialog from './CourseSelectionDialog';
 const CourseCarousel = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { getAllCourses, coursesLoading, courses }  = useAuth();
+  const { user, isAuthenticated } = useAuth();
+  const { getAllCourses, coursesData } = useCourses(isAuthenticated);
   
   const [currentIndex, setCurrentIndex] = useState(0);
   const [visibleCards, setVisibleCards] = useState(3);
   const carouselRef = useRef(null);
   const [cardWidth, setCardWidth] = useState(0);
   const [allCards, setAllCards] = useState([]);
+  const [allCoursesForSelection, setAllCoursesForSelection] = useState([]);
   const [courseSelectionDialogOpen, setCourseSelectionDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   /**
-   * Transform API course data to card format using local cache
-   * @param {string} courseName - Name of the course
-   * @param {Object} courseData - Course data from local cache
-   * @returns {Object} Formatted course card object
+   * Build cards from cached courses with progression + positioning card
+   * Uses combined service to merge course cache with user progression
    */
-  const transformApiCourseToCard = (courseName, courseData) => {
-    return {
-      id: `api_${courseName.toLowerCase().replace(/\s+/g, '_')}`,
-      title: {
-        en: courseName,
-        fr: courseName
-      },
-      shortDescription: {
-        en: `Learn ${courseName} fundamentals and advanced concepts.`,
-        fr: `Apprenez les fondamentaux et concepts avancés de ${courseName}.`
-      },
-      fullDescription: {
-        en: `Complete course covering all aspects of ${courseName}. Master the essential skills and knowledge needed in this field.`,
-        fr: `Cours complet couvrant tous les aspects de ${courseName}. Maîtrisez les compétences et connaissances essentielles dans ce domaine.`
-      },
-      image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&h=300&fit=crop",
-      modules: courseData.totalModules || Object.keys(courseData.modules || {}).length || 0,
-      isActive: true
-    };
-  };
-
-  /**
-   * Builds the complete list of cards combining positioning, API courses, and static courses
-   * Uses local cache data to avoid redundant API calls
-   */
-  const buildAllCards = () => {
-    const cards = [];
-    
-    cards.push(createPositionnementCard());
-    
-    const coursesData = getAllCourses();
-    
-    if (coursesData && Object.keys(coursesData).length > 0) {
-      Object.entries(coursesData).forEach(([courseName, courseData]) => {
-        cards.push(transformApiCourseToCard(courseName, courseData));
-      });
+  const buildAllCards = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const cards = [];
+      
+      // Always add positioning card first
+      cards.push(createPositionnementCard());
+      
+      if (isAuthenticated && user?.id) {
+        const allCourses = getAllCourses();
+        
+        // Only proceed if we have courses data
+        if (Object.keys(allCourses).length > 0) {
+          const coursesWithProgress = await combinedCoursesService.getCoursesWithProgression(
+            user.id, 
+            allCourses,
+            user.course_progress
+          );
+          
+          const allCoursesForSelectionData = await combinedCoursesService.getAllCoursesForSelection(
+            user.id,
+            allCourses,
+            user.course_progress
+          );
+          
+          cards.push(...coursesWithProgress);
+          
+          setAllCoursesForSelection([createPositionnementCard(), ...allCoursesForSelectionData]);
+        }
+      }
+      
+      setAllCards(cards);
+    } catch (err) {
+      console.error('Error loading courses with progression:', err);
+      setError(err.message || 'Failed to load courses');
+      
+      // Fallback: only positioning card
+      setAllCards([createPositionnementCard()]);
+    } finally {
+      setLoading(false);
     }
-    
-    cards.push(...getStaticCourses());
-    
-    setAllCards(cards);
   };
 
   /**
@@ -147,7 +153,6 @@ const CourseCarousel = () => {
    */
   const handleCourseSelection = (selectedCourse) => {
     const courseTitle = selectedCourse.title?.fr || selectedCourse.title?.en || selectedCourse.title;
-    
     navigate('/evaluation', { 
       state: { 
         selectedCourse: courseTitle,
@@ -176,23 +181,60 @@ const CourseCarousel = () => {
   }, []);
 
   /**
-   * Build cards when courses data changes
+   * Build cards when authentication state OR courses data changes
    */
   useEffect(() => {
     buildAllCards();
     
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [courses]);
+  }, [isAuthenticated, user?.id, user?.course_progress, coursesData]);
+
+  /**
+   * Listen for progression updates to refresh interface
+   */
+  useEffect(() => {
+    const handleProgressionUpdate = (event) => {
+      if (event.detail.userId === user?.id) {
+        buildAllCards();
+      }
+    };
+
+    const handleCoursesLoaded = () => {
+      buildAllCards();
+    };
+
+    window.addEventListener('progression:updated', handleProgressionUpdate);
+    window.addEventListener('courses:loaded', handleCoursesLoaded);
+    
+    return () => {
+      window.removeEventListener('progression:updated', handleProgressionUpdate);
+      window.removeEventListener('courses:loaded', handleCoursesLoaded);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   const showNavButtons = allCards.length > visibleCards;
 
-  if (coursesLoading) {
+  if (loading) {
     return (
       <section className="courses-section">
         <div className="courses-container">
           <h2 className="courses-title">{t('courses.title')}</h2>
           <div className="loading-placeholder">
             {t('common.loading')}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="courses-section">
+        <div className="courses-container">
+          <h2 className="courses-title">{t('courses.title')}</h2>
+          <div className="error-placeholder">
+            Error loading courses: {error}
           </div>
         </div>
       </section>
@@ -211,8 +253,13 @@ const CourseCarousel = () => {
           >
             <div 
               className="carousel-container"
+              /*style={{ 
+                transform: `translateX(-${currentIndex * cardWidth}px)`,
+              }}*/
               style={{ 
                 transform: `translateX(-${currentIndex * cardWidth}px)`,
+                justifyContent: 'center',
+                display: 'flex'
               }}
             >
               {allCards.map((course, index) => (
@@ -252,7 +299,7 @@ const CourseCarousel = () => {
           open={courseSelectionDialogOpen}
           onClose={handleCloseDialog}
           onCourseSelect={handleCourseSelection}
-          availableCourses={allCards}
+          availableCourses={allCoursesForSelection}
         />
       </div>
     </section>

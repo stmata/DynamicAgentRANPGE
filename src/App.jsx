@@ -8,13 +8,13 @@ import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 import MainLayout from './components/Layout/MainLayout';
 import ChatLayout from './components/Layout/ChatLayout';
-import Home from './pages/Home';
+import HomeScreen from './pages/HomeScreen';
 import DashboardScreen from './pages/DashboardScreen/DashboardScreen';
-import CourseModules from './pages/CourseModules';
+import CourseModuleScreen from './pages/CourseModuleScreen';
 import SettingsModal from './components/Settings/SettingsModal';
 import EvaluationScreen from './pages/EvaluationScreen/EvaluationScreen';
 import ChatScreen from './pages/ChatScreen';
-import Login from './pages/LoginScreen/Login';
+import LoginScreen from './pages/LoginScreen/LoginScreen';
 import ErrorScreen from './pages/ErrorScreen/ErrorScreen';
 import EvaluationCaseScren from './pages/EvaluationCaseScren';
 import FloatingChatButton from './components/FloatingChatButton/FloatingChatButton';
@@ -40,16 +40,16 @@ function App() {
           <AuthProvider>
             <Router>
               <Routes>
-                <Route path="/login" element={<Login />} />
+                <Route path="/login" element={<LoginScreen />} />
                 
                 {/* Protected routes */}
                 <Route element={<ProtectedRoute />}>
                   {/* Main routes with navbar */}
                   <Route element={<MainLayout />}>
-                    <Route path="/" element={<Home />} />
+                    <Route path="/" element={<HomeScreen />} />
                     <Route path="/dashboard" element={< DashboardScreen/>} />
                     <Route path="/evaluation" element={<EvaluationScreen />} />
-                    <Route path="/course-modules" element={<CourseModules />} />
+                    <Route path="/course-modules" element={<CourseModuleScreen />} />
                   </Route>
                   
                   {/* Chat route with its own layout (no navbar) */}

@@ -2,20 +2,20 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
 import DashboardHeader from '../../components/Dashboard/DashboardHeader';
-import DashboardSummary from '../../components/Dashboard/DashboardSummary';
+import StatsCard from '../../components/Dashboard/StatsCard';
 import CourseCard from '../../components/Dashboard/CourseCard';
-import TopicsCard from '../../components/Dashboard/TopicsCard';
-import EvaluationHistoryCard from '../../components/Dashboard/EvaluationHistoryCard';
+import EvaluationChart from '../../components/Dashboard/EvaluationChart';
+import ScoreEvolutionChart from '../../components/Dashboard/ScoreEvolutionChart';
 import EmptyDashboard from '../../components/Dashboard/EmptyDashboard';
+import { Target, BookOpen, Award, Calendar } from 'lucide-react';
 import './DashboardScreen.css';
 
 /**
- * Main Dashboard component displaying student academic evolution
- * Shows course progress, evaluations history, and topics studied
- * 
- * @returns {React.ReactElement} Dashboard component
+ * Modern Dashboard component displaying student academic evolution
+ * Shows course progress, evaluations history, and analytics
+ * @returns {React.ReactElement} DashboardScreen component
  */
-const Dashboard = () => {
+const DashboardScreen = () => {
   const { t } = useTranslation();
   const { user, isAuthenticated } = useAuth();
   const [evaluations, setEvaluations] = useState([]);
@@ -23,53 +23,31 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      const retrieveUser = user.evaluations || [];
-      setEvaluations(retrieveUser);
+      setEvaluations(user.evaluations || []);
       setLoading(false);
     }
   }, [isAuthenticated, user]);
 
   /**
-   * Calculate topic frequency from evaluations
-   * @param {Array} evaluations - Array of evaluation objects
-   * @returns {Array} Array of [topic, count] tuples sorted by frequency
+   * Calculate days since last activity
+   * @param {Date|Object} lastActivity - Last activity date
+   * @returns {number} Days since last activity
    */
-  const calculateTopicFrequency = (evaluations) => {
-    const topicCount = {};
-    evaluations.forEach(evaluation => {
-      if (evaluation.topics) {
-        evaluation.topics.forEach(topic => {
-          topicCount[topic] = (topicCount[topic] || 0) + 1;
-        });
-      }
-    });
-
-    return Object.entries(topicCount)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 10);
-  };
-
-  /**
-   * Calculate module statistics from evaluations
-   * @param {Array} evaluations - Array of evaluation objects  
-   * @returns {Object} Module statistics object
-   */
-  const calculateModuleStats = (evaluations) => {
-    const modules = {};
-    evaluations.forEach(evaluation => {
-      if (!modules[evaluation.module]) {
-        modules[evaluation.module] = { scores: [], count: 0 };
-      }
-      modules[evaluation.module].scores.push(evaluation.score);
-      modules[evaluation.module].count++;
-    });
-
-    Object.keys(modules).forEach(module => {
-      const scores = modules[module].scores;
-      modules[module].average = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
-    });
-
-    return modules;
+  const calculateDaysSinceActivity = (lastActivity) => {
+    if (!lastActivity) return 0;
+    
+    let date;
+    if (lastActivity.$date) {
+      date = new Date(lastActivity.$date);
+    } else if (typeof lastActivity === 'string' || typeof lastActivity === 'number') {
+      date = new Date(lastActivity);
+    } else {
+      date = lastActivity;
+    }
+    
+    const now = new Date();
+    const diffTime = Math.abs(now - date);
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   };
 
   if (loading) {
@@ -91,58 +69,77 @@ const Dashboard = () => {
   }
 
   const hasEvaluations = evaluations && evaluations.length > 0;
-  const topicFrequency = hasEvaluations ? calculateTopicFrequency(evaluations) : [];
+  const lastActivityDate = user.learning_analytics?.last_activity_date || user.last_activity_date;
+  const daysSinceActivity = calculateDaysSinceActivity(lastActivityDate);
 
   return (
-    <div className="dash-dashboard">
-      <DashboardHeader username={user.username} />
-      
-      {hasEvaluations ? (
-        <div className="dash-grid">
-          <DashboardSummary 
-            averageScore={user.average_score || 0}
-            evaluations={evaluations}
+    <div className="dashboard-dashboard">
+      <div className="dashboard-dashboard-container">
+        
+        <DashboardHeader 
+          username={user.username}
+          lastLogin={user.last_login || user.learning_analytics?.last_activity_date}
+        />
+
+        <div className="dashboard-stats-grid">
+          <StatsCard
+            title={t('dashboard.positioningTests')}
+            value={user.learning_analytics?.total_positionnement_tests || 0}
+            icon={<Target className="dashboard-icon" />}
+            borderColor="dashboard-border-primary"
+            valueColor="dashboard-text-primary"
           />
           
-          {user.course_scores && Object.entries(user.course_scores).map(([courseName, courseData]) => {
+          <StatsCard
+            title={t('dashboard.totalEvaluations')}
+            value={user.total_evaluations || evaluations.length || 0}
+            icon={<BookOpen className="dashboard-icon" />}
+            borderColor="dashboard-border-accent"
+            valueColor="dashboard-text-accent"
+          />
+          
+          <StatsCard
+            title={t('dashboard.activeCourses')}
+            value={user.course_progress ? Object.keys(user.course_progress).length : 0}
+            icon={<Award className="dashboard-icon" />}
+            borderColor="dashboard-border-dark"
+            valueColor="dashboard-text-dark"
+          />
+          
+          <StatsCard
+            title={t('dashboard.daysActivity')}
+            value={daysSinceActivity}
+            icon={<Calendar className="dashboard-icon" />}
+            borderColor="dashboard-border-gray"
+            valueColor="dashboard-text-gray"
+          />
+        </div>
+
+        <div className="dashboard-courses-grid">
+          {user.course_progress && Object.entries(user.course_progress).map(([courseName, courseData]) => {
             const courseEvaluations = evaluations.filter(e => e.course === courseName);
-            const moduleStats = calculateModuleStats(courseEvaluations);
-            
             return (
               <CourseCard
                 key={courseName}
                 courseName={courseName}
                 courseData={courseData}
                 evaluations={courseEvaluations}
-                moduleStats={moduleStats}
               />
             );
           })}
-
-          {user.course_scores && Object.entries(user.course_scores).map(([courseName]) => {
-            const courseEvaluations = evaluations.filter(e => e.course === courseName);
-            
-            return (
-              <EvaluationHistoryCard
-                key={`history-${courseName}`}
-                courseName={courseName}
-                evaluations={courseEvaluations}
-              />
-            );
-          })}
-
-          {topicFrequency.length > 0 && (
-            <TopicsCard
-              topicFrequency={topicFrequency}
-              mostFrequent={topicFrequency[0]}
-            />
-          )}
         </div>
-      ) : (
-        <EmptyDashboard />
-      )}
+
+        {hasEvaluations ? (
+          <div className="dashboard-charts-grid">
+            <EvaluationChart evaluations={evaluations} />
+            <ScoreEvolutionChart evaluations={evaluations} />
+          </div>
+        ) : (
+          <EmptyDashboard />
+        )}
+      </div>
     </div>
   );
 };
 
-export default Dashboard; 
+export default DashboardScreen;

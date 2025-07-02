@@ -6,14 +6,14 @@ import './ModuleCard.css';
  * Module card component with optimized navigation and topic count display
  * Uses local cache data instead of API calls
  */
-const ModuleCard = ({ title, topicsCount = 0, onEvaluationCaseClick, onEvaluationClick }) => {
+const ModuleCard = ({ title, topicsCount = 0, isLocked = false, onEvaluationCaseClick, onEvaluationClick }) => {
   const { t } = useTranslation();
   
   const cardTitle = title || t('courseModules.generalModule');
   
   return (
-    <div className="cardModule-container">
-      <div className="cardModule-icon">🎓</div>
+    <div className={`cardModule-container ${isLocked ? 'locked' : ''}`}>
+      <div className="cardModule-icon">{isLocked ? '🔒' : '🎓'}</div>
       <h2 className="cardModule-title">{cardTitle}</h2>
       
       <div className="cardModule-document-count">
@@ -21,16 +21,24 @@ const ModuleCard = ({ title, topicsCount = 0, onEvaluationCaseClick, onEvaluatio
         <span>{topicsCount}</span>
       </div>
       
+      {isLocked && (
+        <div className="cardModule-locked-message">
+          {t('courseModules.lockedMessage')}
+        </div>
+      )}
+      
       <div className="cardModule-buttons">
         <button 
           className="cardModule-btn chat" 
-          onClick={onEvaluationCaseClick}
+          onClick={isLocked ? null : onEvaluationCaseClick}
+          disabled={isLocked}
         >
           {t('courseModules.evaluation_case')}
         </button>
         <button 
           className="cardModule-btn eval" 
-          onClick={onEvaluationClick}
+          onClick={isLocked ? null : onEvaluationClick}
+          disabled={isLocked}
         >
           {t('courseModules.evaluation')}
         </button>
@@ -41,7 +49,8 @@ const ModuleCard = ({ title, topicsCount = 0, onEvaluationCaseClick, onEvaluatio
 
 ModuleCard.defaultProps = {
   topicsCount: 0,
-  onChatClick: () => {},
+  isLocked: false,
+  onEvaluationCaseClick: () => {},
   onEvaluationClick: () => {}
 };
 

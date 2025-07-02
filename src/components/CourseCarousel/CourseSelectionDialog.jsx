@@ -46,11 +46,12 @@ const CourseSelectionDialog = ({
   };
 
   /**
-   * Filter only active courses for positioning assessment
-   * Exclude the positioning card itself from the selection
+   * Get all courses for positioning assessment (both active and inactive)
+   * All courses should be clickable in the dialog regardless of active status
+   * Exclude only the positioning card itself from the selection
    */
-  const activeCourses = availableCourses.filter(course => 
-    course.isActive && course.id !== 'positionnement'
+  const selectableCourses = availableCourses.filter(course => 
+    course.id !== 'positionnement'
   );
 
   return (
@@ -91,9 +92,9 @@ const CourseSelectionDialog = ({
           </Typography>
         </Box>
 
-        {activeCourses.length > 0 ? (
+        {selectableCourses.length > 0 ? (
           <List sx={{ padding: 0 }}>
-            {activeCourses.map((course, index) => (
+            {selectableCourses.map((course, index) => (
               <React.Fragment key={course.id}>
                 <ListItem disablePadding>
                   <ListItemButton
@@ -141,7 +142,7 @@ const CourseSelectionDialog = ({
                     />
                   </ListItemButton>
                 </ListItem>
-                {index < activeCourses.length - 1 && (
+                {index < selectableCourses.length - 1 && (
                   <Box 
                     sx={{ 
                       height: '1px', 

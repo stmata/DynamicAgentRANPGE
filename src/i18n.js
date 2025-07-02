@@ -23,7 +23,9 @@ const resources = {
         download: 'Télécharger',
         download_pdf: 'Télécharger en PDF',
         backToModules: "Retour aux modules",
-        count: 'Vu'
+        backToK2: "Retourner sur K2",
+        count: 'Vu',
+        txtFloatiActionBtn: "Pensez à retourner au cours K2 pour poursuivre votre progression"
       },
       navbar: {
         chat: 'Chat',
@@ -35,7 +37,8 @@ const resources = {
         title: "RAN-PGE",
         subtitle: "Votre plateforme d'apprentissage personnalisée",
         welcomeHeading: "Ouvrez la porte du savoir",
-        welcomeDescription: "Saisissez votre email SKEMA pour recevoir un code de vérification et commencer votre aventure d'apprentissage.",
+        ssoDescription: "Connectez-vous avec votre compte SKEMA pour commencer votre aventure d'apprentissage.",
+        azureLoginButton: "Se connecter",
         emailLabel: "Adresse Email",
         emailPlaceholder: "exemple@email.com",
         requestCodeButton: "Recevoir un code",
@@ -58,18 +61,22 @@ const resources = {
         errorSendingCode: 'Échec de l\'envoi du code de vérification. Veuillez réessayer.',
       },
       home: {
-        title: 'Suivez ce parcours de prérequis pour préparer votre année académique à SKEMA',
-        description: 'Une plateforme de remise à niveau conçue pour vous. Tests personnalisés, contenus adaptés et accompagnement interactif : tout est réuni pour vous aider à progresser à votre rythme. Commencez dès aujourd\'hui votre parcours de réussite.',
+        title: 'Évaluez vos pré-requis et le développement de vos connaissances ',
+        descriptionP1: "En lien avec votre espace de Remise à Niveau (RAN) sur K2, nous vous proposons des tests personnalisés basés sur le contenus de vos ran et un accompagnement interactif pour progresser à votre rythme.",
+        descriptionP2: "La 1ère étape est de passer le quizz de positionnement que vous permettra de situer votre niveau initial. Si vous obtenez 57% de bonnes réponses ou plus, vous n’êtes pas obligés de travailler ces modules de ran. Dans le cas contraire, il est fortement recommandé de le faire pour commencer sereinement votre année académique.",
+        descriptionP3: "Comme il vous l’est précisé dans votre espace K2, chaque module comportera ensuite des quizz de formation pour lequel vous aurez du feedback. Vous passerez à la fin du module complet un test final de validation de vos connaissances.",
         notice: "Vous pouvez accéder directement aux modules, mais il est fortement recommandé de commencer par le test de positionnement. Il permet d'évaluer votre niveau : un score d'au moins 57 % est nécessaire pour le valider. Les modules sont ensuite là pour vous entraîner librement et renforcer vos compétences.",
         scrollHover: "Accéder aux cours"
       },
       courses: {
-        title: 'Des fondamentaux solides, ça commence ici'
+        title: 'Testez vos fondamentaux'
       },
       course: {
         modules: 'modules',
         start: 'Commencer',
-        comingSoon: 'Bientôt disponible'
+        comingSoon: 'Bientôt disponible',
+        placementTestRequired: 'Test de positionnement requis',
+        placementTestRequiredShort: 'Test de positionnement requis'
       },
       positioning: {
         selectCourse: 'Choisissez votre cours de positionnement',
@@ -99,9 +106,10 @@ const resources = {
         generalModuleDescription: 'Ce module général vous permet d\'interagir avec l\'ensemble du cours. Posez vos questions générales ou testez vos connaissances globales.',
         resources: 'Ressources',
         evaluation_case: 'Cas pratique',
-        evaluation: 'Quiz',
+        evaluation: 'QUIZ',
         notFound: 'Le cours demandé n\'a pas été trouvé',
-        genericDescription: 'Ce cours complet vous offre une formation adaptée à vos besoins. Testez vos connaissances avec des évaluations variées : quiz interactifs, questions ouvertes et cas pratiques professionnels. Développez vos compétences à travers des méthodes d\'évaluation diversifiées et personnalisées.'
+        genericDescription: 'Ce cours complet vous offre une formation adaptée à vos besoins. Testez vos connaissances avec des évaluations variées : quiz interactifs, questions ouvertes et cas pratiques professionnels. Développez vos compétences à travers des méthodes d\'évaluation diversifiées et personnalisées.',
+        lockedMessage: 'Complétez le module précédent ou faites le test de positionnement'
       },
       evaluation: {
         questions: "Questions",
@@ -131,12 +139,9 @@ const resources = {
         viewGuide: "Voir le plan d'étude",
         guideTitle: "Plan d'étude",
         guideUnavailable: "Le guide d'étude n'est pas disponible pour cette évaluation.",
-        scoreLabel: "Votre score :",
-        scoreValue: "{{score}}%",
-        positioningPassed: "🎉 Félicitations ! Vous avez validé le test de positionnement ! Vous possédez déjà de solides bases dans ce domaine. Vous pouvez poursuivre avec des contenus plus avancés ou approfondir certains aspects spécifiques.",
-        positioningFailed: "📚 Continuez vos efforts ! Ce test de positionnement indique qu'il serait bénéfique de revoir les fondamentaux avant d'aborder des sujets plus complexes. Prenez le temps d'explorer les ressources du cours pour renforcer vos bases.",
-        moduleGood: "✨ Excellent travail ! Vous maîtrisez bien les concepts de ce module. Cette évaluation d'entraînement confirme votre bonne compréhension du sujet. Continuez ainsi !",
-        moduleNeedsWork: "💪 Bon effort ! Cette évaluation d'entraînement montre qu'il y a encore quelques notions à consolider. N'hésitez pas à revoir les ressources du module et à vous entraîner davantage.",
+        aboveThresholdPositionnement: "📚 Bien joué pour quiz de positionnement !<br/>Vous avez obtenu <strong>{{score}}%</strong>.<br/><br/>Vous pouvez maintenant retourner sur K2 pour débuter le Module.<br/>👉 Et souvenez-vous, je suis là pour vous aider si besoin !",
+        aboveThresholdModule: "✅ Activité terminée, bravo !<br/>Vous avez obtenu <strong>{{score}}%</strong>.<br/><br/>Vous pouvez maintenant retourner sur K2 et passer à la suite du cours.<br/>👉 Je vous retrouve très vite dans le prochain module !",
+        aboveThresholdFinal: "🎉 Félicitations, vous êtes arrivé(e) au bout du parcours ! Vous venez de finaliser le quiz final, bravo pour votre engagement tout au long de ce cours 👏<br/>Vous avez obtenu <strong>{{score}}%</strong>.<br/><br/>🔁 Et bien sûr, je reste disponible si vous avez envie de continuer à explorer certains sujets ou si vous avez des questions à posteriori.",
         moduleNotFound: "Module non trouvé",
         positioning: {
           title: "Test de positionnement",
@@ -207,8 +212,9 @@ const resources = {
         viewReferences: 'Voir les références',
         sendMessage: 'Envoyer un message...',
         greeting: {
-          title: 'Bienvenue sur ChatAI!',
-          subtitle: 'Je suis votre assistant virtuel. Je suis là pour vous aider à répondre aux questions liées aux contenus de RANPGE disponibles dans votre espace K2.'
+          title: 'Bienvenue sur ChatAI!', 
+          subtitle: 'Je suis votre assistant virtuel. Je suis là pour vous aider à répondre aux questions liées aux contenus de RANPGE disponibles dans votre espace K2.',
+          subtitleK2: 'Cliquez sur la bulle 🔁 K2 pour continuer votre progression.'
         },
         sidebar: {
           newChat: 'Nouveau chat',
@@ -223,38 +229,36 @@ const resources = {
         confirm: 'Supprimer'
       },
       dashboard: {
-        title: 'Mon Évolution Académique',
-        subtitle: 'Dernière connexion: Aujourd\'hui',
-        globalScore: 'Score Moyen Global',
-        bestScore: 'Meilleur',
-        latestScore: 'Dernier',
-        evaluationsCount: 'évaluations',
-        progressPositive: 'Progression positive - Continue!',
-        progressNegative: 'Progression à améliorer - Focus sur les fondamentaux',
-        progressStable: 'Progression stable - Besoin de variété',
-        modulesHistory: 'Historique',
-        topicsStudied: 'Topics Étudiés',
-        topLimit: 'Top 10',
-        mostStudiedTopic: '{{topic}} est votre topic le plus étudié ({{count}} fois)',
-        emptyState: {
-          title: 'Commencez votre parcours !',
-          description: 'Vous n\'avez pas encore d\'évaluations. Commencez votre première évaluation pour voir votre progression.',
-          startButton: 'Commencer maintenant',
-          firstCourseTitle: 'Votre premier cours vous attend',
-          firstCourseDescription: 'Découvrez les fondamentaux du Marketing et commencez à construire vos compétences.',
-          readyToStart: 'Prêt à commencer',
-          tipsTitle: 'Conseils pour bien commencer',
-          tip1: '💡 Prenez votre temps pour comprendre',
-          tip2: '📝 Prenez des notes pendant les cours',
-          tip3: '🤝 N\'hésitez pas à poser des questions',
-          tip4: '🔄 Révisez régulièrement'
+        platform: "Plateforme RAN-PGE",
+        lastLogin: "Dernière connexion",
+        positioningTests: "Tests de positionnement", 
+        totalEvaluations: "Évaluations totales",
+        activeCourses: "Cours actifs",
+        daysActivity: "Jours d'activité",
+        positioningTest: "Test de positionnement",
+        moduleProgress: "Progression des modules",
+        courseEvaluations: "Évaluations du cours",
+        unlockedModules: "Modules débloqués",
+        completed: "Terminés",
+        score: "Score",
+        attempts: "Tentatives",
+        evaluation: "Évaluation",
+        evaluationDistribution: "Répartition des évaluations",
+        scoreEvolution: "Évolution des scores",
+        startLearning: "Commencez votre parcours d'apprentissage !",
+        startDescription: "Démarrez par passer vos tests de positionnement pour évaluer votre niveau initial.",
+        startNow: "Commencer maintenant",
+        course: "Cours",
+        type: "Type",
+        status: {
+          passed: "Réussi",
+          failed: "Échoué", 
+          notAttempted: "Non tenté"
         },
-        evaluationTypes: {
-          case: 'cas',
-          mixed: 'mixte',
-          project: 'projet',
-          exam: 'examen',
-          mcq: 'qcm'
+        evaluationType: {
+          positionnement: "Tests de positionnement",
+          module_mixed: "Évaluations mixtes",
+          module_case: "Études de cas"
         }
       },
       pdf: {
@@ -299,7 +303,9 @@ const resources = {
         download: 'Download',
         download_pdf: 'Download as PDF',
         backToModules: "Back to modules",
-        count: 'Count'
+        backToK2: "Return to K2",
+        count: 'Count',
+        txtFloatiActionBtn:"Remember to return to the K2 course to continue your progress"
       },
       navbar: {
         chat: 'Chat',
@@ -311,7 +317,8 @@ const resources = {
         title: "RANPGE",
         subtitle: "Your personalized learning platform",
         welcomeHeading: "Open the door to knowledge",
-        welcomeDescription: "Enter your SKEMA email to receive a verification code and begin your learning adventure.",
+        ssoDescription: "Connect with your SKEMA account to begin your learning adventure.",
+        azureLoginButton: "Login",
         emailLabel: "Email Address",
         emailPlaceholder: "example@email.com",
         requestCodeButton: "Receive a code",
@@ -334,19 +341,23 @@ const resources = {
         errorSendingCode: 'Failed to send verification code. Please try again.',
       },
       home: {
-        title: 'Follow this prerequisites path to prepare your academic year at SKEMA.',
-        description: 'A tailored learning platform made just for you. Personalized assessments, adaptive content, and interactive support—all designed to help you progress at your own pace. Start your success journey today.',
+        title: 'Assess your prerequisites and the development of your knowledge',
+        descriptionP1: "In connection with your Refresher Course (RAN) space on K2, we are offering personalized tests based on the content of your RAN modules, along with interactive support to help you progress at your own pace.",
+        descriptionP2: "The first step is to take the placement quiz, which will allow you to identify your initial level. If you score 57% or more correct answers, you are not required to work on these RAN modules. Otherwise, it is strongly recommended to do so in order to start your academic year with peace of mind.",
+        descriptionP3: "As specified in your K2 space, each module will then include training quizzes for which you will receive feedback. At the end of the full module, you will take a final test to validate your knowledge.",
         notice: "You can access the modules directly, but we strongly recommend starting with the positioning test. It helps assess your level: you need a score of at least 57% to pass it. The modules are then available for self-paced practice and to reinforce your skills.",
         scrollHover: "Continue to courses"
       },      
       courses: {
-        title: 'Strong foundations start here'
+        title: 'Test your fundamentals'
       },
       course: {
         modules: 'modules',
         topics: 'topics',
         start: 'Start',
-        comingSoon: 'Coming Soon'
+        comingSoon: 'Coming Soon',
+        placementTestRequired: 'Placement test required',
+        placementTestRequiredShort: 'Placement test required'
       },
       positioning: {
         selectCourse: 'Choose your placement course',
@@ -378,7 +389,8 @@ const resources = {
         evaluation_case: 'Case Study',
         evaluation: 'Quiz',
         notFound: 'The requested course was not found',
-        genericDescription: 'This comprehensive course offers training tailored to your needs. Test your knowledge with diverse evaluations: interactive quizzes, open-ended questions, and professional case studies. Develop your skills through varied and personalized assessment methods.'
+        genericDescription: 'This comprehensive course offers training tailored to your needs. Test your knowledge with diverse evaluations: interactive quizzes, open-ended questions, and professional case studies. Develop your skills through varied and personalized assessment methods.',
+        lockedMessage: 'Complete previous module or take placement test'
       },
       evaluation: {
         questions: "Questions",
@@ -408,14 +420,9 @@ const resources = {
         viewGuide: "View study plan",
         guideTitle: "Study Plan",
         guideUnavailable: "Study guide is not available for this evaluation.",
-        aboveThresholdPositionnement: "Well done! You scored {{score}}%. You likely have some prior knowledge (or maybe just a bit of luck 😉). Be sure to go through the full course and resources to strengthen your understanding.",
-        aboveThresholdModule: "Well done! You scored {{score}}%. You already have a good grasp of the topics in this module. Feel free to explore the additional resources to deepen your understanding even further.",
-        scoreLabel: "Your score:",
-        scoreValue: "{{score}}%",
-        positioningPassed: "🎉 Congratulations! You passed the placement test! You already have a solid foundation in this area. You can move on to more advanced content or deepen specific aspects.",
-        positioningFailed: "📚 Keep going! This placement test suggests it would be beneficial to review the basics before tackling more complex topics. Take the time to explore the course resources to strengthen your foundation.",
-        moduleGood: "✨ Excellent work! You have a good grasp of the concepts in this module. This practice assessment confirms your solid understanding of the topic. Keep it up!",
-        moduleNeedsWork: "💪 Good effort! This practice assessment shows that there are still a few concepts to solidify. Don't hesitate to review the module resources and practice further.",
+        aboveThresholdPositionnement: "📚 Well done on completing your positioning quiz!<br/>You scored <strong>{{score}}%</strong>.<br/><br/>You can now return to K2 to begin the Module.<br/>👉 And remember, I'm here to help you if you need anything!",
+        aboveThresholdModule: "✅ Activity completed, well done!<br/>You scored <strong>{{score}}%</strong>.<br/><br/>You can now return to K2 and move on with the course.<br/>👉 I'll see you very soon in the next module!",
+        aboveThresholdFinal: "🎉 Congratulations, you’ve reached the end of the course! You just completed the final quiz—great job on your commitment throughout this course 👏<br/>You scored <strong>{{score}}%</strong>.<br/><br/>🔁 And of course, I’m here if you want to keep exploring certain topics or if you have any questions afterwards.",
         moduleNotFound: "Module not found",
         positioning: {
           title: "Placement test",
@@ -487,7 +494,8 @@ const resources = {
         sendMessage: 'Send a message...',
         greeting: {
           title: 'Welcome to ChatAI!',
-          subtitle: "I am your virtual assistant. I/'m here to help you with any questions related to the RANPGE content available in your K2 space."
+          subtitle: "I am your virtual assistant. I/'m here to help you with any questions related to the RANPGE content available in your K2 space.",
+          subtitleK2: "Click on the 🔁  K2 bubble to continue your progress."
         },
         sidebar: {
           newChat: 'New chat',
@@ -502,38 +510,36 @@ const resources = {
         confirm: 'Delete'
       },
       dashboard: {
-        title: 'My Academic Evolution',
-        subtitle: 'Last login: Today',
-        globalScore: 'Global Average Score',
-        bestScore: 'Best',
-        latestScore: 'Latest',
-        evaluationsCount: 'evaluations',
-        progressPositive: 'Positive progression - Keep going!',
-        progressNegative: 'Progression needs improvement - Focus on fundamentals',
-        progressStable: 'Stable progression - Need for variety',
-        modulesHistory: 'History',
-        topicsStudied: 'Studied Topics',
-        topLimit: 'Top 10',
-        mostStudiedTopic: '{{topic}} is your most studied topic ({{count}} times)',
-        emptyState: {
-          title: 'Start your journey!',
-          description: 'You don\'t have any evaluations yet. Start your first evaluation to see your progress.',
-          startButton: 'Start now',
-          firstCourseTitle: 'Your first course awaits',
-          firstCourseDescription: 'Discover the fundamentals of Marketing and start building your skills.',
-          readyToStart: 'Ready to start',
-          tipsTitle: 'Tips to get started',
-          tip1: '💡 Take your time to understand',
-          tip2: '📝 Take notes during courses',
-          tip3: '🤝 Don\'t hesitate to ask questions',
-          tip4: '🔄 Review regularly'
+        platform: "RAN-PGE Platform",
+        lastLogin: "Last login",
+        positioningTests: "Positioning tests", 
+        totalEvaluations: "Total evaluations",
+        activeCourses: "Active courses",
+        daysActivity: "Days of activity",
+        positioningTest: "Positioning test",
+        moduleProgress: "Module progress",
+        courseEvaluations: "Course evaluations",
+        unlockedModules: "Unlocked modules",
+        completed: "Completed",
+        score: "Score",
+        attempts: "Attempts",
+        evaluation: "Evaluation",
+        evaluationDistribution: "Evaluation distribution",
+        scoreEvolution: "Score evolution",
+        startLearning: "Start your learning journey!",
+        startDescription: "Begin by taking your positioning tests to assess your initial level.",
+        startNow: "Start now",
+        course: "Course",
+        type: "Type",
+        status: {
+          passed: "Passed",
+          failed: "Failed", 
+          notAttempted: "Not attempted"
         },
-        evaluationTypes: {
-          case: 'case',
-          mixed: 'mixed',
-          project: 'project',
-          exam: 'exam',
-          mcq: 'mcq'
+        evaluationType: {
+          positionnement: "Positioning tests",
+          module_mixed: "Mixed evaluations",
+          module_case: "Case studies"
         }
       },
       pdf: {

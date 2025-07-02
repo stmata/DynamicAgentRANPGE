@@ -1,5 +1,5 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { forwardRef } from 'react';
+//import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { Icons } from '../SharedChatComponents/SharedChatComponents';
 import { getConversationTitle, getConversationTime, normalizeConversation } from '../../utils/helpers';
@@ -21,9 +21,11 @@ import logo_light from '../../assets/images/logo_light.png';
  * @param {boolean} props.loading - Loading state
  * @param {boolean} props.isSmallScreen - Small screen state
  * @param {Function} props.translation - Translation function from useTranslation
+ * @param {React.ReactElement} props.floatingButton - FloatingChatButton component to render inside sidebar
+ * @param {React.Ref} ref - Ref for the sidebar element
  * @returns {JSX.Element} ChatSidebar component
  */
-const ChatSidebar = ({
+const ChatSidebar = forwardRef(({
   isOpen,
   onToggle,
   onNewChat,
@@ -34,10 +36,10 @@ const ChatSidebar = ({
   onConversationClick,
   onDeleteConversation,
   loading,
-  translation
-  //isSmallScreen
-}) => {
-  const navigate = useNavigate();
+  translation,
+  floatingButton
+}, ref) => {
+  //const navigate = useNavigate();
   const { isDarkMode } = useTheme();
 
   /**
@@ -81,10 +83,11 @@ const ChatSidebar = ({
   return (
     <>
       <aside 
+        ref={ref}
         className={`chat-sidebar ${!isOpen ? 'chat-sidebar-collapsed' : 'active'}`}
       >
         <div className="chat-sidebar-header">
-          <div className="chat-logo" onClick={() => navigate('/')}>
+          <div className="chat-logo" /*onClick={() => navigate('/')}*/>
             <img src={isDarkMode ? logo_dark : logo_light} alt="Logo" className="chat-logo-img" />
           </div>
           <button className="chat-sidebar-toggle" onClick={onToggle}>
@@ -127,6 +130,8 @@ const ChatSidebar = ({
             </>
           )}
         </div>
+        {/* FloatingChatButton for small screens */}
+        {floatingButton}
       </aside>
 
       {!isOpen && (
@@ -136,6 +141,8 @@ const ChatSidebar = ({
       )}
     </>
   );
-};
+});
+
+ChatSidebar.displayName = 'ChatSidebar';
 
 export default ChatSidebar; 

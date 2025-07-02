@@ -1,6 +1,5 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button } from '@mui/material';
+import { useTranslation, Trans } from 'react-i18next';
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, Box, Typography } from '@mui/material';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { generateStudyGuidePDF } from '../../../utils/pdfGenerator';
 
@@ -14,6 +13,9 @@ import { generateStudyGuidePDF } from '../../../utils/pdfGenerator';
  * @param {number} totalQuestions - Total number of questions
  * @param {Object} submissionResults - Submission results with study guide
  * @param {string} error - Error message
+ * @param {boolean} isPositionnement - Whether this is a positioning evaluation
+ * @param {boolean} isFirstTimePositionnement - Whether this is first time positioning test for this course
+ * @param {number} passingScore - Passing score threshold for positioning test
  * @param {Function} setConfirmDialogOpen - Set confirm dialog state
  * @param {Function} setSuccessDialogOpen - Set success dialog state
  * @param {Function} setGuideDialogOpen - Set guide dialog state
@@ -30,6 +32,8 @@ const QuizDialogs = ({
   submissionResults,
   error,
   isPositionnement,
+  isFirstTimePositionnement,
+  passingScore,
   setConfirmDialogOpen,
   setSuccessDialogOpen,
   setGuideDialogOpen,
@@ -56,6 +60,21 @@ const QuizDialogs = ({
       }
       return part;
     });
+  };
+  
+  const getScoreMessageKey = () => {
+    if (!isPositionnement) {
+      return 'evaluation.aboveThresholdModule';
+    }
+    
+    if (isFirstTimePositionnement) {
+      return 'evaluation.aboveThresholdPositionnement';
+    }
+    
+    const isSuccess = submissionResults?.final_score >= passingScore;
+    return isSuccess 
+      ? 'evaluation.aboveThresholdFinal'
+      : 'evaluation.aboveThresholdPositionnement';
   };
   
   /**
@@ -280,37 +299,35 @@ const QuizDialogs = ({
           {t('evaluation.submissionSuccessTitle')}
         </DialogTitle>
         <DialogContent>
-          <DialogContentText sx={{
+          <Box sx={{
             color: isDarkMode ? 'var(--dark-text)' : 'var(--text-dark)',
             marginTop: '8px'
           }}>
             {submissionResults?.final_score !== undefined ? (
               <>
-                {t('evaluation.submitSuccess')}
-                <br /><br />
-                <div style={{ 
+                <Box sx={{ height: '16px' }} />
+                <Box sx={{ 
                   textAlign: 'center', 
                   fontSize: '1.2em', 
                   fontWeight: 'bold',
                   margin: '10px 0'
                 }}>
-                  {t('evaluation.scoreLabel')} {t('evaluation.scoreValue', { score: Math.round(submissionResults.final_score) })}
-                </div>
-                <br />
-                {isPositionnement ? (
-                  submissionResults.final_score >= 57
-                    ? t('evaluation.positioningPassed')
-                    : t('evaluation.positioningFailed')
-                ) : (
-                  submissionResults.final_score >= 57
-                    ? t('evaluation.moduleGood')
-                    : t('evaluation.moduleNeedsWork')
-                )}
+                  <Typography variant="h6" component="div">
+                    <Trans
+                      i18nKey={getScoreMessageKey()}
+                      values={{ score: Math.round(submissionResults.final_score) }}
+                      components={{ br: <br />, strong: <strong /> }}
+                    />
+                </Typography>
+                </Box>
+                <Box sx={{ height: '8px' }} />
               </>
             ) : (
-              t('evaluation.submitSuccess')
+              <Typography variant="body1" component="div">
+                {t('evaluation.submitSuccess')}
+              </Typography>
             )}
-          </DialogContentText>
+          </Box>
         </DialogContent>
         <DialogActions sx={{ 
           borderTop: '1px solid',

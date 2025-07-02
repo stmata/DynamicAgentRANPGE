@@ -303,20 +303,25 @@ class StorageService {
    * @param {number} ttlMinutes - Time to live in minutes (default 24h)
    */
   setUserSessionWithTTL(user, ttlMinutes = this.defaultUserTTL) {
-    const userData = {
-      username: user.username,
-      average_score: user.average_score,
-      userHash: user.user_hash,
-      id: user.id,
-      course_scores: user.course_scores,
-      evaluations: user.evaluations || [],
-      total_evaluations: user.total_evaluations || 0,
-      lastCached: Date.now(),
-    };
+  const userData = {
+    username: user.username,
+    average_score: user.average_score,
+    userHash: user.user_hash,
+    id: user.id,
+    course_scores: user.course_scores,
+    evaluations: user.evaluations || [],
+    total_evaluations: user.total_evaluations || 0,
+    course_progress: user.course_progress,
+    last_login: user.last_login,
+    created_at: user.created_at,
+    learning_analytics: user.learning_analytics,
+    progression_initialized: user.progression_initialized,
+    lastCached: Date.now(),
+  };
 
-    this.setSessionItem('user_session', userData);
-    this.setCacheItem(this.userCacheKey, userData, ttlMinutes);
-  }
+  this.setSessionItem('user_session', userData);
+  this.setCacheItem(this.userCacheKey, userData, ttlMinutes);
+}
 
   /**
    * Get user session data if still valid (within TTL)
@@ -553,6 +558,88 @@ class StorageService {
   clearCoursesCache() {
     this.removeCacheItem('courses_data');
     this.removeCacheItem('courses_hierarchical');
+  }
+
+  /**
+   * Store user progression data in cache without TTL (event-based invalidation)
+   * @param {string} userId - User ID
+   * @param {Object} progressionData - User progression data
+   */
+  setUserProgression(userId, progressionData) {
+    if (!userId || !progressionData) {
+      console.warn('Invalid parameters for setUserProgression');
+      return false;
+    }
+
+    try {
+      const cacheKey = `user_progression_${userId}`;
+      const cachedData = {
+        progression: progressionData,
+        lastUpdated: Date.now(),
+        userId: userId
+      };
+      
+      this.setSessionItem(cacheKey, cachedData);
+      return true;
+    } catch (error) {
+      console.error('Failed to store user progression:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Get user progression data from cache
+   * @param {string} userId - User ID
+   * @returns {Object|null} User progression data or null if not found
+   */
+  getUserProgression(userId) {
+    if (!userId) {
+      return null;
+    }
+
+    try {
+      const cacheKey = `user_progression_${userId}`;
+      const cachedData = this.getSessionItem(cacheKey);
+      
+      if (!cachedData || !cachedData.progression) {
+        return null;
+      }
+
+      return cachedData.progression;
+    } catch (error) {
+      console.error('Failed to retrieve user progression:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Invalidate user progression cache (called on user actions)
+   * @param {string} userId - User ID
+   */
+  invalidateUserProgression(userId) {
+    if (!userId) {
+      return false;
+    }
+
+    try {
+      const cacheKey = `user_progression_${userId}`;
+      this.removeSessionItem(cacheKey);
+      
+      // Dispatch events to notify components
+      window.dispatchEvent(new CustomEvent('progression:updated', {
+        detail: { userId }
+      }));
+      
+      // Also dispatch event to refresh user data in AuthContext
+      window.dispatchEvent(new CustomEvent('auth:refresh-user', {
+        detail: { userId }
+      }));
+      
+      return true;
+    } catch (error) {
+      console.error('Failed to invalidate user progression:', error);
+      return false;
+    }
   }
 
   /**

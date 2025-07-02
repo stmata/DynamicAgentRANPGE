@@ -15,6 +15,7 @@ export const useChatInterface = () => {
   const textareaRef = useRef(null);
   const profileRef = useRef(null);
   const chatContentRef = useRef(null);
+  const sidebarRef = useRef(null);
 
   /**
    * Handle screen size changes for responsive design
@@ -31,7 +32,34 @@ export const useChatInterface = () => {
     checkScreenSize();
     window.addEventListener('resize', checkScreenSize);
     return () => window.removeEventListener('resize', checkScreenSize);
-  }, [isSidebarOpen]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /**
+   * Handle clicks outside sidebar to close it on small screens
+   */
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        isSmallScreen && 
+        isSidebarOpen && 
+        sidebarRef.current && 
+        !sidebarRef.current.contains(event.target)
+      ) {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    if (isSmallScreen && isSidebarOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+      
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+        document.removeEventListener('touchstart', handleClickOutside);
+      };
+    }
+  }, [isSmallScreen, isSidebarOpen]);
 
   /**
    * Auto-resize textarea based on content
@@ -74,6 +102,7 @@ export const useChatInterface = () => {
     textareaRef,
     profileRef,
     chatContentRef,
+    sidebarRef,
     toggleSidebar,
     handleReferencesClick
   };

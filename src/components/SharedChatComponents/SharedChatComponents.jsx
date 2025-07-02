@@ -156,7 +156,7 @@ export const ProfileDropdown = ({
     userInitials, 
     isProfileOpen, 
     setIsProfileOpen, 
-    onNavigateHome,
+    //onNavigateHome,
     onNavigateDasboard, 
     onOpenSettings, 
     onLogout, 
@@ -189,10 +189,10 @@ export const ProfileDropdown = ({
         
         {isProfileOpen && (
           <div className="chat-profile-menu">
-            <div className="chat-menu-item" onClick={onNavigateHome}>
+            {/*<div className="chat-menu-item" onClick={onNavigateHome}>
               <Icons.Home />
               <span>{t('common.home')}</span>
-            </div>
+            </div>*/}
             <div className="chat-menu-item" onClick={onNavigateDasboard}>
               <Icons.Dashboard />
               <span>{t('navbar.dashboard')}</span>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import authApi from '../services/authApi.js';
 import storage from '../services/storage.js';
+import { API_CONFIG, API_ENDPOINTS } from '../utils/constants.js';
 
 /**
  * Inactivity duration threshold (in milliseconds) used to detect if the user has been "asleep"
@@ -58,6 +59,88 @@ export const useAuth = () => {
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   }, []);
 
+   /**
+   * Extract authentication tokens from URL parameters
+   * 
+   * @returns {Object|null} Token data or null if not found
+   */
+  const extractTokensFromUrl = useCallback(() => {
+    const params = new URLSearchParams(window.location.search);
+    const accessToken = params.get('access_token');
+    const refreshToken = params.get('refresh_token');
+    const userId = params.get('user_id');
+    const accessTokenExpires = params.get('access_token_expires');
+    const refreshTokenExpires = params.get('refresh_token_expires');
+
+    if (accessToken && refreshToken && userId) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+      
+      return {
+        accessToken,
+        refreshToken,
+        userId,
+        accessTokenExpires: parseFloat(accessTokenExpires),
+        refreshTokenExpires: parseFloat(refreshTokenExpires)
+      };
+    }
+    return null;
+  }, []);
+
+  /**
+   * Process authentication tokens from URL and complete login
+   * 
+   * @param {Object} tokenData - Token data extracted from URL
+   * @returns {Promise<boolean>} Success status
+   */
+  const processUrlTokens = useCallback(async (tokenData) => {
+    try {
+      storage.setAuthTokens(
+        tokenData.accessToken,
+        tokenData.refreshToken,
+        tokenData.accessTokenExpires,
+        tokenData.refreshTokenExpires
+      );
+
+      const userInfo = await authApi.getCurrentUser();
+      const userHash = await hashUserId(tokenData.userId);
+
+      const userData = {
+        id: tokenData.userId,
+        username: userInfo.username || userInfo.email?.split('@')[0] || 'User',
+        email: userInfo.email,
+        average_score: userInfo.average_score || 0,
+        total_evaluations: userInfo.total_evaluations || 0,
+        course_scores: userInfo.course_scores || {},
+        evaluations: userInfo.evaluations || [],
+        user_hash: userHash,
+        course_progress: userInfo.course_progress || {},
+        learning_analytics: userInfo.learning_analytics || null,
+        progression_initialized: userInfo.progression_initialized || false,
+        created_at: userInfo.created_at,
+        last_login: userInfo.last_login,
+      };
+
+      setAuthState(userData);
+      storage.setUserSessionWithTTL(userData, 24 * 60 * 60 * 1000);
+      window.dispatchEvent(new CustomEvent('auth:login', { detail: userData }));
+      
+      return true;
+    } catch (err) {
+      console.error('Failed to process URL tokens:', err);
+      setError(err.message || 'Authentication failed');
+      return false;
+    }
+  }, [hashUserId, setAuthState]);
+
+  /**
+   * Redirect to Azure OAuth login
+   * 
+   * @returns {void}
+   */
+  const loginWithAzureRedirect = useCallback(() => {
+    window.location.href = `${API_CONFIG.BASE_URL}${API_ENDPOINTS.AUTH.AZURE_LOGIN}`;
+  }, []);
+
   /**
    * Check if token needs refresh based on expiration time
    */
@@ -109,84 +192,6 @@ export const useAuth = () => {
     return false;
   }, [isAuthenticated, shouldRefreshToken]);
 
-  /**
-   * Send verification code to email
-   */
-  const sendVerificationCode = useCallback(async (email) => {
-    try {
-      setError(null);
-      setLoading(true);
-      
-      const response = await authApi.sendVerificationCode(email);
-      return response;
-    } catch (err) {
-      setError(err.message || 'Failed to send verification code');
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  /**
-   * Verify code and complete login
-   */
-  const verifyCodeAndLogin = useCallback(async (email, code) => {
-    try {
-      setError(null);
-      setLoading(true);
-      
-      const response = await authApi.verifyCode(email, code);
-      
-      if (response.status && response.access_token) {
-        storage.setAuthTokens(
-          response.access_token,
-          response.refresh_token,
-          response.access_token_expires,
-          response.refresh_token_expires
-        );
-
-        const userHash = await hashUserId(response.user_id);
-        
-        const userData = {
-          id: response.user_id,
-          username: email.split('@')[0],
-          average_score: response.average_score || 0,
-          total_evaluations: response.total_evaluations || 0,
-          course_scores: response.course_scores,
-          evaluations: response.evaluations || [],
-          user_hash: userHash,
-        };
-        
-        setAuthState(userData);
-        
-        try {
-          const userInfo = await authApi.getCurrentUser();
-          const updatedUserData = {
-            ...userData,
-            username: userInfo.username,
-            average_score: userInfo.average_score,
-            total_evaluations: userInfo.total_evaluations || 0,
-            course_scores: userInfo.course_scores,
-            evaluations: userInfo.evaluations || [],
-            user_hash: userHash,
-          };
-          setAuthState(updatedUserData);
-        } catch (userInfoError) {
-          console.warn('Failed to fetch user info:', userInfoError);
-        }
-        
-        window.dispatchEvent(new CustomEvent('auth:login', { detail: userData }));
-        return response;
-      } else {
-        throw new Error('Invalid verification response');
-      }
-    } catch (err) {
-      setError(err.message || 'Verification failed');
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, [hashUserId, setAuthState]);
 
   /**
    * Logout user and clear all data
@@ -245,6 +250,9 @@ export const useAuth = () => {
           course_scores: userInfo.course_scores,
           evaluations: userInfo.evaluations || [],
           user_hash: existingSession?.user_hash || await hashUserId(userInfo.id),
+          course_progress: userInfo.course_progress || {},
+          learning_analytics: userInfo.learning_analytics || null,
+          progression_initialized: userInfo.progression_initialized || false,
         };
         
         setAuthState(userData);
@@ -265,6 +273,9 @@ export const useAuth = () => {
                 course_scores: userInfo.course_scores,
                 evaluations: userInfo.evaluations || [],
                 user_hash: existingSession?.user_hash || await hashUserId(userInfo.id),
+                course_progress: userInfo.course_progress || {},
+                learning_analytics: userInfo.learning_analytics || null,
+                progression_initialized: userInfo.progression_initialized || false,
               };
               
               setAuthState(userData);
@@ -341,24 +352,41 @@ export const useAuth = () => {
    * Initialize authentication state
    */
   useEffect(() => {
-    const initializeAuth = async () => {
-      setLoading(true);
+  const initializeAuth = async () => {
+    setLoading(true);
+    
+    try {
+      const urlTokens = extractTokensFromUrl();
       
-      try {
-        const isValid = await verifySession();
-        if (!isValid) {
-          clearAuthState();
+      if (urlTokens) {
+        const success = await processUrlTokens(urlTokens);
+        if (success) {
+          setLoading(false);
+          return;
         }
-      } catch (err) {
-        console.error('Auth initialization failed:', err);
-        clearAuthState();
-      } finally {
-        setLoading(false);
       }
-    };
 
-    initializeAuth();
-  }, [verifySession, clearAuthState]);
+      const { accessToken } = storage.getAuthTokens();
+      if (!accessToken) {
+        setLoading(false);
+        return;
+      }
+      
+      const isValid = await verifySession();
+      if (!isValid) {
+        clearAuthState();
+      }
+    } catch (err) {
+      console.error('Auth initialization failed:', err);
+      clearAuthState();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  initializeAuth();
+// eslint-disable-next-line react-hooks/exhaustive-deps
+}, [verifySession, clearAuthState]);
 
    /**
    * Refresh user information from the server
@@ -376,6 +404,9 @@ export const useAuth = () => {
         course_scores: userInfo.course_scores,
         evaluations: userInfo.evaluations || [],
         user_hash: existingSession?.user_hash || await hashUserId(userInfo.id),
+        course_progress: userInfo.course_progress || {},
+        learning_analytics: userInfo.learning_analytics || null,
+        progression_initialized: userInfo.progression_initialized || false,
       };
       
       setAuthState(userData);
@@ -397,6 +428,34 @@ export const useAuth = () => {
     }
     const courseData = user.course_scores[courseName];
     return courseData?.average_score || null;
+  }, [user?.course_scores]);
+
+  /**
+   * Get course progression data for a specific course
+   * @param {string} courseName - Name of the course
+   * @returns {Object|null} Course progression data or null if not found
+   */
+  const getCourseProgress = useCallback((courseName) => {
+    if (!user?.course_progress || !courseName) {
+      return null;
+    }
+    return user.course_progress[courseName] || null;
+  }, [user?.course_progress]);
+
+  /**
+   * Get user learning analytics
+   * @returns {Object|null} Learning analytics data or null if not available
+   */
+  const getLearningAnalytics = useCallback(() => {
+    return user?.learning_analytics || null;
+  }, [user?.learning_analytics]);
+
+  /**
+   * Check if user progression is initialized
+   * @returns {boolean} True if progression is initialized
+   */
+  const isProgressionInitialized = useCallback(() => {
+    return user?.progression_initialized || false;
   }, [user]);
   
   /**
@@ -429,48 +488,92 @@ export const useAuth = () => {
     };
 
     const handleRefreshUser = async () => {
-      await refreshUserInfo();
+      if (isAuthenticated) {
+        try {
+          const userInfo = await authApi.getCurrentUser();
+          const userData = {
+            ...user,
+            username: userInfo.username,
+            average_score: userInfo.average_score,
+            total_evaluations: userInfo.total_evaluations || 0,
+            course_scores: userInfo.course_scores,
+            evaluations: userInfo.evaluations || [],
+            course_progress: userInfo.course_progress || {},
+            learning_analytics: userInfo.learning_analytics || null,
+            progression_initialized: userInfo.progression_initialized || false,
+          };
+          setAuthState(userData);
+        } catch (error) {
+          console.warn('Failed to refresh user data:', error);
+        }
+      }
     };
 
-    const activities = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
-    activities.forEach(activity => {
-      document.addEventListener(activity, updateActivity, true);
-    });
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', handleFocus);
+    // Event listeners for various auth and sleep detection scenarios
     window.addEventListener('auth:logout', handleAuthLogout);
     window.addEventListener('auth:unauthorized', handleUnauthorized);
     window.addEventListener('auth:refresh-user', handleRefreshUser);
+    window.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
 
     storage.initialize();
 
     return () => {
       clearInterval(tokenCheckInterval);
       
-      activities.forEach(activity => {
-        document.removeEventListener(activity, updateActivity, true);
-      });
-      
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('focus', handleFocus);
       window.removeEventListener('auth:logout', handleAuthLogout);
       window.removeEventListener('auth:unauthorized', handleUnauthorized);
       window.removeEventListener('auth:refresh-user', handleRefreshUser);
+      window.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [handleWakeUp, updateActivity, clearAuthState, isAuthenticated, refreshTokenIfNeeded, refreshUserInfo]);
+
+  /**
+   * Update placement test progression
+   * @param {string} course - Course name
+   * @param {number} score - Final score
+   */
+  // eslint-disable-next-line no-unused-vars
+  const updatePlacementTest = useCallback(async (course, score) => {
+    try {
+      await refreshUserInfo();
+    } catch (error) {
+      console.warn('Failed to update placement test progression:', error);
+    }
+  }, [refreshUserInfo]);
+
+  /**
+   * Update module progression
+   * @param {string} course - Course name
+   * @param {string} module - Module name
+   * @param {number} score - Final score
+   */
+  // eslint-disable-next-line no-unused-vars
+  const updateModuleProgress = useCallback(async (course, module, score) => {
+    try {
+      await refreshUserInfo();
+    } catch (error) {
+      console.warn('Failed to update module progression:', error);
+    }
+  }, [refreshUserInfo]);
 
   return {
     isAuthenticated,
     user,
     loading,
     error,
-    sendVerificationCode,
-    verifyCodeAndLogin,
+    loginWithAzureRedirect,
     logout,
     verifySession,
     refreshUserInfo,
     getCourseScore,
+    getCourseProgress,
+    getLearningAnalytics,
+    isProgressionInitialized,
+    updatePlacementTest,
+    updateModuleProgress,
     clearError: () => setError(null),
   };
 };

@@ -7,6 +7,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useEvaluationFlow } from '../../hooks/useEvaluationFlow';
 import { getUserInitials } from '../../utils/helpers';
 import { generateEvaluationCasePDF } from '../../utils/pdfGenerator';
+import { API_CONFIG } from '../../utils/constants';
 import {
   ChatInput,
   ProfileDropdown,
@@ -109,11 +110,11 @@ const EvaluationCase = ({ moduleId, courseTitle }) => {
 
   /**
    * Navigate to home page
-   */
+   *
   const handleNavigateHome = () => {
     setIsProfileOpen(false);
     navigate('/');
-  };
+  };*/
 
   /**
    * Open settings dialog
@@ -147,7 +148,8 @@ const EvaluationCase = ({ moduleId, courseTitle }) => {
   };
 
   const handleBackToCourseModules = () => {
-    navigate(`/course-modules?course=${encodeURIComponent(courseTitle)}`);
+    //navigate(`/course-modules?course=${encodeURIComponent(courseTitle)}`);
+    window.location.href = API_CONFIG.BACKTOK2;
   };
 
   return (
@@ -158,7 +160,7 @@ const EvaluationCase = ({ moduleId, courseTitle }) => {
             userInitials={userInitials}
             isProfileOpen={isProfileOpen}
             setIsProfileOpen={setIsProfileOpen}
-            onNavigateHome={handleNavigateHome}
+            //onNavigateHome={handleNavigateHome}
             onNavigateDasboard={handleNavigateDashboard}
             onOpenSettings={handleOpenSettings}
             onLogout={handleLogout}
@@ -205,7 +207,7 @@ const EvaluationCase = ({ moduleId, courseTitle }) => {
                 className="evaluation-back-to-modules-btn"
                 onClick={handleBackToCourseModules}
               >
-                ↶ {t('common.backToModules')}
+                {t('common.backToK2')}
               </button>
             </div>
           </div>

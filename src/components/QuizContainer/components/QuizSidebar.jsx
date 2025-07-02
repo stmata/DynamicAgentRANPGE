@@ -15,8 +15,7 @@ import { useTranslation } from 'react-i18next';
  * @param {boolean} isSubmitted - Whether quiz is submitted
  * @param {boolean} isLoading - Whether quiz is loading
  * @param {Function} updateQuestionUI - Update current question
- * @param {Function} onSubmit - Submit quiz handler
- * @param {Function} onViewGuide - View guide handler
+ * @param {Function} onBackToModules - Back to modules handler
  * @param {boolean} allQuestionsAnswered - Whether all questions are answered
  */
 const QuizSidebar = ({
@@ -26,12 +25,9 @@ const QuizSidebar = ({
   //flaggedCount,
   unattemptedCount,
   timer,
-  isSubmitted,
   isLoading,
   updateQuestionUI,
-  onSubmit,
-  onViewGuide,
-  allQuestionsAnswered
+  onBackToModules,
 }) => {
   const { t } = useTranslation();
   const [useResponsiveGrid, setUseResponsiveGrid] = useState(false);
@@ -138,11 +134,11 @@ const QuizSidebar = ({
       <div className="action-buttons">
         <button 
           className="btn btn-submit" 
-          onClick={isSubmitted ? onViewGuide : onSubmit}
-          disabled={isLoading || (!isSubmitted && !allQuestionsAnswered)}
+          onClick={onBackToModules}
+          disabled={isLoading}
         >
-          <i className={isSubmitted ? "fas fa-book-open" : "fas fa-paper-plane"}></i>
-          <span>{isSubmitted ? t('evaluation.viewGuide') : t('evaluation.submit')}</span>
+          <i className="fas fa-arrow-left"></i>
+          <span>{t('common.backToK2')}</span>
         </button>
       </div>
     </div>

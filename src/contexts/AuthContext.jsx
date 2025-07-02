@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect } from 'react';
+import { createContext, useContext, useEffect } from 'react';
 import useAuthHook from '../hooks/useAuth.js';
 import useCourses from '../hooks/useCourses.js';
 
@@ -108,6 +108,8 @@ export const AuthProvider = ({ children }) => {
     };
   };
 
+
+
   /**
    * Enhanced context value with optimized auth and courses integration
    */
@@ -120,12 +122,14 @@ export const AuthProvider = ({ children }) => {
     error: currentError,
     
     // Authentication methods
-    sendVerificationCode: auth.sendVerificationCode,
-    verifyCodeAndLogin: auth.verifyCodeAndLogin,
+    loginWithAzureRedirect: auth.loginWithAzureRedirect,
     logout: handleLogout,
     verifySession: auth.verifySession,
     refreshUserInfo: auth.refreshUserInfo,
     getCourseScore: auth.getCourseScore,
+    getCourseProgress: auth.getCourseProgress,
+    getLearningAnalytics: auth.getLearningAnalytics,
+    isProgressionInitialized: auth.isProgressionInitialized,
     clearError: clearAllErrors,
     getUserId,
     
@@ -174,8 +178,7 @@ export const AuthProvider = ({ children }) => {
 /**
  * Hook to access auth context with validation
  */
-// eslint-disable-next-line react-refresh/only-export-components
-export const useAuthContext = () => {
+const useAuthContext = () => {
   const context = useContext(AuthContext);
   
   if (!context) {

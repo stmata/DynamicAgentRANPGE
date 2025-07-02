@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuizState } from './hooks/useQuizState';
 import { useQuizTimer } from './hooks/useQuizTimer';
@@ -6,7 +6,7 @@ import ProgressBar from './components/ProgressBar';
 import QuizSidebar from './components/QuizSidebar';
 import QuestionContent from './components/QuestionContent';
 import QuizDialogs from './components/QuizDialogs';
-import { useNavigate } from 'react-router-dom';
+//import { useNavigate } from 'react-router-dom';
 import './QuizContainer.css';
 
 /**
@@ -18,7 +18,7 @@ import './QuizContainer.css';
  */
 const QuizContainer = ({ moduleId, courseTitle, moduleTopics, isPositionnement }) => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
 
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
@@ -59,7 +59,8 @@ const QuizContainer = ({ moduleId, courseTitle, moduleTopics, isPositionnement }
    * Handles navigation back to course modules
   */
   const handleBackToModules = () => {
-    navigate(`/course-modules?course=${encodeURIComponent(courseTitle)}`);
+    //navigate(`/course-modules?course=${encodeURIComponent(courseTitle)}`);
+    window.location.href = 'https://k2.skema.edu/my/';
   };
 
   /**
@@ -108,6 +109,23 @@ const QuizContainer = ({ moduleId, courseTitle, moduleTopics, isPositionnement }
     saveCurrentAnswer(e.target.value);
   };
 
+  const passingScore = 57.0;
+  
+  const isFirstTimePositionnement = useMemo(() => {
+    if (!isPositionnement) return false;
+    
+    const userDataStr = localStorage.getItem('userData');
+    if (!userDataStr) return true;
+    
+    try {
+      const userData = JSON.parse(userDataStr);
+      const courseProgress = userData.course_progress?.[courseTitle];
+      return courseProgress?.positionnement_test?.status === "not_attempted";
+    } catch {
+      return true;
+    }
+  }, [isPositionnement, courseTitle]);
+
   if (isLoading) {
     return (
       <div className="quiz-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -145,12 +163,10 @@ const QuizContainer = ({ moduleId, courseTitle, moduleTopics, isPositionnement }
         //flaggedCount={flaggedCount}
         unattemptedCount={unattemptedCount}
         timer={timer}
-        isSubmitted={isSubmitted}
         isLoading={isLoading}
         updateQuestionUI={updateQuestionUI}
-        onSubmit={handleSubmit}
+        onBackToModules={handleBackToModules}
         onViewGuide={handleViewGuide}
-        allQuestionsAnswered={unattemptedCount === 0}
       />
 
       <QuestionContent
@@ -163,7 +179,9 @@ const QuizContainer = ({ moduleId, courseTitle, moduleTopics, isPositionnement }
         goToPrevQuestion={goToPrevQuestion}
         goToNextQuestion={goToNextQuestion}
         //toggleFlag={toggleFlag}
-        onBackToModules={handleBackToModules}
+        onSubmit={handleSubmit}
+        onViewGuide={handleViewGuide}
+        allQuestionsAnswered={unattemptedCount === 0}
       />
       
       <QuizDialogs
@@ -176,6 +194,8 @@ const QuizContainer = ({ moduleId, courseTitle, moduleTopics, isPositionnement }
         submissionResults={submissionResults}
         error={error}
         isPositionnement={isPositionnement}
+        isFirstTimePositionnement={isFirstTimePositionnement}
+        passingScore={passingScore}
         setConfirmDialogOpen={setConfirmDialogOpen}
         setSuccessDialogOpen={setSuccessDialogOpen}
         setGuideDialogOpen={setGuideDialogOpen}

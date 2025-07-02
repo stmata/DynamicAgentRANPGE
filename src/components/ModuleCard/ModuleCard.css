@@ -37,6 +37,46 @@
   transform: translateX(100%);
 }
 
+.cardModule-container.locked {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cardModule-container.locked:hover {
+  transform: none;
+  box-shadow: var(--shadow-light);
+}
+
+.cardModule-container.locked::after {
+  display: none;
+}
+
+.cardModule-locked-message {
+  background: rgba(231, 61, 60, 0.1);
+  color: var(--primary-color);
+  font-size: 0.85rem;
+  padding: 8px 12px;
+  border-radius: var(--border-radius-sm);
+  text-align: center;
+  font-weight: 500;
+  border: 1px solid rgba(231, 61, 60, 0.2);
+}
+
+.cardModule-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dark-theme .cardModule-container.locked:hover {
+  box-shadow: var(--shadow-dark);
+}
+
+.dark-theme .cardModule-locked-message {
+  background: rgba(231, 61, 60, 0.15);
+  color: #ff6b6b;
+  border-color: rgba(231, 61, 60, 0.3);
+}
+
 .cardModule-icon {
   font-size: 40px;
   height: 50px; 

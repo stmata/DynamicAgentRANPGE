@@ -76,7 +76,8 @@
   }
   
   .description p {
-    max-width: 800px;
+    max-width: 80%;
+    text-align:center;
     margin: 0 auto;
     line-height: 1.6;
     color: #666;

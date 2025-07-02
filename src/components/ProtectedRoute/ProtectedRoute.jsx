@@ -2,13 +2,13 @@ import React from 'react';
 import { Navigate, useLocation, Outlet } from 'react-router-dom';
 import { Box, CircularProgress, Typography, Alert } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { useAuthContext } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 /**
  * Protected route component that requires authentication
  */
 const ProtectedRoute = ({ children, redirectTo = '/login' }) => {
-  const { isAuthenticated, loading, initialized, error } = useAuthContext();
+  const { isAuthenticated, loading, initialized, error } = useAuth();
   const { t } = useTranslation();
   const location = useLocation();
   /**

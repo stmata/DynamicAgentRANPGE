@@ -9,9 +9,10 @@
 export const API_CONFIG = {
     BASE_URL: window._env_?.VITE_APP_API_URL || import.meta.env.VITE_APP_API_URL,
     BASE_URL_Grader: window._env_?.VITE_APP_GRADER_URL || import.meta.env.VITE_APP_GRADER_URL,
+    BACKTOK2: window._env_?.VITE_APP_BACKTOK2_URL || import.meta.env.VITE_APP_BACKTOK2_URL,
     TIMEOUT: 30000,
     MAX_RETRIES: 3,
-    RETRY_DELAY: 1000,
+    RETRY_DELAY: 1000
   };
   
   /**
@@ -19,8 +20,7 @@ export const API_CONFIG = {
    */
   export const API_ENDPOINTS = {
     AUTH: {
-      SEND_CODE: '/api/auth/send-verification-code',
-      VERIFY_CODE: '/api/auth/verify-code',
+      AZURE_LOGIN: '/api/auth/azure/login',
       REFRESH_TOKEN: '/api/auth/refresh-token',
       LOGOUT: '/api/auth/logout',
       ME: '/api/auth/me',
@@ -35,7 +35,8 @@ export const API_CONFIG = {
     },
     EVALUATION: {
       STANDARD: '/api/evaluation/mcq-or-open',
-      MIXED: '/api/evaluation/evaluate-mixed',
+      //MIXED: '/api/evaluation/evaluate-mixed',
+      MIXED: '/api/evaluation/evaluate-mixed-csv',
       CASE: '/api/evaluation/evaluate/case',
       SUBMIT_MCQ_OPEN: '/api/evaluation/submit-and-save',
       SUBMIT_CASE: '/api/evaluation/submit-case-and-save',
@@ -156,8 +157,8 @@ export const API_CONFIG = {
     },
     TYPES: {
       STANDARD: 'standard',
-      MIXED: 'mixed',
-      CASE: 'case',
+      MIXED: 'module_mixed',
+      CASE: 'module_case',
     },
     QUESTION_TYPES: {
       MCQ: 'mcq',
@@ -196,7 +197,7 @@ export const API_CONFIG = {
     COURSES: '/courses',
     PROFILE: '/profile',
     SETTINGS: '/settings',
-    ERROR: '/error',
+    ERROR: '/error'
   };
   
   /**

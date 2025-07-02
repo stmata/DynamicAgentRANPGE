@@ -12,7 +12,9 @@ import QuestionNavigation from './QuestionNavigation';
  * @param {Function} handleTextAreaChange - Handle text area change
  * @param {Function} goToPrevQuestion - Navigate to previous question
  * @param {Function} goToNextQuestion - Navigate to next question
- * @param {Function} onBackToModules - Navigate to Module for current course
+ * @param {Function} onSubmit - Submit quiz handler
+ * @param {Function} onViewGuide - View guide handler
+ * @param {boolean} allQuestionsAnswered - Whether all questions are answered
  */
 const QuestionContent = ({
   currentQuestion,
@@ -23,7 +25,9 @@ const QuestionContent = ({
   handleTextAreaChange,
   goToPrevQuestion,
   goToNextQuestion,
-  onBackToModules
+  onSubmit,
+  onViewGuide,
+  allQuestionsAnswered
 }) => {
   const { t } = useTranslation();
 
@@ -131,9 +135,12 @@ const QuestionContent = ({
         //currentQuestion={currentQuestion}
         currentQuestionIndex={currentQuestionIndex}
         totalQuestions={totalQuestions}
+        isSubmitted={isSubmitted}
         goToPrevQuestion={goToPrevQuestion}
         goToNextQuestion={goToNextQuestion}
-        onBackToModules={onBackToModules}
+        onSubmit={onSubmit}
+        onViewGuide={onViewGuide}
+        allQuestionsAnswered={allQuestionsAnswered}
       />
     </div>
   );

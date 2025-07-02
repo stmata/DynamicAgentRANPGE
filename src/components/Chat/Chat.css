@@ -42,7 +42,7 @@
   color: white;
   cursor: pointer;
   box-shadow: var(--button-shadow-light);
-  z-index: 20;
+  z-index: 40;
   border: none;
   transition: var(--transition-medium);
 }
@@ -291,7 +291,7 @@
   position: absolute;
   top: 50px;
   right: 0;
-  width: 220px;
+  width: 190px;
   background-color: var(--white);
   border-radius: var(--border-radius-md);
   box-shadow: var(--enhanced-shadow-light);
@@ -775,7 +775,7 @@ body.dark-mode .chat-input-textarea::placeholder {
   }
   
   .chat-profile-menu {
-    width: 200px; /* Réduire sur écrans plus petits */
+    width: 200px;
   }
 }
 
@@ -784,7 +784,7 @@ body.dark-mode .chat-input-textarea::placeholder {
     position: absolute;
     left: -280px;
     height: 100%;
-    z-index: 30;
+    z-index: 40;
   }
   
   .chat-sidebar.active {
@@ -810,7 +810,7 @@ body.dark-mode .chat-input-textarea::placeholder {
   
   .chat-profile-menu {
     width: 180px;
-    right: -10px; /* Décaler légèrement vers la gauche sur mobile */
+    right: -10px; 
   }
 }
 

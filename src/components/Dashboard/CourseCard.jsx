@@ -1,186 +1,145 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { BookOpen, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 
 /**
- * Course card component displaying course progress and statistics
- * 
+ * Course progress card component
  * @param {Object} props - Component props
  * @param {string} props.courseName - Name of the course
- * @param {Object} props.courseData - Course data object with average_score and total_evaluations
- * @param {Array} props.evaluations - Array of evaluation objects for this course
- * @param {Object} props.moduleStats - Module statistics object
+ * @param {Object} props.courseData - Course progress data
+ * @param {Array} props.evaluations - User evaluations for this course
  * @returns {React.ReactElement} CourseCard component
  */
-const CourseCard = ({ courseName, courseData, evaluations, moduleStats }) => {
+const CourseCard = ({ courseName, courseData, evaluations }) => {
   const { t } = useTranslation();
-  const progressRingRef = useRef(null);
 
   /**
-   * Get score class based on score value
-   * @param {number} score - Score value
-   * @returns {string} CSS class name
+   * Get status color based on test status
+   * @param {string} status - Test status
+   * @returns {string} CSS color class
    */
-  const getScoreClass = (score) => {
-    if (score >= 50) return 'dash-excellent';
-    if (score >= 30) return 'dash-good';
-    return 'dash-needs-improvement';
-  };
-
-  /**
-   * Calculate progress trend from evaluations
-   * @param {Array} evaluations - Array of evaluation objects
-   * @returns {string} Trend type ('up', 'down', 'stable')
-   */
-  const calculateTrend = (evaluations) => {
-    if (evaluations.length < 2) return 'stable';
-    
-    const scores = evaluations.map(e => e.score);
-    const first = scores[0];
-    const last = scores[scores.length - 1];
-    const diff = last - first;
-    
-    if (Math.abs(diff) <= 5) return 'stable';
-    return diff > 0 ? 'up' : 'down';
-  };
-
-  /**
-   * Get trend information object
-   * @param {string} trend - Trend type
-   * @returns {Object} Trend information with arrow, text, and class
-   */
-  const getTrendInfo = (trend) => {
-    const trendInfo = {
-      up: { 
-        arrow: '↗️', 
-        text: t('dashboard.progressPositive'), 
-        class: 'dash-trend-up' 
-      },
-      down: { 
-        arrow: '↘️', 
-        text: t('dashboard.progressNegative'), 
-        class: 'dash-trend-down' 
-      },
-      stable: { 
-        arrow: '➡️', 
-        text: t('dashboard.progressStable'), 
-        class: 'dash-trend-stable' 
-      }
-    };
-    return trendInfo[trend];
-  };
-
-  useEffect(() => {
-    if (progressRingRef.current) {
-      const score = courseData.average_score;
-      const circumference = 2 * Math.PI * 25;
-      const progress = score / 100;
-      const dashOffset = circumference * (1 - progress);
-      
-      setTimeout(() => {
-        progressRingRef.current.style.strokeDashoffset = dashOffset;
-      }, 500);
+  const getStatusColor = (status) => {
+    switch(status) {
+      case 'passed': return 'dashboard-status-passed';
+      case 'failed': return 'dashboard-status-failed';
+      default: return 'dashboard-status-not-attempted';
     }
-  }, [courseData.average_score]);
+  };
 
-  const scores = evaluations.map(e => e.score);
-  const bestScore = scores.length > 0 ? Math.max(...scores) : 0;
-  const latestScore = scores.length > 0 ? scores[scores.length - 1] : 0;
-  const trend = calculateTrend(evaluations);
-  const trendData = getTrendInfo(trend);
+  /**
+   * Get status icon based on test status
+   * @param {string} status - Test status
+   * @returns {React.ReactElement} Status icon
+   */
+  const getStatusIcon = (status) => {
+    switch(status) {
+      case 'passed': return <CheckCircle className="dashboard-status-icon" />;
+      case 'failed': return <XCircle className="dashboard-status-icon" />;
+      default: return <AlertCircle className="dashboard-status-icon" />;
+    }
+  };
 
-  const timelinePoints = scores.map((score, index) => (
-    <div 
-      key={index}
-      className={`dash-timeline-point ${getScoreClass(score)}`}
-      style={{ left: `${score}%` }}
-      data-score={`${score} pts`}
-      title={`${t('evaluation.evaluation')} ${index + 1}: ${score} points`}
-    >
-    </div>
-  ));
+  /**
+   * Get status text based on test status
+   * @param {string} status - Test status
+   * @returns {string} Translated status text
+   */
+  const getStatusText = (status) => {
+    switch(status) {
+      case 'passed': return t('dashboard.status.passed');
+      case 'failed': return t('dashboard.status.failed');
+      default: return t('dashboard.status.notAttempted');
+    }
+  };
 
-  const moduleItems = Object.entries(moduleStats).map(([module, stats]) => (
-    <div key={module} className="dash-module-item">
-      <span className="dash-module-name">
-        {module.replace(/_/g, ' ')}
-      </span>
-      <span className="dash-module-score">
-        {stats.average} pts ({stats.count})
-      </span>
-    </div>
-  ));
+  /**
+   * Format score display - show "00/00" if no score available
+   * @param {number|null} score - Score value
+   * @returns {string} Formatted score
+   */
+  const formatScore = (score) => {
+    if (score === null || score === undefined) {
+      return '00/00';
+    }
+    
+    if (typeof score === 'string' && score.includes('/')) {
+      return score;
+    }
+    
+    const roundedScore = Math.round(Number(score) * 100) / 100;
+    return `${roundedScore}/100`;
+  };
+
+  const evaluationTypes = ['positionnement', 'module_mixed', 'module_case'];
+  const progressPercentage = Math.round((courseData.unlocked_modules / courseData.total_modules) * 100);
 
   return (
-    <div className="dash-card">
-      <div className="dash-course-header">
-        <h3 className="dash-course-title">{courseName}</h3>
-        <span className="dash-course-badge">
-          {courseData.total_evaluations} {t('dashboard.evaluationsCount')}
-        </span>
+    <div className="dashboard-course-card">
+      <div className="dashboard-course-header">
+        <h3 className="dashboard-course-title">
+          <BookOpen className="dashboard-course-icon" />
+          {courseName}
+        </h3>
       </div>
-
-      <div className="dash-progress-container">
-        <div className="dash-circular-progress">
-          <svg viewBox="0 0 60 60">
-            <circle 
-              className="dash-progress-ring" 
-              cx="30" 
-              cy="30" 
-              r="25"
-            />
-            <circle 
-              ref={progressRingRef}
-              className="dash-progress-ring-fill" 
-              cx="30" 
-              cy="30" 
-              r="25"
-            />
-          </svg>
-          <div className="dash-progress-text">{courseData.average_score}</div>
-        </div>
-
-        <div className="dash-stats-grid">
-          <div className="dash-stat-item">
-            <div className="dash-stat-value">{bestScore}</div>
-            <div className="dash-stat-label">{t('dashboard.bestScore')}</div>
+      
+      <div className="dashboard-course-content">
+        <div className="dashboard-test-section">
+          <div className="dashboard-test-header">
+            <h4 className="dashboard-test-title">
+              {getStatusIcon(courseData.positionnement_test.status)}
+              {t('dashboard.positioningTest')}
+            </h4>
+            <span className={`dashboard-status-badge ${getStatusColor(courseData.positionnement_test.status)}`}>
+              {getStatusText(courseData.positionnement_test.status)}
+            </span>
           </div>
-          <div className="dash-stat-item">
-            <div className="dash-stat-value">{latestScore}</div>
-            <div className="dash-stat-label">{t('dashboard.latestScore')}</div>
+          <div className="dashboard-test-details">
+            <span>{t('dashboard.score')}: {formatScore(courseData.positionnement_test.score)}</span>
+            <span>{t('dashboard.attempts')}: {courseData.positionnement_test.attempts}</span>
           </div>
         </div>
-      </div>
 
-      {scores.length > 0 && (
-        <div className="dash-evolution-timeline">
-          <div className="dash-timeline-container">
-            <div className="dash-timeline-scale">
-              <span>0</span>
-              <span>25</span>
-              <span>50</span>
-              <span>75</span>
-              <span>100</span>
+        <div className="dashboard-progress-section">
+          <h4 className="dashboard-section-title">{t('dashboard.moduleProgress')}</h4>
+          <div className="dashboard-progress-details">
+            <div className="dashboard-progress-text">
+              <span>{t('dashboard.unlockedModules')}</span>
+              <span className="dashboard-progress-numbers">
+                {courseData.unlocked_modules}/{courseData.total_modules}
+              </span>
             </div>
-            <div className="dash-timeline-line"></div>
-            {timelinePoints}
+            <div className="dashboard-progress-bar">
+              <div 
+                className="dashboard-progress-fill"
+                style={{ width: `${progressPercentage}%` }}
+              ></div>
+            </div>
+            <div className="dashboard-progress-footer">
+              {/*<span>{t('dashboard.completed')}: {courseData.completed_modules}</span>*/}
+              <span>{progressPercentage}%</span>
+            </div>
           </div>
         </div>
-      )}
 
-      {Object.keys(moduleStats).length > 0 && (
-        <div className="dash-modules-section">
-          {moduleItems}
+        <div className="dashboard-evaluations-section">
+          <h4 className="dashboard-section-title">{t('dashboard.courseEvaluations')}</h4>
+          <div className="dashboard-evaluation-types">
+            {evaluationTypes.map(type => {
+              const count = evaluations.filter(e => e.evaluation_type === type).length;
+              return (
+                <div key={type} className="dashboard-evaluation-type">
+                  <span className="dashboard-evaluation-label">
+                    {t(`dashboard.evaluationType.${type}`)}
+                  </span>
+                  <span className="dashboard-evaluation-count">{count}</span>
+                </div>
+              );
+            })}
+          </div>
         </div>
-      )}
-
-      <div className="dash-trend-indicator">
-        <span className={`dash-trend-arrow ${trendData.class}`}>
-          {trendData.arrow}
-        </span>
-        <span className="dash-trend-text">{trendData.text}</span>
       </div>
     </div>
   );
 };
 
-export default CourseCard; 
+export default CourseCard;

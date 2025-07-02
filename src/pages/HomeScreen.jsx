@@ -6,9 +6,9 @@ import CourseCarousel from '../components/CourseCarousel/CourseCarousel';
 /**
  * Home page component
  * 
- * @returns {React.ReactElement} Home component
+ * @returns {React.ReactElement} HomeScreen component
  */
-const Home = () => {
+const HomeScreen = () => {
   const { t } = useTranslation();
 
   const scrollToContent = () => {
@@ -23,14 +23,16 @@ const Home = () => {
 
   return (
     <>
-      <ImageSlider />
+      {/*<ImageSlider />*/}
       <section className="description">
-        <h2>{t('home.title')}</h2><br/>
-        <p>{t('home.description')}</p>
-        <div style={{ fontWeight: 'bold', marginTop: '1em' }}>
+        <h2>{t('home.title')}</h2>
+        <p style={{ fontWeight: 'bold', marginTop: '1em' }}>{t('home.descriptionP1')}</p>
+        <p style={{ fontWeight: 'bold', marginTop: '1em' }}>{t('home.descriptionP2')}</p>
+        <p style={{ fontWeight: 'bold', marginTop: '1em' }}>{t('home.descriptionP3')}</p>
+        {/*<div style={{ fontWeight: 'bold', marginTop: '1em' }}>
           <div>⚠️</div>
           {t('home.notice')}
-        </div>
+        </div>*/}
         
         <div className="scroll-indicator" onClick={scrollToContent}>
           <div className="scroll-arrow">
@@ -48,4 +50,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default HomeScreen;

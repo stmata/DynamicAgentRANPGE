@@ -20,9 +20,13 @@ import DeleteConversationDialog from './DeleteConversationDialog';
 import './Chat.css';
 
 /**
- * Main chat component with conversation management and real-time messaging
+ * Main chat component with conversation management and real-time messaging.
+ *
+ * @param {Object} props - Component props.
+ * @param {React.ReactElement} props.sidebarFloatingButton - FloatingChatButton component to render inside the sidebar on small screens.
+ * @param {(open: boolean) => void} [props.onSidebarToggle] - Optional callback triggered when the sidebar open state changes.
  */
-const Chat = () => {
+const Chat = ({ sidebarFloatingButton, onSidebarToggle }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { conversationId } = useParams();
@@ -49,6 +53,7 @@ const Chat = () => {
     textareaRef,
     profileRef,
     chatContentRef,
+    sidebarRef,
     toggleSidebar,
     handleReferencesClick
   } = useChatInterface();
@@ -76,6 +81,19 @@ const Chat = () => {
   const { pinned, unpinned } = getGroupedConversations();
 
   const isWelcomePage = location.pathname === '/chat' && !conversationId && messages.length === 0 && !sending;
+
+  /**
+   * Notify when sidebar open state changes.
+    *
+    * @param {boolean} isSidebarOpen
+    * @param {(open: boolean) => void} [onSidebarToggle]
+    */
+    useEffect(() => {
+      if (onSidebarToggle) {
+        onSidebarToggle(isSidebarOpen);
+      }
+    }, [isSidebarOpen, onSidebarToggle]);
+
 
   /**
    * Auto-scroll to bottom when new messages arrive
@@ -210,11 +228,11 @@ const Chat = () => {
 
   /**
    * Navigate to home page
-   */
+   *
   const handleNavigateHome = () => {
     setIsProfileOpen(false);
     navigate('/');
-  };
+  };*/
 
   /**
    * Navigate to Dahboard page
@@ -248,6 +266,7 @@ const Chat = () => {
   return (
     <div className="chat-container">
       <ChatSidebar
+        ref={sidebarRef}
         isOpen={isSidebarOpen}
         onToggle={toggleSidebar}
         onNewChat={createNewChat}
@@ -260,6 +279,7 @@ const Chat = () => {
         loading={loadingConversations}
         isSmallScreen={isSmallScreen}
         translation={t}
+        floatingButton={sidebarFloatingButton}
       />
 
       <main className="chat-main-content">
@@ -268,7 +288,7 @@ const Chat = () => {
             userInitials={userInitials}
             isProfileOpen={isProfileOpen}
             setIsProfileOpen={setIsProfileOpen}
-            onNavigateHome={handleNavigateHome}
+            //onNavigateHome={handleNavigateHome}
             onNavigateDasboard={handleNavigateDashboard}
             onOpenSettings={handleOpenSettings}
             onLogout={handleLogout}
@@ -282,6 +302,7 @@ const Chat = () => {
               <span className="chat-greeting-emoji">👋</span>
               <h1 className="chat-greeting-title">{t('chat.greeting.title')}</h1>
               <p className="chat-greeting-subtitle">{t('chat.greeting.subtitle')}</p>
+              <p className="chat-greeting-subtitle">{t('chat.greeting.subtitleK2')}</p>
             </div>
           ) : (
             messages.map((message, index) => (

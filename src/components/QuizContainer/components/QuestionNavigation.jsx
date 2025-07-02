@@ -8,15 +8,21 @@ import { useTranslation } from 'react-i18next';
  * @param {number} totalQuestions - Total number of questions
  * @param {Function} goToPrevQuestion - Navigate to previous question
  * @param {Function} goToNextQuestion - Navigate to next question
- * @param {Function} onBackToModules - Navigate to Modules for current course
+ * @param {boolean} isSubmitted - Whether quiz is submitted
+ * @param {Function} onSubmit - Submit quiz handler
+ * @param {Function} onViewGuide - View guide handler
+ * @param {boolean} allQuestionsAnswered - Whether all questions are answered
  */
 const QuestionNavigation = ({
   //currentQuestion,
   currentQuestionIndex,
   totalQuestions,
+  isSubmitted,
   goToPrevQuestion,
   goToNextQuestion,
-  onBackToModules
+  onSubmit,
+  onViewGuide,
+  allQuestionsAnswered
 }) => {
   const { t } = useTranslation();
 
@@ -35,11 +41,12 @@ const QuestionNavigation = ({
       <button 
         className="flag-button" 
         id="flag-btn"
-        onClick={onBackToModules}
+        onClick={isSubmitted ? onViewGuide : onSubmit}
+        disabled={!isSubmitted && !allQuestionsAnswered}
       >
         <span>
           {/*currentQuestion?.flagged ? t('evaluation.unflag') : t('evaluation.flag')*/}
-          <span>{t('common.backToModules')}</span>
+          <span>{isSubmitted ? t('evaluation.viewGuide') : t('evaluation.submit')}</span>
         </span>
       </button>
       

@@ -52,12 +52,12 @@ export const useQuizState = (moduleId, courseTitle, moduleTopics, isPositionneme
         return { allTopics, modulesTopics };
       } else {
         // Default fallback - use Marketing topics for general positioning
-        const marketingModules = getModulesForCourse('Marketing');
+        const marketingModules = getModulesForCourse('Marketing Management');
         const allMarketingTopics = [];
         const modulesTopics = {};
         
         Object.keys(marketingModules).forEach(moduleName => {
-          const moduleTopics = getTopicsForModule('Marketing', moduleName);
+          const moduleTopics = getTopicsForModule('Marketing Management', moduleName);
           allMarketingTopics.push(...moduleTopics);
           modulesTopics[moduleName] = moduleTopics;
         });
@@ -65,7 +65,13 @@ export const useQuizState = (moduleId, courseTitle, moduleTopics, isPositionneme
         return { allTopics: allMarketingTopics, modulesTopics };
       }
     } else {
-      return { allTopics: moduleTopics || [], modulesTopics: null };
+      //return { allTopics: moduleTopics || [], modulesTopics: null };
+      const modulesTopics = {};
+      if (moduleId && moduleTopics && moduleTopics.length > 0) {
+        modulesTopics[moduleId] = moduleTopics;
+      }
+      return { allTopics: moduleTopics || [], modulesTopics };
+      
     }
   };
 
@@ -96,12 +102,11 @@ export const useQuizState = (moduleId, courseTitle, moduleTopics, isPositionneme
       const numQuestions = isPositionnement ? 15 : 5;
       
       const courseFilter = determineCourseFilter(isPositionnement, selectedCourse, courseTitle);
-      
       const evaluation = await generateMixedEvaluation(
         topicsToUse,
         numQuestions,
-        0.6,
-        0.4,
+        0.7,
+        0.3,
         isPositionnement,
         modulesTopics,
         courseFilter
@@ -164,7 +169,7 @@ export const useQuizState = (moduleId, courseTitle, moduleTopics, isPositionneme
       const { questions: submissionQuestions, responses } = prepareSubmissionData(questions);
       const topicsData = getEvaluationTopics();
       const topicsToUse = topicsData.allTopics;
-      const evaluationType = 'mixed'; 
+      const evaluationType = isPositionnement ? 'positionnement' : 'module_mixed'; 
       
       const result = await submitEvaluationHook(
         submissionQuestions,

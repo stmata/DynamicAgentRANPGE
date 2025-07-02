@@ -28,12 +28,12 @@ export const hashUserId = async (userId) => {
  * @returns {string|null} The course name to use as a filter, or null
  */
 export const determineCourseFilter = (isPositioning, selectedCourse, courseFromParams) => {
-  if (isPositioning && selectedCourse) {
-    return selectedCourse;
+  if (courseFromParams && courseFromParams !== 'positionnement') {
+    return courseFromParams;
   }
   
-  if (!isPositioning && (courseFromParams || selectedCourse)) {
-    return courseFromParams || selectedCourse;
+  if (selectedCourse && selectedCourse !== 'positionnement') {
+    return selectedCourse;
   }
   
   return null;
@@ -125,7 +125,7 @@ export const validateEvaluationParams = (type, params) => {
     return 'Number of questions must be at least 1';
   }
   
-  if (type === 'mixed') {
+  if (type === 'module_mixed') {
     if (mcqWeight < 0 || mcqWeight > 1 || openWeight < 0 || openWeight > 1) {
       return 'Weights must be between 0 and 1';
     }

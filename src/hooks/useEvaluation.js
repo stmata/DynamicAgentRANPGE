@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import evaluationApi from '../services/evaluationApi.js';
 import storage from '../services/storage.js';
 import { EVALUATION_CONFIG } from '../utils/constants.js';
+import { useAuth } from '../contexts/AuthContext.jsx';
 
 /**
  * Evaluation hook for managing current assessment
@@ -12,6 +13,7 @@ export const useEvaluation = () => {
   const [error, setError] = useState(null);
   const [currentEvaluation, setCurrentEvaluation] = useState(null);
   const { i18n } = useTranslation();
+  const { updatePlacementTest, updateModuleProgress, getUserId } = useAuth();
   const generatePromiseRef = useRef(null);
   const evaluationCacheKey = 'current_evaluation';
 
@@ -83,7 +85,7 @@ export const useEvaluation = () => {
   /**
    * Generate mixed evaluation (MCQ and Open questions)
    */
-  const generateMixedEvaluation = useCallback(async (topics, numQuestions, mcqWeight = 0.8, openWeight = 0.2, isPositioning = false, modulesTopics = null, courseFilter = null) => {
+  const generateMixedEvaluation = useCallback(async (topics, numQuestions, mcqWeight = 0.7, openWeight = 0.3, isPositioning = false, modulesTopics = null, courseFilter = null) => {
     if (!topics || topics.length === 0) {
       throw new Error('Topics are required');
     }
@@ -121,7 +123,7 @@ export const useEvaluation = () => {
       
       const evaluation = {
         id: Date.now().toString(),
-        type: 'mixed',
+        type: 'module_mixed',
         topics,
         numQuestions,
         mcqWeight,
@@ -184,7 +186,7 @@ export const useEvaluation = () => {
       
       const evaluation = {
         id: Date.now().toString(),
-        type: 'case',
+        type: 'module_case',
         topics,
         level,
         courseContext,
@@ -260,6 +262,8 @@ export const useEvaluation = () => {
       
       const language = getCurrentLanguage();
   
+      const userId = getUserId();
+      
       const response = await evaluationApi.submitEvaluation(
         questions,
         responses,
@@ -267,10 +271,23 @@ export const useEvaluation = () => {
         module,
         topics,
         evaluationType,
-        language
+        language,
+        userId
       );
 
       const gradingResults = response.grading_result;
+      
+      // Update progression based on evaluation results
+      if (gradingResults && gradingResults.final_score !== undefined) {
+        try {
+          if (evaluationType === 'module_mixed') {
+            await updateModuleProgress(course, module, gradingResults.final_score);
+          }
+        } catch (progressError) {
+          console.warn('Failed to update module progress:', progressError);
+        }
+      }
+      
       // Dispatch event to notify other components about successful submission
       window.dispatchEvent(new CustomEvent('evaluation:submitted', {
         detail: { 
@@ -291,6 +308,7 @@ export const useEvaluation = () => {
     } finally {
       setLoading(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getCurrentLanguage]);
 
   /**
@@ -335,6 +353,8 @@ export const useEvaluation = () => {
       
       const language = getCurrentLanguage();
   
+      const userId = getUserId();
+      
       const gradingResults = await evaluationApi.submitCaseEvaluation(
         caseData,
         userResponse,
@@ -342,7 +362,8 @@ export const useEvaluation = () => {
         level,
         topics,
         module,
-        language
+        language,
+        userId
       );
       
       // Dispatch event to notify other components about successful case submission
@@ -365,6 +386,7 @@ export const useEvaluation = () => {
     } finally {
       setLoading(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getCurrentLanguage]);
 
 
@@ -391,6 +413,35 @@ export const useEvaluation = () => {
   }, []);
 
   /**
+   * Submit placement test evaluation and update progression
+   * @param {Array<Array<any>>} questions - List of questions
+   * @param {Array<string>} responses - User responses
+   * @param {string} course - Course name
+   * @param {Array<string>} topics - List of topics covered
+   * @param {string} evaluationType - Type of evaluation
+   * @returns {Promise<Object>} - Grading results with progression update
+   */
+  const submitPlacementTestEvaluation = useCallback(async (questions, responses, course, topics, evaluationType) => {
+    try {
+      const gradingResults = await submitEvaluation(questions, responses, course, 'Positionnement', topics, evaluationType);
+      
+      // Update placement test progression
+      if (gradingResults && gradingResults.final_score !== undefined) {
+        try {
+          await updatePlacementTest(course, gradingResults.final_score);
+        } catch (progressError) {
+          console.warn('Failed to update placement test progress:', progressError);
+        }
+      }
+      
+      return gradingResults;
+    } catch (error) {
+      console.error('Failed to submit placement test evaluation:', error);
+      throw error;
+    }
+  }, [submitEvaluation, updatePlacementTest]);
+
+  /**
    * Validate evaluation parameters
    */
   const validateEvaluationParams = useCallback((type, params) => {
@@ -400,15 +451,15 @@ export const useEvaluation = () => {
       return 'Topics are required';
     }
     
-    if (type === 'case' && !level) {
+    if (type === 'module_case' && !level) {
       return 'Level is required for case evaluations';
     }
     
-    if (type !== 'case' && (!numQuestions || numQuestions < 1)) {
+    if (type !== 'module_case' && (!numQuestions || numQuestions < 1)) {
       return 'Number of questions must be at least 1';
     }
     
-    if (type === 'mixed') {
+    if (type === 'module_mixed') {
       if (mcqWeight < 0 || mcqWeight > 1 || openWeight < 0 || openWeight > 1) {
         return 'Weights must be between 0 and 1';
       }
@@ -447,6 +498,7 @@ export const useEvaluation = () => {
     checkServiceHealth,
     submitEvaluation,
     submitCaseEvaluation,
+    submitPlacementTestEvaluation,
     clearError: () => setError(null),
   };
 };
