@@ -118,13 +118,13 @@ const Navbar = () => {
               </div>
             )*/}
             
-            <div className="profile-dropdown-item" onClick={() => {
+            {/*<div className="profile-dropdown-item" onClick={() => {
               setIsProfileOpen(false);
               navigate('/dashboard');
             }}>
               <span className="fas fa-dashboard"></span>
               <span>{t('navbar.dashboard')}</span>
-            </div>
+            </div>*/}
             
             <div className="profile-dropdown-item" onClick={() => {
               setIsProfileOpen(false);
@@ -134,12 +134,12 @@ const Navbar = () => {
               <span>{t('navbar.settings')}</span>
             </div>
             
-            <div className="profile-dropdown-item logout" onClick={() => {
+            {/*<div className="profile-dropdown-item logout" onClick={() => {
               handleLogout();
             }}>
               <span className="fas fa-sign-out-alt"></span>
               <span>{t('navbar.logout')}</span>
-            </div>
+            </div>*/}
           </div>
         )}
       </div>

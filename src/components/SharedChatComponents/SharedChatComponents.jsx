@@ -193,18 +193,18 @@ export const ProfileDropdown = ({
               <Icons.Home />
               <span>{t('common.home')}</span>
             </div>*/}
-            <div className="chat-menu-item" onClick={onNavigateDasboard}>
+            {/*<div className="chat-menu-item" onClick={onNavigateDasboard}>
               <Icons.Dashboard />
               <span>{t('navbar.dashboard')}</span>
-            </div>
+            </div>*/}
             <div className="chat-menu-item" onClick={onOpenSettings}>
               <Icons.Settings />
               <span>{t('navbar.settings')}</span>
             </div>
-            <div className="chat-menu-item" onClick={onLogout}>
+            {/*<div className="chat-menu-item" onClick={onLogout}>
               <Icons.Logout />
               <span>{t('navbar.logout')}</span>
-            </div>
+            </div>*/}
           </div>
         )}
       </div>
