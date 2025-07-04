@@ -28,6 +28,7 @@ const QuizSidebar = ({
   isLoading,
   updateQuestionUI,
   onBackToModules,
+  allQuestionsAnswered
 }) => {
   const { t } = useTranslation();
   const [useResponsiveGrid, setUseResponsiveGrid] = useState(false);
@@ -135,7 +136,7 @@ const QuizSidebar = ({
         <button 
           className="btn btn-submit" 
           onClick={onBackToModules}
-          disabled={isLoading}
+          disabled={!allQuestionsAnswered && !isLoading}
         >
           <i className="fas fa-arrow-left"></i>
           <span>{t('common.backToK2')}</span>

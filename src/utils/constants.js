@@ -10,6 +10,9 @@ export const API_CONFIG = {
     BASE_URL: window._env_?.VITE_APP_API_URL || import.meta.env.VITE_APP_API_URL,
     BASE_URL_Grader: window._env_?.VITE_APP_GRADER_URL || import.meta.env.VITE_APP_GRADER_URL,
     BACKTOK2: window._env_?.VITE_APP_BACKTOK2_URL || import.meta.env.VITE_APP_BACKTOK2_URL,
+    BACKTOK2_ECONOMIE: window._env_?.VITE_APP_BACKTOK2_ECONOMIE_URL || import.meta.env.VITE_APP_BACKTOK2_ECONOMIE_URL,
+    BACKTOK2_MARKETING: window._env_?.VITE_APP_BACKTOK2_MARKETING_URL || import.meta.env.VITE_APP_BACKTOK2_MARKETING_URL,
+    BACKTOK2_COMPTABILITE: window._env_?.VITE_APP_BACKTOK2_COMPTABILITE_URL || import.meta.env.VITE_APP_BACKTOK2_COMPTABILITE_URL,
     TIMEOUT: 30000,
     MAX_RETRIES: 3,
     RETRY_DELAY: 1000
@@ -101,6 +104,56 @@ export const API_CONFIG = {
     USER_SESSION: 480,
   };
   
+  /**
+   * Get the appropriate K2 return URL based on selected course
+   * @param {string} selectedCourse - The currently selected course
+   * @returns {string} The appropriate K2 URL
+   */
+  export const getK2ReturnUrl = (selectedCourse) => {
+      let courseToCheck = selectedCourse;
+      
+      if (!courseToCheck) {
+          const urlParams = new URLSearchParams(window.location.search);
+          courseToCheck = urlParams.get('course');
+      }
+      
+      if (!courseToCheck) {
+          try {
+              courseToCheck = sessionStorage.getItem('selected_course');
+          // eslint-disable-next-line no-unused-vars
+          } catch (e) {
+              //
+          }
+      }
+      
+      if (!courseToCheck) {
+          const pathname = window.location.pathname;
+          if (pathname.includes('marketing')) {
+              courseToCheck = 'marketing';
+          } else if (pathname.includes('economie') || pathname.includes('économie')) {
+              courseToCheck = 'economie';
+          } else if (pathname.includes('comptabilite') || pathname.includes('comptabilité')) {
+              courseToCheck = 'comptabilite';
+          }
+      }
+      
+      if (!courseToCheck) {
+          return API_CONFIG.BACKTOK2_MARKETING;
+      }
+
+      const courseNormalized = courseToCheck.toLowerCase();
+      
+      if (courseNormalized.includes('marketing')) {
+          return API_CONFIG.BACKTOK2_MARKETING;
+      } else if (courseNormalized.includes('economie') || courseNormalized.includes('économie')) {
+          return API_CONFIG.BACKTOK2_ECONOMIE;
+      } else if (courseNormalized.includes('comptabilite') || courseNormalized.includes('comptabilité')) {
+          return API_CONFIG.BACKTOK2_COMPTABILITE;
+      }
+      
+      return API_CONFIG.BACKTOK2_MARKETING;
+  };
+
   /**
    * Token Durations (in minutes)
    */

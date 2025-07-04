@@ -2,7 +2,8 @@ import { HiMiniChatBubbleLeftRight, HiOutlineChatBubbleLeftRight } from 'react-i
 import LogoK2 from "../../assets/images/K2.png";
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
-import { API_CONFIG } from '../../utils/constants';
+import { getK2ReturnUrl } from '../../utils/constants';
+import useCourses from "../../hooks/useCourses";
 
 /**
  * Floating action button that can either navigate to chat or redirect to K2 Skema
@@ -13,14 +14,13 @@ const FloatingChatButton = ({ isK2Mode = false, intoSidebar = false }) => {
   const { isDarkMode } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
-  
+  const { selectedCourse } = useCourses();
   /**
    * Handle button click navigation based on mode
    */
   const handleNavigation = () => {
     if (isK2Mode) {
-      //window.open('https://k2.skema.edu/my/', '_blank', 'noopener,noreferrer');
-      window.location.href = API_CONFIG.BACKTOK2;
+      window.location.href = getK2ReturnUrl(selectedCourse);
     } else {
       navigate('/chat');
     }

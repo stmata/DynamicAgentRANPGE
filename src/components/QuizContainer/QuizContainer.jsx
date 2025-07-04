@@ -7,6 +7,8 @@ import QuizSidebar from './components/QuizSidebar';
 import QuestionContent from './components/QuestionContent';
 import QuizDialogs from './components/QuizDialogs';
 //import { useNavigate } from 'react-router-dom';
+import { getK2ReturnUrl } from '../../utils/constants';
+import useCourses from '../../hooks/useCourses';
 import './QuizContainer.css';
 
 /**
@@ -18,6 +20,7 @@ import './QuizContainer.css';
  */
 const QuizContainer = ({ moduleId, courseTitle, moduleTopics, isPositionnement }) => {
   const { t } = useTranslation();
+  const { selectedCourse } = useCourses();
   //const navigate = useNavigate();
 
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
@@ -59,8 +62,8 @@ const QuizContainer = ({ moduleId, courseTitle, moduleTopics, isPositionnement }
    * Handles navigation back to course modules
   */
   const handleBackToModules = () => {
-    //navigate(`/course-modules?course=${encodeURIComponent(courseTitle)}`);
-    window.location.href = 'https://k2.skema.edu/my/';
+      if (isLoading) return;
+      window.location.href = getK2ReturnUrl(selectedCourse);
   };
 
   /**
@@ -167,6 +170,7 @@ const QuizContainer = ({ moduleId, courseTitle, moduleTopics, isPositionnement }
         updateQuestionUI={updateQuestionUI}
         onBackToModules={handleBackToModules}
         onViewGuide={handleViewGuide}
+        allQuestionsAnswered={unattemptedCount === 0}
       />
 
       <QuestionContent

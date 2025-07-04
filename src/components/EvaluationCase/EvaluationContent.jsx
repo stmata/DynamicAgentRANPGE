@@ -1,5 +1,4 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 import { ChatMessage } from '../SharedChatComponents/SharedChatComponents';
 
 /**
@@ -35,6 +34,15 @@ const EvaluationContent = ({
         <div className="chat-greeting">
           <span className="chat-greeting-emoji">📝</span>
           <h1 className="chat-greeting-title">{t('evaluation.case.welcome.title')}</h1>
+          <Trans 
+            i18nKey="evaluation.case.welcome.introBlock"
+            components={{ 
+              p: <p />, 
+              ul: <ul />, 
+              li: <li />,
+              em: <em/> 
+            }}
+          />
           {evaluationError && (
             <div style={{ color: 'red', margin: '1rem 0' }}>
               {t('common.error')}: {evaluationError}

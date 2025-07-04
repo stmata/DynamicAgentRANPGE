@@ -7,7 +7,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useEvaluationFlow } from '../../hooks/useEvaluationFlow';
 import { getUserInitials } from '../../utils/helpers';
 import { generateEvaluationCasePDF } from '../../utils/pdfGenerator';
-import { API_CONFIG } from '../../utils/constants';
+import { getK2ReturnUrl } from '../../utils/constants';
+import useCourses from '../../hooks/useCourses';
 import {
   ChatInput,
   ProfileDropdown,
@@ -30,6 +31,7 @@ const EvaluationCase = ({ moduleId, courseTitle }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [showReferences, setShowReferences] = useState(false);
   const [currentReferences, setCurrentReferences] = useState([]);
+  const { selectedCourse } = useCourses();
 
   const textareaRef = useRef(null);
   const profileRef = useRef(null);
@@ -149,7 +151,7 @@ const EvaluationCase = ({ moduleId, courseTitle }) => {
 
   const handleBackToCourseModules = () => {
     //navigate(`/course-modules?course=${encodeURIComponent(courseTitle)}`);
-    window.location.href = API_CONFIG.BACKTOK2;
+    window.location.href = getK2ReturnUrl(selectedCourse);
   };
 
   return (

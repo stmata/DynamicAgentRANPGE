@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -11,8 +11,9 @@ import './EvaluationScreen.css';
 const EvaluationScreen = () => {
   const { t, i18n } = useTranslation();
   const currentLanguage = i18n.language || 'en';
+  const [showWelcome, setShowWelcome] = useState(true);
   const { isDarkMode } = useTheme();
-  const { getUserId, getAllCourses, getTopicsForModule, getTopicsCountForModule, courseExists, moduleExists } = useAuth();
+  const { getUserId, getAllCourses, getTopicsForModule, getTopicsCountForModule, courseExists, moduleExists, user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const { selectedCourse, isPositionnement: isPositionnementFromDialog } = location.state || {};
@@ -26,6 +27,22 @@ const EvaluationScreen = () => {
   const courseTitle = searchParams.get('course') || selectedCourse;
   
   const isPositionnement = isPositionnementFromDialog || (!moduleId && !courseTitle);
+    
+    const isFirstTimePositionnement = () => {
+      if (!isPositionnement) return false;
+      if (!user?.course_progress) return true;
+      
+      const courseToCheck = selectedCourse || courseTitle;
+      const courseProgress = user.course_progress[courseToCheck];
+      return courseProgress?.positionnement_test?.status === "not_attempted";
+    };
+
+    const getWelcomeTextKey = () => {
+      if (!isPositionnement) return 'evaluation.positioning.moduleTraining';
+      return isFirstTimePositionnement() ? 
+        'evaluation.positioning.positioningFirstTime' : 
+        'evaluation.positioning.positioningRetry';
+    };
 
   useEffect(() => {
     if (!isPositionnement && (!moduleId || !courseTitle)) {
@@ -113,6 +130,36 @@ const EvaluationScreen = () => {
     fetchData();
   }, [moduleId, courseTitle, selectedCourse, currentLanguage, isPositionnement, getAllCourses, getTopicsForModule, getTopicsCountForModule, courseExists, moduleExists, t]);
 
+  if (showWelcome) {
+  return (
+    <div className={`app ${isDarkMode ? 'dark-theme' : ''}`}>
+      <section className="main-content">
+        <div className="chat-greeting">
+          <span className="chat-greeting-emoji">📝</span>
+          <h1 className="chat-greeting-title">
+            {isPositionnement ? t('evaluation.positioning.title') : 'Quiz d\'entraînement'}
+          </h1>
+          <Trans 
+            i18nKey={getWelcomeTextKey()}
+            components={{ 
+              p: <p />, 
+              ul: <ul />, 
+              li: <li />,
+              em: <em/>,
+              strong: <strong/>
+            }}
+          />
+          <button 
+            className="chat-start-evaluation-btn"
+            onClick={() => setShowWelcome(false)}
+          >
+            Commencer
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+  }
   if (loading) {
     return (
       <div className={`app ${isDarkMode ? 'dark-theme' : ''}`}>

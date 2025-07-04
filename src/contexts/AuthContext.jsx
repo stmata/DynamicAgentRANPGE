@@ -175,23 +175,11 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-/**
- * Hook to access auth context with validation
- */
-const useAuthContext = () => {
-  const context = useContext(AuthContext);
-  
-  if (!context) {
-    throw new Error('useAuthContext must be used within an AuthProvider');
-  }
-  
-  return context;
-};
 
 /**
  * Convenient alias for useAuthContext
  */
 // eslint-disable-next-line react-refresh/only-export-components
-export const useAuth = useAuthContext;
+export const useAuth = () => useContext(AuthContext);
 
 export default AuthProvider;

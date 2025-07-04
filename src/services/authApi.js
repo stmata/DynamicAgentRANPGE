@@ -48,6 +48,21 @@ class AuthApi {
   async getCurrentUser() {
     return fetchWrapper.get(API_ENDPOINTS.AUTH.ME);
   }
+
+  /**
+   * Refresh access token using refresh token
+   * 
+   * @async
+   * @method refreshToken
+   * @param {string} refreshToken - Refresh token
+   * @returns {Promise<Object>} New tokens response
+   * @throws {Error} HTTP error with status and details
+   */
+  async refreshToken(refreshToken) {
+    return fetchWrapper.post(API_ENDPOINTS.AUTH.REFRESH_TOKEN, {
+      refresh_token: refreshToken
+    });
+  }
 }
 
 export default new AuthApi();
