@@ -1,8 +1,6 @@
 from datetime import datetime
 import logging
-from typing import Optional, Dict, Any, Union, List
-from bson import ObjectId
-from pymongo.errors import DuplicateKeyError
+from typing import Optional, Dict, Any, Union
 
 from app.models.entities.user import UserModel, UserCreate, UserUpdate, UserResponse, AddEvaluationScore, EvaluationScore
 from app.services.database.mongo_utils import get_service
@@ -316,6 +314,30 @@ class UserCollection:
         except Exception as e:
             logger.error(f"Error adding evaluation score: {str(e)}")
             raise UserCollectionError(f"Error adding evaluation score: {str(e)}")
+    
+    async def add_activity_date(self, user_id: str) -> bool:
+        """
+        Add current date to user activity_dates array if not already present.
+        Used for tracking actual user activities (chat, evaluations).
+        """
+        try:
+            service = await get_service()
+            today_str = datetime.now().strftime("%Y-%m-%d")
+            
+            result = await service.update_user_raw(user_id, {
+                "$addToSet": {
+                    "learning_analytics.activity_dates": today_str
+                },
+                "$set": {
+                    "learning_analytics.last_activity_date": datetime.now()
+                }
+            })
+            
+            return result is not None
+            
+        except Exception as e:
+            logger.error(f"Error adding activity date for user {user_id}: {str(e)}")
+            return False
 
     async def get_user_evaluation_stats(self, user_id: str) -> Optional[Dict[str, Any]]:
         """

@@ -60,6 +60,15 @@ class CourseProgress(BaseModel):
     completed_modules: int = 0
     overall_progress: float = 0.0
 
+#class LearningAnalytics(BaseModel):
+#    """
+#    Model for user learning analytics and statistics
+#    """
+#    total_positionnement_tests: int = 0
+#    total_evaluations_completed: int = 0
+#    first_course_started: Optional[datetime] = None
+#    last_activity_date: Optional[datetime] = None
+
 class LearningAnalytics(BaseModel):
     """
     Model for user learning analytics and statistics
@@ -68,6 +77,7 @@ class LearningAnalytics(BaseModel):
     total_evaluations_completed: int = 0
     first_course_started: Optional[datetime] = None
     last_activity_date: Optional[datetime] = None
+    activity_dates: List[str] = Field(default_factory=list)
 
 class EvaluationScore(BaseModel):
     """
@@ -171,6 +181,7 @@ class EvaluationSubmissionRequest(BaseModel):
     module: str
     evaluation_type: str
     language: str = Field(default="French", description="Language for evaluation grading")
+    is_final: bool = Field(default=False)
 
 
 class CaseEvaluationSubmissionRequest(BaseModel):

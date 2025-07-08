@@ -10,6 +10,7 @@ from typing import Dict, List, Optional, Union
 from dotenv import load_dotenv
 from datetime import datetime
 from bson import ObjectId
+from app.logs import logger
 
 load_dotenv()
 
@@ -221,24 +222,34 @@ class AsyncMongoDBService:
         
         result = await self.users.delete_one({"_id": ObjectId(user_id)})
         return result.deleted_count > 0
-    
+
     async def update_last_login(self, user_id: str) -> bool:
-        """Update user last login timestamp and learning analytics activity date."""
-        if not ObjectId.is_valid(user_id):
-            return False
-        
-        now = datetime.now()
-        result = await self.users.update_one(
-            {"_id": ObjectId(user_id)},
-            {
-                "$set": {
-                    "last_login": now, 
-                    "updated_at": now,
-                    "learning_analytics.last_activity_date": now
+        """
+        Update user last login timestamp and last activity date.
+        Does not count as activity for activity_dates tracking.
+        """
+        try:
+            if not ObjectId.is_valid(user_id):
+                return False
+            
+            now = datetime.now()
+            
+            result = await self.users.update_one(
+                {"_id": ObjectId(user_id)},
+                {
+                    "$set": {
+                        "last_login": now, 
+                        "updated_at": now,
+                        "learning_analytics.last_activity_date": now
+                    }
                 }
-            }
-        )
-        return result.modified_count > 0
+            )
+            return result.modified_count > 0
+            
+        except Exception as e:
+            logger.error(f"Error updating last login for user {user_id}: {str(e)}")
+            return False
+
 
     async def find_conversations_by_user(self, user_id: str, limit: int = 50) -> List[Dict]:
         """Find user conversations."""

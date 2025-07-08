@@ -203,21 +203,20 @@ async def generate_practical_case(request: CaseRequest):
 async def submit_evaluation_and_save(
     evaluation_data: EvaluationSubmissionRequest,
     user_id: str = Depends(auth_service.get_current_user_id)
-
 ) -> Dict[str, Any]:
     """
-    Submit evaluation to grader and automatically save the score
+    Submit evaluation to grader and automatically save the score with activity tracking
     
     Args:
-        evaluation_data: Evaluation submission request
+        evaluation_data: Evaluation submission request containing questions, responses, and metadata
+        is_final: Whether this is a final validation evaluation
         user_id: Current authenticated user ID
         
     Returns:
-        Combined grading result and save status
+        Dict containing grading result, save status, final score, and progression update status
     """
     try:
         logger.info(f"Submit evaluation and save for user: {user_id}, course: {evaluation_data.course}")
-        
         grader_result = await grader_service.grade_evaluation(
             user_id=user_id,
             questions=evaluation_data.questions,
@@ -227,28 +226,33 @@ async def submit_evaluation_and_save(
         
         final_score = grader_result.get("final_score")
         score_saved = False
-        
+        is_final = evaluation_data.is_final
         if final_score is not None:
+            evaluation_type = evaluation_data.evaluation_type
+            if is_final and evaluation_data.evaluation_type == "positionnement":
+                evaluation_type = "finale"
+            
             score_data = AddEvaluationScore(
                 score=final_score,
-                topics=evaluation_data.topics,
+                #topics=evaluation_data.topics,
+                topics=[],
                 course=evaluation_data.course,
                 module=evaluation_data.module,
-                evaluation_type=evaluation_data.evaluation_type
+                evaluation_type=evaluation_type
             )
             
             updated_user = await user_collection.add_evaluation_score(user_id, score_data)
             score_saved = updated_user is not None
             
             if score_saved:
+                await user_collection.add_activity_date(user_id)
                 logger.info(f"Score saved successfully for user: {user_id}, score: {final_score}")
             else:
                 logger.warning(f"Failed to save score for user: {user_id}")
         
-        # Update progression based on evaluation type
         progression_updated = False
         if score_saved and final_score is not None:
-            if evaluation_data.evaluation_type == "positionnement":
+            if evaluation_data.evaluation_type == "positionnement" and not is_final:
                 try:
                     progression_updated = await progression_service.update_placement_test_result(
                         user_id, evaluation_data.course, final_score
@@ -279,6 +283,7 @@ async def submit_evaluation_and_save(
     except Exception as e:
         logger.error(f"Error in submit_evaluation_and_save: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Evaluation submission failed: {str(e)}")
+        
 
 @router.post("/submit-case-and-save")
 async def submit_case_evaluation_and_save(
@@ -314,7 +319,8 @@ async def submit_case_evaluation_and_save(
         if final_score is not None:
             score_data = AddEvaluationScore(
                 score=final_score,
-                topics=evaluation_data.topics,
+                #topics=evaluation_data.topics,
+                topics=[],
                 course=evaluation_data.course,
                 module=evaluation_data.module,
                 evaluation_type="module_case"
@@ -324,6 +330,7 @@ async def submit_case_evaluation_and_save(
             score_saved = updated_user is not None
             
             if score_saved:
+                await user_collection.add_activity_date(user_id)
                 logger.info(f"Case score saved successfully for user: {user_id}, score: {final_score}")
             else:
                 logger.warning(f"Failed to save case score for user: {user_id}")
@@ -338,6 +345,7 @@ async def submit_case_evaluation_and_save(
     except Exception as e:
         logger.error(f"Error in submit_case_evaluation_and_save: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Case evaluation submission failed: {str(e)}")
+        
 
 
 # ─── Health check endpoint ───────────────────────────────

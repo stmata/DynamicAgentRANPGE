@@ -2,19 +2,21 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException, Depends
 from typing import Dict, Any
 from bson.objectid import ObjectId
+import asyncio
 import logging
 import uuid
 import re
+import json
 from fastapi.responses import JSONResponse
 
 from app.models.entities.conversation import ConversationUpdate
 from app.repositories.conversation_repository import ConversationCollection
 from app.repositories.message_repository import MessageCollection
+from app.repositories.user_repository import UserCollection
 from app.services.chat.chat_service import get_chat_service
 from app.models.schemas.evaluation_models import UserQuery
 from app.services.chat.chat_service import handle_chat_request
 from app.services.external.auth_service import auth_service
-import json
 
 logger = logging.getLogger(__name__)
 
@@ -188,6 +190,7 @@ async def chat(request: Dict[str, Any]):
     """
     Send a message and receive response using reactAgent with MongoDB persistence.
     Creates conversation automatically if conversation_id is not provided or doesn't exist.
+    Tracks user activity for first message in conversation.
     """
     try:
         user_id = request.get("user_id")
@@ -205,6 +208,12 @@ async def chat(request: Dict[str, Any]):
         )
         
         serialized_result = serialize_mongo_data(result)
+        
+        is_first_message = not conversation_id or not result.get("conversation_existed", True)
+        if is_first_message:
+            user_collection = UserCollection()
+            asyncio.create_task(user_collection.add_activity_date(user_id))
+        
         return JSONResponse(content=serialized_result)
         
     except HTTPException:
