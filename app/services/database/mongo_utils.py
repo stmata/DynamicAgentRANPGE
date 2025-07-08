@@ -241,6 +241,9 @@ class AsyncMongoDBService:
                         "last_login": now, 
                         "updated_at": now,
                         "learning_analytics.last_activity_date": now
+                    },
+                    "$setOnInsert": {
+                        "learning_analytics.activity_dates": []
                     }
                 }
             )
