@@ -717,3 +717,50 @@ export const validateCourseModuleParams = (courses, courseName, moduleName = nul
   
   return result;
 };
+
+
+/**
+ * Detect if current URL contains final evaluation parameter
+ * @returns {boolean} True if final=true parameter is present
+ */
+export const isFinalEvaluation = () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get('final') === 'true';
+};
+
+/**
+ * Get evaluation title key based on URL parameters
+ * @param {boolean} isPositionnement - Whether this is a positioning evaluation
+ * @returns {string} Translation key for evaluation title
+ */
+export const getEvaluationTitleKey = (isPositionnement) => {
+  if (!isPositionnement) {
+    return 'courseModules.evaluation';
+  }
+  
+  if (isFinalEvaluation()) {
+    return 'evaluation.positioning.finalValidationTitle';
+  }
+  
+  return 'evaluation.positioning.title';
+};
+
+/**
+ * Get welcome text key based on evaluation type and user history
+ * @param {boolean} isPositionnement - Whether this is a positioning evaluation
+ * @param {Function} isFirstTimePositionnement - Function to check if first time positioning
+ * @returns {string} Translation key for welcome text
+ */
+export const getWelcomeTextKey = (isPositionnement, isFirstTimePositionnement) => {
+  if (!isPositionnement) {
+    return 'evaluation.positioning.moduleTraining';
+  }
+  
+  if (isFinalEvaluation()) {
+    return 'evaluation.positioning.finalValidation';
+  }
+  
+  return isFirstTimePositionnement() ? 
+    'evaluation.positioning.positioningFirstTime' : 
+    'evaluation.positioning.positioningRetry';
+};

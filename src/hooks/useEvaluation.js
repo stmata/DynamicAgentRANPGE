@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import evaluationApi from '../services/evaluationApi.js';
 import storage from '../services/storage.js';
 import { EVALUATION_CONFIG } from '../utils/constants.js';
+import { isFinalEvaluation } from '../utils/helpers.js';
 import { useAuth } from '../contexts/AuthContext.jsx';
 
 /**
@@ -263,7 +264,9 @@ export const useEvaluation = () => {
       const language = getCurrentLanguage();
   
       const userId = getUserId();
-      
+      const isFinal = isFinalEvaluation();
+      console.log('test ISFINAL')
+      console.log(isFinal)
       const response = await evaluationApi.submitEvaluation(
         questions,
         responses,
@@ -272,7 +275,8 @@ export const useEvaluation = () => {
         topics,
         evaluationType,
         language,
-        userId
+        userId,
+        isFinal
       );
 
       const gradingResults = response.grading_result;

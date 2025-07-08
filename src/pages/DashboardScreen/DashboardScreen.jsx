@@ -12,9 +12,11 @@ import { Target, BookOpen, Award, Calendar } from 'lucide-react';
 import './DashboardScreen.css';
 
 /**
- * Modern Dashboard component displaying student academic evolution
- * Shows course progress, evaluations history, and analytics
- * @returns {React.ReactElement} DashboardScreen component
+ * Modern dashboard component displaying student academic evolution and analytics.
+ * Shows course progress, evaluation history, active days tracking, and performance charts.
+ * Handles authentication states, loading states, and renders appropriate content
+ * based on user data availability. Provides comprehensive overview of learning progress.
+ * @returns {React.ReactElement} DashboardScreen component with user analytics
  */
 const DashboardScreen = () => {
   const { t } = useTranslation();
@@ -22,6 +24,11 @@ const DashboardScreen = () => {
   const [evaluations, setEvaluations] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  /**
+   * Effect hook for loading user evaluations and setting loading state.
+   * Updates evaluations state when user authentication and data become available.
+   * Manages loading state transition from initial load to content display.
+   */
   useEffect(() => {
     if (isAuthenticated && user) {
       setEvaluations(user.evaluations || []);
@@ -30,25 +37,12 @@ const DashboardScreen = () => {
   }, [isAuthenticated, user]);
 
   /**
-   * Calculate days since last activity
-   * @param {Date|Object} lastActivity - Last activity date
-   * @returns {number} Days since last activity
+   * Get the count of active learning days from user analytics.
+   * @param {Object} user - User object with learning analytics
+   * @returns {number} Number of active days
    */
-  const calculateDaysSinceActivity = (lastActivity) => {
-    if (!lastActivity) return 0;
-    
-    let date;
-    if (lastActivity.$date) {
-      date = new Date(lastActivity.$date);
-    } else if (typeof lastActivity === 'string' || typeof lastActivity === 'number') {
-      date = new Date(lastActivity);
-    } else {
-      date = lastActivity;
-    }
-    
-    const now = new Date();
-    const diffTime = Math.abs(now - date);
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const getActiveDaysCount = (user) => {
+    return user?.learning_analytics?.activity_dates?.length || 0;
   };
 
   if (loading) {
@@ -70,8 +64,7 @@ const DashboardScreen = () => {
   }
 
   const hasEvaluations = evaluations && evaluations.length > 0;
-  const lastActivityDate = user.learning_analytics?.last_activity_date || user.last_activity_date;
-  const daysSinceActivity = calculateDaysSinceActivity(lastActivityDate);
+  const activeDaysCount = getActiveDaysCount(user);
 
   return (
     <div className="dashboard-dashboard">
@@ -109,7 +102,7 @@ const DashboardScreen = () => {
           
           <StatsCard
             title={t('dashboard.daysActivity')}
-            value={daysSinceActivity}
+            value={activeDaysCount}
             icon={<Calendar className="dashboard-icon" />}
             borderColor="dashboard-border-gray"
             valueColor="dashboard-text-gray"

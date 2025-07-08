@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuizState } from './hooks/useQuizState';
 import { useQuizTimer } from './hooks/useQuizTimer';
@@ -111,23 +111,7 @@ const QuizContainer = ({ moduleId, courseTitle, moduleTopics, isPositionnement }
     if (isSubmitted) return;
     saveCurrentAnswer(e.target.value);
   };
-
-  const passingScore = 57.0;
   
-  const isFirstTimePositionnement = useMemo(() => {
-    if (!isPositionnement) return false;
-    
-    const userDataStr = localStorage.getItem('userData');
-    if (!userDataStr) return true;
-    
-    try {
-      const userData = JSON.parse(userDataStr);
-      const courseProgress = userData.course_progress?.[courseTitle];
-      return courseProgress?.positionnement_test?.status === "not_attempted";
-    } catch {
-      return true;
-    }
-  }, [isPositionnement, courseTitle]);
 
   if (isLoading) {
     return (
@@ -198,8 +182,6 @@ const QuizContainer = ({ moduleId, courseTitle, moduleTopics, isPositionnement }
         submissionResults={submissionResults}
         error={error}
         isPositionnement={isPositionnement}
-        isFirstTimePositionnement={isFirstTimePositionnement}
-        passingScore={passingScore}
         setConfirmDialogOpen={setConfirmDialogOpen}
         setSuccessDialogOpen={setSuccessDialogOpen}
         setGuideDialogOpen={setGuideDialogOpen}

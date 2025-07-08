@@ -70,7 +70,7 @@ const CourseCard = ({ courseName, courseData, evaluations }) => {
     return `${roundedScore}/100`;
   };
 
-  const evaluationTypes = ['positionnement', 'module_mixed', 'module_case'];
+  const evaluationTypes = ['positionnement', 'module_mixed', 'module_case', 'finale'];
   const progressPercentage = Math.round((courseData.unlocked_modules / courseData.total_modules) * 100);
 
   return (

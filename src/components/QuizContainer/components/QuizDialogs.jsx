@@ -1,7 +1,10 @@
+import { useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, Box, Typography } from '@mui/material';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { generateStudyGuidePDF } from '../../../utils/pdfGenerator';
+import { isFinalEvaluation } from '../../../utils/helpers.js';
+import { getK2ReturnUrl } from '../../../utils/constants.js';
 
 /**
  * Quiz dialogs component containing all Material-UI dialogs
@@ -14,8 +17,6 @@ import { generateStudyGuidePDF } from '../../../utils/pdfGenerator';
  * @param {Object} submissionResults - Submission results with study guide
  * @param {string} error - Error message
  * @param {boolean} isPositionnement - Whether this is a positioning evaluation
- * @param {boolean} isFirstTimePositionnement - Whether this is first time positioning test for this course
- * @param {number} passingScore - Passing score threshold for positioning test
  * @param {Function} setConfirmDialogOpen - Set confirm dialog state
  * @param {Function} setSuccessDialogOpen - Set success dialog state
  * @param {Function} setGuideDialogOpen - Set guide dialog state
@@ -32,17 +33,16 @@ const QuizDialogs = ({
   submissionResults,
   error,
   isPositionnement,
-  isFirstTimePositionnement,
-  passingScore,
   setConfirmDialogOpen,
   setSuccessDialogOpen,
   setGuideDialogOpen,
   setErrorDialogOpen,
   confirmSubmit,
-  onSuccessDialogClose
+  onSuccessDialogClose,
 }) => {
   const { t } = useTranslation();
   const { isDarkMode } = useTheme();
+  const [isFinal] = useState(() => isFinalEvaluation());
 
   /**
    * Processes bold text formatting in study guide content
@@ -61,20 +61,11 @@ const QuizDialogs = ({
       return part;
     });
   };
-  
-  const getScoreMessageKey = () => {
-    if (!isPositionnement) {
-      return 'evaluation.aboveThresholdModule';
-    }
-    
-    if (isFirstTimePositionnement) {
-      return 'evaluation.aboveThresholdPositionnement';
-    }
-    
-    const isSuccess = submissionResults?.final_score >= passingScore;
-    return isSuccess 
-      ? 'evaluation.aboveThresholdFinal'
-      : 'evaluation.aboveThresholdPositionnement';
+
+  const getSuccessTextKey = () => {
+    if (isFinal) return 'evaluation.aboveThresholdFinal';
+    if (isPositionnement) return 'evaluation.aboveThresholdPositionnement';
+    return 'evaluation.aboveThresholdModule';
   };
   
   /**
@@ -280,7 +271,7 @@ const QuizDialogs = ({
       
       <Dialog
         open={successDialogOpen}
-        onClose={() => setSuccessDialogOpen(false)}
+        onClose={isFinal ? () => {} : () => setSuccessDialogOpen(false)}
         slotProps={{
           paper: {
             sx: {
@@ -314,7 +305,7 @@ const QuizDialogs = ({
                 }}>
                   <Typography variant="h6" component="div">
                     <Trans
-                      i18nKey={getScoreMessageKey()}
+                      i18nKey={getSuccessTextKey()}
                       values={{ score: Math.round(submissionResults.final_score) }}
                       components={{ br: <br />, strong: <strong /> }}
                     />
@@ -334,23 +325,38 @@ const QuizDialogs = ({
           borderColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
           padding: '16px 24px'
         }}>
-          <Button 
-            onClick={() => {
-              setSuccessDialogOpen(false);
-              if (onSuccessDialogClose) {
-                onSuccessDialogClose();
-              }
-            }} 
-            variant="contained"
-            sx={{
-              backgroundColor: isDarkMode ? 'var(--primary)' : 'var(--primary)',
-              '&:hover': {
-                backgroundColor: isDarkMode ? 'var(--primary-dark)' : 'var(--primary-dark)'
-              }
-            }}
-          >
-            {t('common.ok')}
-          </Button>
+          {isFinal ? (
+            <Button 
+              onClick={() => window.location.href = getK2ReturnUrl()}
+              variant="contained"
+              sx={{
+                backgroundColor: isDarkMode ? 'var(--primary)' : 'var(--primary)',
+                '&:hover': {
+                  backgroundColor: isDarkMode ? 'var(--primary-dark)' : 'var(--primary-dark)'
+                }
+              }}
+            >
+              {t('common.backToK2')}
+            </Button>
+          ) : (
+            <Button 
+              onClick={() => {
+                setSuccessDialogOpen(false);
+                if (onSuccessDialogClose) {
+                  onSuccessDialogClose();
+                }
+              }} 
+              variant="contained"
+              sx={{
+                backgroundColor: isDarkMode ? 'var(--primary)' : 'var(--primary)',
+                '&:hover': {
+                  backgroundColor: isDarkMode ? 'var(--primary-dark)' : 'var(--primary-dark)'
+                }
+              }}
+            >
+              {t('common.ok')}
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
       

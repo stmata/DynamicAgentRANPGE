@@ -145,12 +145,15 @@ const resources = {
         moduleNotFound: "Module non trouvé",
         positioning: {
           title: "Test de positionnement",
+          finalValidationTitle: "Test de validation finale",
           titleWithCourse: "Test de positionnement - {{course}}",
           description: "Cette évaluation permet de déterminer votre niveau actuel pour un apprentage personnalisé.",
           descriptionWithCourse: "Test de positionnement pour le cours {{course}}. Cette évaluation couvre tous les modules du cours pour déterminer votre niveau actuel dans ce domaine.",
+          descriptionWithCourseFinale: "Quiz de validation finale pour le cours {{course}}. Cette évaluation couvre tous les modules et permet de valider vos connaissances acquises dans ce domaine.",
           moduleTraining: "<p><strong>Je vous propose à présent un quiz d'entraînement pour faire le point sur ce que vous venez d'apprendre. Ces quiz ont été conçus pour :</strong></p><ul><li>renforcer votre compréhension des notions clés,</li><li>vous aider à vérifier que tout est bien assimilé,</li><li>vous préparer sereinement au quiz final.</li></ul><p>📝 <em>Ces quiz sont là pour vous entraîner, à votre rythme. Et si une question vous bloque, je suis là pour vous aider à y voir plus clair via le chat !</em></p>",
-          positioningFirstTime: "<p><strong>Bienvenue dans votre test de positionnement ! Cette évaluation permet de :</strong></p><ul><li>évaluer votre niveau actuel dans ce domaine,</li><li>identifier vos points forts et axes d'amélioration,</li><li>personnaliser votre parcours d'apprentissage.</li></ul><p>📝 <em>Prenez votre temps, il n'y a pas de piège. Un score de 57% ou plus confirme votre niveau et vous dispense du cours !</em></p>",
-          positioningRetry: "<p><strong>Vous refaites le test de positionnement - c'est une excellente initiative ! Cette nouvelle tentative vous permettra de :</strong></p><ul><li>mesurer vos progrès depuis la dernière fois,</li><li>améliorer votre score précédent,</li><li>consolider vos connaissances.</li></ul><p>📝 <em>Vous connaissez déjà le principe : 57% ou plus confirme votre niveau et vous dispense du cours !</em></p>"
+          positioningFirstTime: "<p><strong>Bienvenue dans votre test de positionnement ! Cette évaluation permet de  </strong></p><ul><li>évaluer votre niveau actuel dans ce domaine,</li><li>identifier vos points forts et axes d'amélioration,</li><li>personnaliser votre parcours d'apprentissage.</li></ul><p>📝 <em>Prenez votre temps, il n'y a pas de piège. Un score de 57% ou plus confirme votre niveau et vous dispense du cours !</em></p>",
+          positioningRetry: "<p><strong>Vous refaites le test de positionnement - c'est une excellente initiative ! Cette nouvelle tentative vous permettra de :</strong></p><ul><li>mesurer vos progrès depuis la dernière fois,</li><li>améliorer votre score précédent,</li><li>consolider vos connaissances.</li></ul><p>📝 <em>Vous connaissez déjà le principe : 57% ou plus confirme votre niveau et vous dispense du cours !</em></p>",
+          finalValidation: "<p><strong>Félicitations, vous voici arrivé(e) au test de validation finale ! Cette évaluation permet de :</strong></p><ul><li>valider l'ensemble des connaissances acquises,</li><li>confirmer votre maîtrise des concepts fondamentaux,</li><li>finaliser officiellement votre parcours d'apprentissage.</li></ul><p>📝 <em>Vous avez travaillé dur pour arriver jusqu'ici. Ce test marque l'aboutissement de votre formation - donnez le meilleur de vous-même !</em></p>"
         },
         moduleEvaluation: {
           description: "Testez votre niveau sur les thèmes de ce module. Cette évaluation comprend des quiz interactifs et des questions ouvertes pour valider vos connaissances et identifier les points à approfondir."
@@ -262,7 +265,8 @@ const resources = {
         evaluationType: {
           positionnement: "Quiz de positionnement",
           module_mixed: "Quiz d'entrainement",
-          module_case: "Cas pratiques (optionnels)"
+          module_case: "Cas pratiques (optionnels)",
+          finale: "Quiz de validation finale"
         }
       },
       pdf: {
@@ -430,12 +434,15 @@ const resources = {
         moduleNotFound: "Module not found",
         positioning: {
           title: "Placement test",
+          finalValidationTitle: "Final Validation Test",
           titleWithCourse: "Placement test - {{course}}",
           description: "This evaluation allows you to determine your current level for personalized learning.",
           descriptionWithCourse: "Placement test for the course {{course}}. This evaluation covers all course modules to determine your current level in this field.",
+          descriptionWithCourseFinale: "Final validation quiz for the {{course}} course. This assessment covers all modules and is designed to validate your knowledge in this subject area.",
           moduleTraining: "<p><strong>I now offer you a training quiz to review what you've just learned. These quizzes have been designed to:</strong></p><ul><li>strengthen your understanding of key concepts,</li><li>help you verify that everything is well understood,</li><li>prepare you confidently for the final quiz.</li></ul><p>📝 <em>These quizzes are here for you to practice at your own pace. And if a question stumps you, I'm here to help clarify things via chat!</em></p>",
           positioningFirstTime: "<p><strong>Welcome to your placement test! This evaluation allows to:</strong></p><ul><li>assess your current level in this field,</li><li>identify your strengths and areas for improvement,</li><li>personalize your learning path.</li></ul><p>📝 <em>Take your time, there are no tricks. A score of 57% or more confirms your level and exempts you from the course!</em></p>",
-          positioningRetry: "<p><strong>You're retaking the placement test - that's an excellent initiative! This new attempt will allow you to:</strong></p><ul><li>measure your progress since last time,</li><li>improve your previous score,</li><li>consolidate your knowledge.</li></ul><p>📝 <em>You already know the principle: 57% or more confirms your level and exempts you from the course!</em></p>"
+          positioningRetry: "<p><strong>You're retaking the placement test - that's an excellent initiative! This new attempt will allow you to:</strong></p><ul><li>measure your progress since last time,</li><li>improve your previous score,</li><li>consolidate your knowledge.</li></ul><p>📝 <em>You already know the principle: 57% or more confirms your level and exempts you from the course!</em></p>",
+          finalValidation: "<p><strong>Congratulations, you have reached the final validation test! This assessment allows you to:</strong></p><ul><li>validate all the knowledge you have acquired,</li><li>confirm your mastery of fundamental concepts,</li><li>officially complete your learning journey.</li></ul><p>📝 <em>You have worked hard to get here. This test marks the culmination of your training - give it your best!</em></p>"
         },
         moduleEvaluation: {
           description: "Test your level on the themes of this module. This evaluation includes interactive quizzes and open-ended questions to validate your knowledge and identify areas for improvement."
@@ -547,7 +554,8 @@ const resources = {
         evaluationType: {
           positionnement: "Placement quiz",
           module_mixed: "Practice quiz",
-          module_case: "Practice case studies (optional)"
+          module_case: "Practice case studies (optional)",
+          finale: "Final validation quiz"
         }
       },
       pdf: {

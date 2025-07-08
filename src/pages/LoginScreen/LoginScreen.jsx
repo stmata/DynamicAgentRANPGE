@@ -7,10 +7,13 @@ import microsoftIcon from '../../assets/images/microsoft.svg'
 import './LoginScreen.css';
 
 /**
- * Login component with Azure SSO authentication
- * 
+ * Login screen component that provides Azure SSO authentication interface.
+ * Displays a modern login form with Microsoft Azure integration, loading states,
+ * error handling, and feature highlights. Supports both light and dark themes.
+ * Handles authentication flow, user feedback, and provides visual appeal with
+ * animations and illustrations to enhance user experience during login process.
  * @component
- * @returns {JSX.Element} Login page with Azure authentication
+ * @returns {JSX.Element} Login page component with Azure authentication capabilities
  */
 const LoginScreen = () => {
   const { t } = useTranslation();
@@ -24,25 +27,34 @@ const LoginScreen = () => {
   
   const [localError, setLocalError] = useState('');
 
-
+  /**
+     * Effect hook for cleaning up authentication errors on component mount.
+     * Clears any existing authentication errors and local error states to ensure
+     * a clean login experience. Prevents stale error messages from previous
+     * authentication attempts from being displayed to users.
+     * Runs once on component initialization to reset error states.
+   */
   useEffect(() => {
     clearError();
     setLocalError('');
   }, [clearError]);
 
-  /**
-   * Handle Azure SSO login button click
-   * 
+ /**
+   * Handle Azure SSO login button click and initiate authentication flow.
+   * Prevents default form submission, clears any existing error states,
+   * and triggers the Azure AD redirect authentication process.
+   * Provides clean error state management before starting authentication.
+   * Essential for maintaining proper authentication flow and user feedback.
    * @async
-   * @function handleAzureLogin
-   * @param {Event} e - Form submit event
-   */
+   * @function
+   * @param {Event} e - Form submit event to prevent default browser behavior
+ */
   const handleAzureLogin = (e) => {
-  e.preventDefault();
-  clearError();
-  setLocalError('');
-  loginWithAzureRedirect();
-};
+    e.preventDefault();
+    clearError();
+    setLocalError('');
+    loginWithAzureRedirect();
+  };
   const displayError = localError || error;
 
   return (

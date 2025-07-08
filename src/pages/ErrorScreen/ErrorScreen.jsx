@@ -5,15 +5,27 @@ import { useTranslation } from 'react-i18next';
 import './ErrorScreen.css';
 
 /**
- * Error component for 404 page
- * 
- * @returns {React.ReactElement} Error component
+ * Error screen component that displays a user-friendly 404 page not found interface.
+ * Features an animated GIF, localized error messages, and navigation back to home.
+ * Supports both light and dark theme modes and provides a visually appealing
+ * error experience to prevent user frustration. Includes clear call-to-action
+ * button to guide users back to the main application flow.
+ * @returns {React.ReactElement} Error component with 404 handling and home navigation
  */
 const ErrorScreen = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { isDarkMode } = useTheme();
 
+
+  /**
+   * Navigation handler function that redirects users back to the home page.
+   * Uses React Router's navigate function with replace option to prevent
+   * users from returning to the error page via browser back button.
+   * Provides smooth recovery from error states and maintains clean navigation history.
+   * Essential for user experience when recovering from 404 or routing errors.
+   * @function
+   */
   const handleGoHome = () => {
     navigate('/', { replace: true });
   };

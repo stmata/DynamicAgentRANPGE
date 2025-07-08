@@ -67,7 +67,8 @@ class EvaluationApi {
    * @param {string} userId - User ID for cache invalidation
    * @returns {Promise<{grading_result: Object, score_saved: boolean, final_score: number, user_updated: boolean}>} - Complete response with grading results
    */
-  async submitEvaluation(questions, responses, course, module, topics, evaluationType, language = 'French', userId = null) {
+  //async submitEvaluation(questions, responses, course, module, topics, evaluationType, language = 'French', userId = null) {
+  async submitEvaluation(questions, responses, course, module, topics, evaluationType, language = 'French', userId = null, isFinal = false) {
     try {
       const result = await fetchWrapper.post(API_ENDPOINTS.EVALUATION.SUBMIT_MCQ_OPEN, {
         questions: questions,
@@ -76,7 +77,8 @@ class EvaluationApi {
         course: course,
         module: module,
         evaluation_type: evaluationType,
-        language: language
+        language: language,
+        is_final: isFinal
       });
 
       // Invalidate progression cache on successful submission

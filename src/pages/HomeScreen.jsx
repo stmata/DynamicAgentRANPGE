@@ -4,13 +4,24 @@ import ImageSlider from '../components/ImageSlider/ImageSlider';
 import CourseCarousel from '../components/CourseCarousel/CourseCarousel';
 
 /**
- * Home page component
- * 
- * @returns {React.ReactElement} HomeScreen component
+ * Home page component that serves as the main landing page of the application.
+ * Displays a hero section with descriptive content, smooth scroll navigation to courses,
+ * and renders the main course carousel. Provides the primary entry point for users
+ * to discover and access available courses. Includes responsive design elements
+ * and interactive scroll indicators for improved user experience.
+ * @returns {React.ReactElement} Home screen component with hero section and course carousel
  */
 const HomeScreen = () => {
   const { t } = useTranslation();
 
+/**
+ * Smooth scroll navigation function that scrolls to the courses section.
+ * Finds the courses section element using querySelector and performs smooth scrolling
+ * to bring it into view at the top of the viewport. Provides seamless navigation
+ * between the hero section and course content without page jumps.
+ * Used by the scroll indicator component for enhanced user interaction.
+ * @function
+ */
   const scrollToContent = () => {
     const coursesSection = document.querySelector('.courses');
     if (coursesSection) {

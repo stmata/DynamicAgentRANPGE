@@ -8,9 +8,10 @@ import CourseInfo from '../components/CourseInfo/CourseInfo';
 import { validateCourseModuleParams } from '../utils/helpers';
 
 /**
- * Course modules page component
- * 
- * @returns {React.ReactElement} CourseModules component
+ * Course modules page component that displays all modules for a specific course.
+ * Handles course validation, module loading, progress tracking, and navigation to evaluations.
+ * Shows loading states, error handling, and renders module cards with lock/unlock status.
+ * @returns {React.ReactElement} CourseModuleScreen component
  */
 const CourseModuleScreen = () => {
   const { t, i18n } = useTranslation();
@@ -28,15 +29,24 @@ const CourseModuleScreen = () => {
   const courseTitle = searchParams.get('course');
 
   /**
-   * Get course description for course modules
-   * @param {string} courseName - Name of the course
-   * @param {string} language - Current language
-   * @returns {string} Course description
+   * Get course description for course modules display.
+   * Following a client request, this now returns a generic description,
+   * regardless of the courseName. Can be extended in the future for course-specific descriptions.
+   * @param {string} courseName - Name of the course (currently unused)
+   * @param {string} language - Current language for localization
+   * @returns {string} Course description text
    */
+  // eslint-disable-next-line no-unused-vars
   const getCourseDescription = (courseName, language) => {
     return t('courseModules.genericDescription');
   };
 
+
+  /**
+   * Effect hook for initial navigation validation.
+   * Redirects to home page if course title is missing or no courses are available.
+   * Ensures the component only renders when valid course data exists.
+   */
   useEffect(() => {
     if (!courseTitle || !getAllCourses() || Object.keys(getAllCourses()).length === 0) {
       navigate('/');
@@ -44,6 +54,13 @@ const CourseModuleScreen = () => {
     }
   }, [courseTitle, getAllCourses, navigate]);
 
+  /**
+   * Asynchronous function to fetch and process course data including modules and progress.
+   * Validates course existence, retrieves modules, calculates lock states based on progress,
+   * and sets up course information and modules list. Includes comprehensive error handling.
+   * @async
+   * @function
+   */
   useEffect(() => {
     const fetchCourseData = async () => {
       if (!courseTitle) {
@@ -117,11 +134,11 @@ const CourseModuleScreen = () => {
     navigate(`/evaluation-case?module=${moduleId}&course=${courseTitle}`);
   };
 
-  /**
-   * Handle navigation to evaluation-case page
-   * Updated: Navigate to evaluation-case instead of chat
-   * @param {string} moduleId - Module identifier
-   */
+/**
+ * Handle navigation to evaluation page for a specific module.
+ * Navigates to the evaluation route with module and course parameters for quiz-based evaluations.
+ * @param {string} moduleId - Module identifier for the evaluation
+ */
   const handleEvaluationClick = (moduleId) => {
     console.log(`Evaluation clicked for module ${moduleId}`);
     navigate(`/evaluation?module=${moduleId}&course=${courseTitle}`);
