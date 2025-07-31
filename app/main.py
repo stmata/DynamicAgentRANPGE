@@ -1,7 +1,7 @@
 """
 FastAPI entry-point with background initialization of agents cache to prevent first-request latency.
 """
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from threading import Event
@@ -15,32 +15,27 @@ from app.state import _build_agent_for_course
 
 tools_ready = Event()
 
+
 async def preload_agents():
-    """
-    Pre-load the cache with the 'all' agent in the background.
-    Does not block application startup.
-    
-    This function loads commonly used agents to improve response times
-    for initial requests. It loads the general 'all' agent and several
-    course-specific agents that are frequently accessed.
-    
-    Raises:
-        Exception: Logs any errors during agent preloading but continues execution.
-    """
     try:
         logger.info("[preload] Starting background agent preloading...")
         
+        # Load general agent
         await _build_agent_for_course(None)
-        await _build_agent_for_course("Marketing RAN")
-        await _build_agent_for_course("Économie RAN")
-        await _build_agent_for_course("Comptabilité RAN")
+        
+        from app.services.database.mongo_utils import get_service
+        service = await get_service()
+        course_names = await service.topics.distinct("course")
+        
+        for course_name in course_names:
+            await _build_agent_for_course(course_name)
         
         tools_ready.set()
         logger.info(f"[preload] Agents preloaded successfully. Cached: {list(agents_cache.keys())}")
         
     except Exception as e:
         logger.error(f"[preload] Error during agent preloading: {str(e)}")
-        tools_ready.set()   
+        tools_ready.set()  
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -112,6 +107,22 @@ async def readiness():
         "cached_agents": list(agents_cache.keys()),
         "preload_complete": tools_ready.is_set()
     }
+
+@app.post("/preload-agents")
+async def trigger_preload_agents():
+    """Manually trigger agent preloading in background."""
+    try:
+        asyncio.create_task(preload_agents())
+        return {
+            "status": "started",
+            "message": "Agent preloading started in background"
+        }
+    except Exception as e:
+        logger.error(f"Error starting agent preloading: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail="An error occurred while starting agent preloading"
+        )
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000, workers=1)
