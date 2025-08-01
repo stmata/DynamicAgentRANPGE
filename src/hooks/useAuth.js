@@ -28,6 +28,85 @@ export const useAuth = () => {
   const [error, setError] = useState(null);
   
   const lastActivityRef = useRef(Date.now());
+
+  /**
+   * Send verification code to email
+   */
+  const sendVerificationCode = useCallback(async (email) => {
+    try {
+      setError(null);
+      setLoading(true);
+      
+      const response = await authApi.sendVerificationCode(email);
+      return response;
+    } catch (err) {
+      setError(err.message || 'Failed to send verification code');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  /**
+   * Verify code and complete login
+   */
+  const verifyCodeAndLogin = useCallback(async (email, code) => {
+    try {
+      setError(null);
+      setLoading(true);
+      
+      const response = await authApi.verifyCode(email, code);
+      
+      if (response.status && response.access_token) {
+        storage.setAuthTokens(
+          response.access_token,
+          response.refresh_token,
+          response.access_token_expires,
+          response.refresh_token_expires
+        );
+        const userHash = await hashUserId(response.user_id);
+        
+        const userData = {
+          id: response.user_id,
+          user_hash: userHash,
+          username: email.split('@')[0],
+          email:email
+        };
+        
+        setAuthState(userData);
+        
+        try {
+          const userInfo = await authApi.getCurrentUser();
+          const updatedUserData = {
+            ...userData,
+            average_score: userInfo.average_score,
+            total_evaluations: userInfo.total_evaluations || 0,
+            course_scores: userInfo.course_scores,
+            evaluations: userInfo.evaluations || [],
+            course_progress: userInfo.course_progress || {},
+            learning_analytics: userInfo.learning_analytics || null,
+            progression_initialized: userInfo.progression_initialized || false,
+            created_at: userInfo.created_at,
+            last_login: userInfo.last_login,
+          };
+          setAuthState(updatedUserData);
+          userData = updatedUserData
+        } catch (userInfoError) {
+          console.warn('Failed to fetch user info:', userInfoError);
+        }
+        storage.setUserSessionWithTTL(userData, 24 * 60 * 60 * 1000);
+        window.dispatchEvent(new CustomEvent('auth:login', { detail: userData }));
+        return true;
+      } else {
+        throw new Error('Invalid verification response');
+      }
+    } catch (err) {
+      setError(err.message || 'Verification failed');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [hashUserId, setAuthState]);
   
 
   /**
@@ -564,6 +643,8 @@ export const useAuth = () => {
     user,
     loading,
     error,
+    sendVerificationCode,
+    verifyCodeAndLogin,
     loginWithAzureRedirect,
     logout,
     verifySession,

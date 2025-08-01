@@ -122,6 +122,8 @@ export const AuthProvider = ({ children }) => {
     error: currentError,
     
     // Authentication methods
+    sendVerificationCode: auth.sendVerificationCode,
+    verifyCodeAndLogin: auth.verifyCodeAndLogin,
     loginWithAzureRedirect: auth.loginWithAzureRedirect,
     logout: handleLogout,
     verifySession: auth.verifySession,

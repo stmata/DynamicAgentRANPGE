@@ -36,6 +36,7 @@ const resources = {
       login: {
         title: "RAN-PGE",
         subtitle: "Votre plateforme d'apprentissage personnalisée",
+        welcomeDescription: "Saisissez votre email SKEMA pour recevoir un code de vérification et commencer votre aventure d'apprentissage.",
         welcomeHeading: "Ouvrez la porte du savoir",
         ssoDescription: "Connectez-vous avec votre compte SKEMA pour commencer votre aventure d'apprentissage.",
         azureLoginButton: "Se connecter",
@@ -92,8 +93,9 @@ const resources = {
         testVoice: 'Tester la voix',
         testing: 'Test en cours...',
         voiceTestText: 'Skema School Business vous souhaite la bienvenue',
-        french: 'Français',
-        english: 'Anglais'
+        french: '🇫🇷 Français',
+        english: '🇬🇧 Anglais',
+        portuguese: '🇧🇷 Portugais'
       },
       courseModules: {
         aboutCourse: 'À propos du cours',
@@ -324,6 +326,7 @@ const resources = {
       login: {
         title: "RANPGE",
         subtitle: "Your personalized learning platform",
+        welcomeDescription: "Enter your SKEMA email to receive a verification code and begin your learning journey.",
         welcomeHeading: "Open the door to knowledge",
         ssoDescription: "Connect with your SKEMA account to begin your learning adventure.",
         azureLoginButton: "Login",
@@ -381,8 +384,9 @@ const resources = {
         testVoice: 'Test voice',
         testing: 'Testing...',
         voiceTestText: 'Skema School Business welcomes you',
-        french: 'French',
-        english: 'English'
+        french: '🇫🇷 French',
+        english: '🇬🇧 English',
+        portuguese: '🇧🇷 Portuguese'
       },
       courseModules: {
         aboutCourse: 'About the course',
@@ -578,15 +582,306 @@ const resources = {
         }
       }
     }
+  },
+  "pt-BR": {
+  translation: {
+    auth: {
+      verifyingSession: "Verificando sessão...",
+      authenticationError: "Erro de autenticação",
+      sessionVerificationError: "Ocorreu um erro ao verificar sua sessão."
+    },
+    common: {
+      loading: "Carregando...",
+      error: "Erro",
+      cancel: "Cancelar",
+      confirm: "Confirmar",
+      ok: "OK",
+      close: "Fechar",
+      modules: "módulos",
+      home: "Início",
+      pages: "Páginas",
+      date: "Data",
+      download: "Baixar",
+      download_pdf: "Baixar em PDF",
+      backToModules: "Voltar aos módulos",
+      backToK2: "Voltar ao K2",
+      count: "Visualizado",
+      txtFloatiActionBtn: "Não se esqueça de voltar ao curso K2 para continuar seu progresso"
+    },
+    navbar: {
+      chat: "Chat",
+      settings: "Configurações",
+      logout: "Sair",
+      dashboard: "Painel"
+    },
+    login: {
+      title: "RAN‑PGE",
+      subtitle: "Sua plataforma de aprendizagem personalizada",
+      welcomeDescription: "Digite seu e-mail SKEMA para receber um código de verificação e iniciar sua jornada de aprendizado.",
+      welcomeHeading: "Abra a porta do conhecimento",
+      ssoDescription: "Conecte‑se com sua conta SKEMA para começar sua jornada de aprendizagem.",
+      azureLoginButton: "Entrar",
+      emailLabel: "Endereço de email",
+      emailPlaceholder: "exemplo@email.com",
+      requestCodeButton: "Receber código",
+      verificationHeading: "Verificação",
+      verificationDescription: "Um código de verificação foi enviado para",
+      codeLabel: "Código de verificação",
+      codePlaceholder: "Digite o código de 6 dígitos",
+      expiresIn: "Expira em:",
+      seconds: "segundos",
+      resendButton: "Reenviar código",
+      verifyButton: "Verificar",
+      backButton: "Voltar",
+      featureChat: "Chats interativos",
+      featureEvaluation: "Avaliação",
+      featureProgress: "Acompanhamento de progresso",
+      errorInvalidEmail: "Por favor, insira um email válido",
+      errorInvalidCode: "O código de verificação deve ter 6 dígitos",
+      errorSkemaDomain: "Somente endereços de email @skema.edu são aceitos",
+      errorInvalidResponse: "Dados de usuário inválidos recebidos do servidor",
+      errorSendingCode: "Falha ao enviar o código de verificação. Por favor, tente novamente."
+    },
+    home: {
+      title: "Avalie seus pré‑requisitos e o desenvolvimento do seu conhecimento",
+      descriptionP1: "Em conexão com o seu espaço de Remise à Niveau (RAN) no K2, oferecemos testes personalizados baseados nos conteúdos dos seus RAN e um acompanhamento interativo para você progredir no seu ritmo.",
+      descriptionP2: "A primeira etapa é fazer o quiz de posicionamento que permitirá situar seu nível inicial. Se você obtiver 57% de acertos ou mais, não será necessário trabalhar nesses módulos de RAN. Caso contrário, é altamente recomendável fazê‑los para começar o ano acadêmico com tranquilidade.",
+      descriptionP3: "Como indicado no seu espaço K2, cada módulo incluirá quizzes de formação com feedback. Ao final do módulo completo, você passará um teste final para validação dos seus conhecimentos.",
+      notice: "Você pode acessar diretamente os módulos, mas é altamente recomendável começar pelo teste de posicionamento. Ele avalia seu nível: uma pontuação de pelo menos 57% é necessária para validá‑lo. Os módulos estão disponíveis depois para treinar livremente e reforçar suas habilidades.",
+      scrollHover: "Acessar os cursos"
+    },
+    courses: {
+      title: "Teste seus fundamentos"
+    },
+    course: {
+      modules: "módulos",
+      start: "Começar",
+      comingSoon: "Em breve disponível",
+      placementTestRequired: "Teste de posicionamento necessário",
+      placementTestRequiredShort: "Teste de posicionamento necessário"
+    },
+    positioning: {
+      selectCourse: "Escolha seu curso de posicionamento",
+      selectCourseDescription: "Selecione o curso que você deseja ser avaliado para determinar seu nível.",
+      noCoursesAvailable: "Nenhum curso disponível para posicionamento"
+    },
+    settings: {
+      title: "Configurações",
+      language: "Idioma",
+      theme: "Tema",
+      darkMode: "Modo escuro",
+      voice: "Voz Text‑to‑Speech",
+      testVoice: "Testar voz",
+      testing: "Testando...",
+      voiceTestText: "Skema School Business dá‑lhe as boas‑vindas",
+      french: "🇫🇷 Francês",
+      english: "🇬🇧 Inglês",
+      portuguese: "🇧🇷 Português"
+    },
+    courseModules: {
+      aboutCourse: "Sobre o curso",
+      modules: "módulos",
+      topics: "tópicos",
+      all: "Todos",
+      averageRating: "Avaliação média",
+      description: "Este curso completo irá guiá‑lo através dos conceitos fundamentais de programação. Você aprenderá os fundamentos essenciais, estruturas de dados, algoritmos e boas práticas de programação. O curso é projetado para iniciantes que desejam começar no desenvolvimento de software.",
+      generalModule: "Módulo Geral",
+      generalModuleDescription: "Este módulo geral permite interagir com todo o curso. Faça perguntas gerais ou teste seu conhecimento global.",
+      resources: "Recursos",
+      evaluation_case: "Caso prático",
+      evaluation: "QUIZ",
+      notFound: "O curso solicitado não foi encontrado",
+      genericDescription: "Este curso completo oferece treinamento adaptado às suas necessidades. Teste seus conhecimentos com avaliações variadas: quizzes interativos, questões abertas e casos práticos profissionais. Desenvolva suas competências por meio de métodos de avaliação diversificados e personalizados.",
+      lockedMessage: "Complete o módulo anterior ou faça o teste de posicionamento"
+    },
+    evaluation: {
+      questions: "Perguntas",
+      summary: "Resumo",
+      attempted: "Tentadas",
+      flagged: "Marcadas",
+      unattempted: "Não tentadas",
+      timeRemaining: "Tempo restante",
+      submit: "Enviar",
+      submitted: "Enviado",
+      multipleChoice: "Múltipla escolha",
+      openEnded: "Resposta aberta",
+      enterYourAnswer: "Digite sua resposta aqui...",
+      previousQuestion: "Pergunta anterior",
+      nextQuestion: "Próxima pergunta",
+      flag: "Marcar",
+      unflag: "Desmarcar",
+      confirmSubmit: "Você respondeu {{attempted}} de {{total}} perguntas. Tem certeza que deseja enviar?",
+      confirmSubmitTitle: "Confirmar envio",
+      submitSuccess: "Avaliação enviada com sucesso!",
+      submissionSuccessTitle: "Envio bem‑sucedido",
+      timeUp: "Tempo esgotado! Sua avaliação será enviada automaticamente. Clique OK para continuar.",
+      modelAnswer: "Resposta sugerida",
+      feedback: "Comentários",
+      references: "Referências",
+      grade: "Nota",
+      viewGuide: "Ver plano de estudo",
+      guideTitle: "Plano de estudo",
+      guideUnavailable: "Plano de estudo não está disponível para esta avaliação.",
+      aboveThresholdPositionnement: "📚 Parabéns pelo quiz de posicionamento!<br/>Você obteve <strong>{{score}}%</strong>.<br/><br/>Agora você pode voltar ao K2 para iniciar o Módulo.<br/>👉 E lembre‑se: estou aqui para ajudar se precisar!",
+      aboveThresholdModule: "✅ Atividade concluída, bravo!<br/>Você obteve <strong>{{score}}%</strong>.<br/><br/>Agora você pode voltar ao K2 e seguir para o próximo módulo.<br/>👉 Nos vemos em breve no próximo módulo!",
+      aboveThresholdFinal: "🎉 Parabéns, você chegou ao final do percurso! Você concluiu o quiz final com ótimo engajamento 👏<br/>Você obteve <strong>{{score}}%</strong>.<br/><br/>🔁 E claro, continuo disponível se quiser explorar mais temas ou tiver dúvidas depois.",
+      moduleNotFound: "Módulo não encontrado",
+      positioning: {
+        title: "Teste de posicionamento",
+        finalValidationTitle: "Teste de validação final",
+        titleWithCourse: "Teste de posicionamento – {{course}}",
+        description: "Esta avaliação permite determinar seu nível atual para um aprendizado personalizado.",
+        descriptionWithCourse: "Teste de posicionamento para o curso {{course}}. Esta avaliação cobre todos os módulos do curso para determinar seu nível atual nessa área.",
+        descriptionWithCourseFinale: "Quiz de validação final para o curso {{course}}. Esta avaliação cobre todos os módulos e permite validar os conhecimentos adquiridos nessa área.",
+        moduleTraining: "<p><strong>Agora proponho um quiz de treino para revisar o que você acabou de aprender. Esses quizzes foram elaborados para:</strong></p><ul><li>reforçar sua compreensão dos conceitos-chave,</li><li>ajudar a verificar que tudo foi assimilado,</li><li>prepará-lo com tranquilidade para o quiz final.</li></ul><p>📝 <em>Esses quizzes são para treinar no seu ritmo. E se alguma pergunta for difícil, estou aqui via chat para ajudar!</em></p>",
+        positioningFirstTime: "<p><strong>Bem‑vindo ao seu teste de posicionamento! Esta avaliação permite:</strong></p><ul><li>avaliar seu nível atual na área,</li><li>identificar seus pontos fortes e de melhoria,</li><li>personalizar seu percurso de aprendizagem.</li></ul><p>📝 <em>Tome seu tempo, não há pegadinhas. Uma pontuação de 57% ou mais confirma seu nível e dispensa o curso!</em></p>",
+        positioningRetry: "<p><strong>Você está refazendo o teste de posicionamento – ótima iniciativa! Esta nova tentativa permitirá:</strong></p><ul><li>medir seu progresso desde a última vez,</li><li>melhorar sua pontuação anterior,</li><li>consolidar seus conhecimentos.</li></ul><p>📝 <em>Você já conhece o princípio: 57% ou mais confirma seu nível e dispensa o curso!</em></p>",
+        finalValidation: "<p><strong>Parabéns, você chegou ao teste de validação final! Esta avaliação permite:</strong></p><ul><li>validar todos os conhecimentos adquiridos,</li><li>confirmar sua compreensão dos conceitos fundamentais,</li><li>finalizar oficialmente seu percurso de aprendizagem.</li></ul><p>📝 <em>Você se esforçou muito para chegar até aqui. Este teste marca o fim da sua formação – dê o seu melhor!</em></p>"
+      },
+      moduleEvaluation: {
+        description: "Teste seu nível nos temas deste módulo. Esta avaliação inclui quizzes interativos e questões abertas para validar seus conhecimentos e identificar pontos a aprofundar."
+      },
+      case: {
+        welcome: {
+          title: "Prepare-se para seu caso prático de treino",
+          startButton: "Começar",
+          introBlock: "<p><strong>Agora que você avançou bem no curso, proponho aplicar seus conhecimentos em um mini caso prático. Esta atividade permitirá:</strong></p><ul><li>aplicar noções-chave abordadas nos módulos,</li><li>mobilizar o que você aprendeu em uma situação concreta,</li><li>treinar para resolver um caso em contexto profissional.</li></ul><p>📝 <em>Esta atividade é principalmente um exercício de treino: reflita, mobilize o que aprendeu… e não hesite em me chamar via chat se precisar!</em></p>"
+        },
+        loading: {
+          generating: "Gerando seu caso prático de treino...",
+          correcting: "Corrigindo em andamento..."
+        },
+        labels: {
+          title: "Título",
+          context: "Contexto",
+          description: "Descrição",
+          instructions: "Instruções",
+          pedagogicalObjectives: "Objetivos pedagógicos"
+        },
+        placeholders: {
+          responseInput: "Redija sua resposta à avaliação..."
+        },
+        correction: {
+          title: "Resultados da avaliação",
+          score: "Pontuação obtida",
+          feedback: "Comentários detalhados",
+          submitted: "Sua avaliação foi enviada e corrigida com sucesso."
+        }
+      }
+    },
+    error: {
+      title: "Erro 404",
+      description: "Ops! Esta página não existe. A página que você procura pode ter sido movida, excluída ou você digitou um URL incorreto.",
+      goHomeButton: "Voltar ao início",
+      networkError: "Erro de conexão de rede",
+      authenticationFailed: "Falha na autenticação",
+      sessionExpired: "Sessão expirada",
+      invalidEmail: "Endereço de email inválido (domínio @skema.edu exigido)",
+      invalidCode: "Código de verificação inválido",
+      serverError: "Erro do servidor",
+      unknownError: "Ocorreu um erro desconhecido",
+      coursesLoadFailed: "Falha ao carregar cursos",
+      evaluationFailed: "Falha na geração da avaliação",
+      chatError: "Erro ao enviar mensagem",
+      topicsRequired: "Tópicos são obrigatórios",
+      levelRequired: "Nível é obrigatório para avaliações de caso",
+      weightsInvalid: "Os pesos devem estar entre 0 e 1",
+      weightsSumInvalid: "Os pesos MCQ e Aberto devem totalizar 1.0"
+    },
+    success: {
+      loginSuccess: "Login bem‑sucedido",
+      logoutSuccess: "Logout bem‑sucedido",
+      codeSent: "Código de verificação enviado",
+      evaluationGenerated: "Avaliação gerada com sucesso",
+      messageSent: "Mensagem enviada",
+      conversationUpdated: "Conversa atualizada",
+      coursesLoaded: "Cursos carregados com sucesso"
+    },
+    chat: {
+      references: "Referências",
+      viewReferences: "Ver referências",
+      sendMessage: "Enviar mensagem...",
+      greeting: {
+        title: "Bem‑vindo ao ChatAI!",
+        subtitle: "Sou seu assistente virtual. Estou aqui para ajudá‑lo a responder perguntas relacionadas aos conteúdos do RANPGE disponíveis no seu espaço K2.",
+        subtitleK2: "Clique na bolha 🔁 K2 para continuar seu progresso."
+      },
+      sidebar: {
+        newChat: "Novo chat",
+        pinned: "Fixadas",
+        recent: "Recentes"
+      }
+    },
+    deleteConversation: {
+      title: "Excluir conversa",
+      message: "Tem certeza de que deseja excluir esta conversa? Esta ação é irreversível.",
+      cancel: "Cancelar",
+      confirm: "Excluir"
+    },
+    dashboard: {
+      platform: "Plataforma RAN‑PGE",
+      lastLogin: "Último login",
+      positioningTests: "Quizzes de posicionamento",
+      totalEvaluations: "Número de avaliações realizadas",
+      activeCourses: "Cursos ativos",
+      daysActivity: "Dias de atividade",
+      positioningTest: "Quiz de posicionamento",
+      moduleProgress: "Progresso dos módulos",
+      courseEvaluations: "Avaliações do curso",
+      unlockedModules: "Módulos desbloqueados",
+      completed: "Concluídos",
+      score: "Pontuação",
+      attempts: "Tentativas",
+      evaluation: "Avaliação",
+      evaluationDistribution: "Distribuição das avaliações",
+      scoreEvolution: "Evolução das pontuações",
+      startLearning: "Comece seu percurso de aprendizagem!",
+      startDescription: "Inicie fazendo os testes de posicionamento para avaliar seu nível inicial.",
+      startNow: "Começar agora",
+      course: "Curso",
+      type: "Tipo",
+      status: {
+        passed: "Aprovado",
+        failed: "Reprovado",
+        notAttempted: "Não tentado"
+      },
+      evaluationType: {
+        positionnement: "Quiz de posicionamento",
+        module_mixed: "Quiz de treino",
+        module_case: "Casos práticos (opcionais)",
+        finale: "Quiz de validação final"
+      }
+    },
+    pdf: {
+      generatedOn: "Gerado em",
+      at: "às",
+      studyGuide: {
+        title: "Guia de estudo"
+      },
+      evaluation: {
+        title: "Avaliação de Caso Prático",
+        module: "Módulo",
+        score: "Pontuação",
+        strengths: "Pontos fortes",
+        improvements: "Pontos a melhorar",
+        comments: "Comentários detalhados"
+      },
+      conversation: {
+        you: "Você",
+        assistant: "Assistente"
+      }
+    }
   }
+}
+,
 };
 
 i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: localStorage.getItem('language') || 'fr',
-    fallbackLng: 'fr',
+    lng: localStorage.getItem('language') || 'en',
+    fallbackLng: 'en',
     interpolation: {
       escapeValue: false
     }

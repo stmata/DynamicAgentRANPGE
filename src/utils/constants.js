@@ -23,6 +23,8 @@ export const API_CONFIG = {
    */
   export const API_ENDPOINTS = {
     AUTH: {
+      SEND_CODE: '/api/auth/send-verification-code',
+      VERIFY_CODE: '/api/auth/verify-code',
       AZURE_LOGIN: '/api/auth/azure/login',
       REFRESH_TOKEN: '/api/auth/refresh-token',
       LOGOUT: '/api/auth/logout',
