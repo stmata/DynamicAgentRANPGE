@@ -22,6 +22,12 @@ class Prompt:
                 "según el texto", "según el documento", "según el contexto",
                 "según la imagen", "según el pasaje", "según el extracto",
                 "de acuerdo con el texto", "basado en el documento"
+            ],
+            "Portuguese (Brazil)": [
+                "segundo o texto", "de acordo com o documento", "segundo o contexto",
+                "segundo a imagem", "com base na passagem", "segundo o excerto",
+                "de acordo com o texto", "no texto", "no documento", "no contexto",
+                "como mencionado no", "como indicado no", "como descrito no"
             ]
         }
 
