@@ -89,7 +89,7 @@ const LoginScreen = () => {
     try {
       const response = await verifyCodeAndLogin(email, verificationCode);
       
-      if (response && response.status) {
+      if (response) {
         navigate(redirectPath, { replace: true });
       } else {
         throw new Error(t('login.errorInvalidResponse'));
@@ -144,7 +144,7 @@ const LoginScreen = () => {
                   id="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="prenom.nom@skema.edu"
+                  placeholder={t('login.emailPlaceholder')}
                   required
                 />
               </div>

@@ -6,9 +6,8 @@ import ProgressBar from './components/ProgressBar';
 import QuizSidebar from './components/QuizSidebar';
 import QuestionContent from './components/QuestionContent';
 import QuizDialogs from './components/QuizDialogs';
-//import { useNavigate } from 'react-router-dom';
-import { getK2ReturnUrl } from '../../utils/constants';
-import useCourses from '../../hooks/useCourses';
+import { useNavigate } from 'react-router-dom';
+//import useCourses from '../../hooks/useCourses';
 import './QuizContainer.css';
 
 /**
@@ -20,8 +19,8 @@ import './QuizContainer.css';
  */
 const QuizContainer = ({ moduleId, courseTitle, moduleTopics, isPositionnement }) => {
   const { t } = useTranslation();
-  const { selectedCourse } = useCourses();
-  //const navigate = useNavigate();
+  //const { selectedCourse } = useCourses();
+  const navigate = useNavigate();
 
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
@@ -58,13 +57,12 @@ const QuizContainer = ({ moduleId, courseTitle, moduleTopics, isPositionnement }
     setConfirmDialogOpen(true);
   };
 
-  /**
-   * Handles navigation back to course modules
-  */
-  const handleBackToModules = () => {
-      if (isLoading) return;
-      window.location.href = getK2ReturnUrl(selectedCourse);
-  };
+    /**
+     * Handles navigation back to course modules
+    */
+    const handleBackToModules = () => {
+      navigate(`/course-modules?course=${encodeURIComponent(courseTitle)}`);
+    };
 
   /**
    * Confirms and processes quiz submission

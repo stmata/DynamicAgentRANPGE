@@ -139,7 +139,7 @@ const QuizSidebar = ({
           disabled={!allQuestionsAnswered && !isLoading}
         >
           <i className="fas fa-arrow-left"></i>
-          <span>{t('common.backToK2')}</span>
+          <span>{t('common.backToModules')}</span>
         </button>
       </div>
     </div>

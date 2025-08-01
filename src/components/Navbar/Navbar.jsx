@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useSettings } from '../../contexts/SettingsContext';
@@ -18,7 +18,7 @@ const Navbar = () => {
   const { openSettings } = useSettings();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  //const location = useLocation();
+  const location = useLocation();
   
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef(null);
@@ -87,15 +87,15 @@ const Navbar = () => {
 
     /**
      * Navigate to home page
-     *
+     **/
     const handleHomeNavigation = () => {
       setIsProfileOpen(false);
       navigate('/');
-    };*/
+    };
 
   return (
     <div className={`navbar ${isDarkMode ? 'dark-mode' : ''}`}>
-      <div className="navbar-logo" /*onClick={() => navigate('/')}*/>
+      <div className="navbar-logo" onClick={() => navigate('/')}>
         <img src={logoImage} alt="Logo" className="logo-image" />
       </div>
       
@@ -111,20 +111,20 @@ const Navbar = () => {
         
         {isProfileOpen && (
           <div className="profile-dropdown">
-            {/*location.pathname === '/dashboard' && (
+            {location.pathname === '/dashboard' && (
               <div className="profile-dropdown-item" onClick={handleHomeNavigation}>
                 <span className="fas fa-home"></span>
                 <span>{t('common.home')}</span>
               </div>
-            )*/}
+            )}
             
-            {/*<div className="profile-dropdown-item" onClick={() => {
+            <div className="profile-dropdown-item" onClick={() => {
               setIsProfileOpen(false);
               navigate('/dashboard');
             }}>
               <span className="fas fa-dashboard"></span>
               <span>{t('navbar.dashboard')}</span>
-            </div>*/}
+            </div>
             
             <div className="profile-dropdown-item" onClick={() => {
               setIsProfileOpen(false);
@@ -134,12 +134,12 @@ const Navbar = () => {
               <span>{t('navbar.settings')}</span>
             </div>
             
-            {/*<div className="profile-dropdown-item logout" onClick={() => {
+           <div className="profile-dropdown-item logout" onClick={() => {
               handleLogout();
             }}>
               <span className="fas fa-sign-out-alt"></span>
               <span>{t('navbar.logout')}</span>
-            </div>*/}
+            </div>
           </div>
         )}
       </div>

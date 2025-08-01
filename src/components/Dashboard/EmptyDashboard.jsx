@@ -10,7 +10,7 @@ const EmptyDashboard = () => {
       <Target className="dashboard-empty-icon" />
       <h3 className="dashboard-empty-title">{t('dashboard.startLearning')}</h3>
       <p className="dashboard-empty-description">{t('dashboard.startDescription')}</p>
-      <BackToK2Section />
+      {/*<BackToK2Section />*/}
     </div>
   );
 };

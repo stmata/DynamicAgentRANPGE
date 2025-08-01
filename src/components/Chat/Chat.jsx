@@ -228,11 +228,11 @@ const Chat = ({ sidebarFloatingButton, onSidebarToggle }) => {
 
   /**
    * Navigate to home page
-   *
+   **/
   const handleNavigateHome = () => {
     setIsProfileOpen(false);
     navigate('/');
-  };*/
+  };
 
   /**
    * Navigate to Dahboard page
@@ -279,7 +279,7 @@ const Chat = ({ sidebarFloatingButton, onSidebarToggle }) => {
         loading={loadingConversations}
         isSmallScreen={isSmallScreen}
         translation={t}
-        floatingButton={sidebarFloatingButton}
+        //floatingButton={sidebarFloatingButton}
       />
 
       <main className="chat-main-content">
@@ -288,7 +288,7 @@ const Chat = ({ sidebarFloatingButton, onSidebarToggle }) => {
             userInitials={userInitials}
             isProfileOpen={isProfileOpen}
             setIsProfileOpen={setIsProfileOpen}
-            //onNavigateHome={handleNavigateHome}
+            onNavigateHome={handleNavigateHome}
             onNavigateDasboard={handleNavigateDashboard}
             onOpenSettings={handleOpenSettings}
             onLogout={handleLogout}

@@ -7,7 +7,7 @@ import CourseCard from '../../components/Dashboard/CourseCard';
 import EvaluationChart from '../../components/Dashboard/EvaluationChart';
 import ScoreEvolutionChart from '../../components/Dashboard/ScoreEvolutionChart';
 import EmptyDashboard from '../../components/Dashboard/EmptyDashboard';
-import BackToK2Section from '../../components/Dashboard/BackToK2Section';
+//import BackToK2Section from '../../components/Dashboard/BackToK2Section';
 import { Target, BookOpen, Award, Calendar } from 'lucide-react';
 import './DashboardScreen.css';
 
@@ -129,12 +129,12 @@ const DashboardScreen = () => {
               <EvaluationChart evaluations={evaluations} />
               <ScoreEvolutionChart evaluations={evaluations} />
             </div>
-            <div className="dashboard-empty-state" style={{marginTop: "1rem"}}>
+            {/*<div className="dashboard-empty-state" style={{marginTop: "1rem"}}>
               <p className="dashboard-empty-description">
                 {t('common.txtFloatiActionBtn')}
               </p>
               <BackToK2Section />
-            </div>
+            </div>*/}
           </>
         ) : (
           <EmptyDashboard />

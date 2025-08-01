@@ -47,10 +47,10 @@ const ChatScreen = () => {
         onSidebarToggle={setIsSidebarOpen}
       />
       
-      {/* FloatingChatButton for large screens - positioned outside sidebar */}
+      {/* FloatingChatButton for large screens - positioned outside sidebar 
       {!isSmallScreen && (
         <FloatingChatButton isK2Mode={true} intoSidebar={false} />
-      )}
+      )}*/}
     </div>
   );
 };

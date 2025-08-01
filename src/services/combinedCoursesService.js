@@ -47,11 +47,13 @@ class CombinedCoursesService {
         },
         shortDescription: {
           en: `Learn ${courseName} fundamentals and advanced concepts.`,
-          fr: `Apprenez les fondamentaux et concepts avancés de ${courseName}.`
+          fr: `Apprenez les fondamentaux et concepts avancés de ${courseName}.`,
+          "pt-BR": `Aprenda os fundamentos e conceitos avançados de ${courseName}.`
         },
         fullDescription: {
           en: `Complete course covering all aspects of ${courseName}. Master the essential skills and knowledge needed in this field.`,
-          fr: `Cours complet couvrant tous les aspects de ${courseName}. Maîtrisez les compétences et connaissances essentielles dans ce domaine.`
+          fr: `Cours complet couvrant tous les aspects de ${courseName}. Maîtrisez les compétences et connaissances essentielles dans ce domaine.`,
+          "pt-BR": `Curso completo cobrindo todos os aspectos de ${courseName}. Domine as habilidades e conhecimentos essenciais nesta área.`
         },
         image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&h=300&fit=crop",
         modules: courseData.totalModules || 0,

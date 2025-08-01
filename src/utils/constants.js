@@ -225,7 +225,8 @@ export const API_CONFIG = {
       'en': 'English',
       'es': 'Spanish',
       'de': 'German',
-      'it': 'Italian'
+      'it': 'Italian',
+      'pt-BR': 'Portuguese (Brazil)'
     },
     DEFAULT_LANGUAGE: 'French'
   };

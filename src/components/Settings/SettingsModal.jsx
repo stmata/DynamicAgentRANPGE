@@ -46,6 +46,7 @@ const SettingsModal = () => {
             >
               <option value="fr">{t('settings.french')}</option>
               <option value="en">{t('settings.english')}</option>
+              <option value="pt-BR">{t('settings.portuguese')}</option>
             </select>
           </div>
 

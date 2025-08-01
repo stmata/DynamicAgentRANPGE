@@ -8,15 +8,11 @@ import CardAssessment from '../../assets/images/ranking.png';
 const CourseCard = ({ course, onStartCourse, index, lang }) => {
   const { t } = useTranslation();
 
-  if (!(course.title.en === 'Positionnement' || course.title.fr === 'Positionnement')) {
-    return null;
-  }
-
   const getImageToUse = () => {
-    if (course.title.en === 'Positionnement' || course.title.fr === 'Positionnement') {
-      return CardAssessment;
-    }
-    return index % 2 === 0 ? CardImage : CardImage2;
+      if (course.title.en === 'Positionnement' || course.title.fr === 'Positionnement') {
+        return CardAssessment;
+      }
+      return index % 2 === 0 ? CardImage : CardImage2;
   };
 
   const imageToUse = getImageToUse();

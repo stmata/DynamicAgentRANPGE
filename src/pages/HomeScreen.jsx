@@ -34,16 +34,16 @@ const HomeScreen = () => {
 
   return (
     <>
-      {/*<ImageSlider />*/}
+      <ImageSlider />
       <section className="description">
         <h2>{t('home.title')}</h2>
         <p style={{ fontWeight: 'bold', marginTop: '1em' }}>{t('home.descriptionP1')}</p>
         <p style={{ fontWeight: 'bold', marginTop: '1em' }}>{t('home.descriptionP2')}</p>
         <p style={{ fontWeight: 'bold', marginTop: '1em' }}>{t('home.descriptionP3')}</p>
-        {/*<div style={{ fontWeight: 'bold', marginTop: '1em' }}>
+        <div style={{ fontWeight: 'bold', marginTop: '1em' }}>
           <div>⚠️</div>
           {t('home.notice')}
-        </div>*/}
+        </div>
         
         <div className="scroll-indicator" onClick={scrollToContent}>
           <div className="scroll-arrow">

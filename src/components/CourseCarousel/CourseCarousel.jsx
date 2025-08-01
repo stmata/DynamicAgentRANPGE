@@ -5,7 +5,7 @@ import CourseCard from '../CourseCard/CourseCard';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useAuth } from '../../contexts/AuthContext';
-import { getStaticCourses, createPositionnementCard } from '../../services/courseService';
+import { createPositionnementCard } from '../../services/courseService';
 import combinedCoursesService from '../../services/combinedCoursesService';
 import { useCourses } from '../../hooks/useCourses';
 import './CourseCarousel.css';
@@ -31,33 +31,6 @@ const CourseCarousel = () => {
   const [courseSelectionDialogOpen, setCourseSelectionDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  /**
-   * Transform API course data to card format using local cache
-   * @param {string} courseName - Name of the course
-   * @param {Object} courseData - Course data from local cache
-   * @returns {Object} Formatted course card object
-   */
-  const transformApiCourseToCard = (courseName, courseData) => {
-    return {
-      id: `api_${courseName.toLowerCase().replace(/\s+/g, '_')}`,
-      title: {
-        en: courseName,
-        fr: courseName
-      },
-      shortDescription: {
-        en: `Learn ${courseName} fundamentals and advanced concepts.`,
-        fr: `Apprenez les fondamentaux et concepts avancés de ${courseName}.`
-      },
-      fullDescription: {
-        en: `Complete course covering all aspects of ${courseName}. Master the essential skills and knowledge needed in this field.`,
-        fr: `Cours complet couvrant tous les aspects de ${courseName}. Maîtrisez les compétences et connaissances essentielles dans ce domaine.`
-      },
-      image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&h=300&fit=crop",
-      modules: courseData.totalModules || Object.keys(courseData.modules || {}).length || 0,
-      isActive: true
-    };
-  };
 
   /**
    * Build cards from cached courses with progression + positioning card
@@ -89,13 +62,11 @@ const CourseCarousel = () => {
             allCourses,
             user.course_progress
           );
-          
           cards.push(...coursesWithProgress);
           
           setAllCoursesForSelection([createPositionnementCard(), ...allCoursesForSelectionData]);
         }
       }
-      
       setAllCards(cards);
     } catch (err) {
       console.error('Error loading courses with progression:', err);
@@ -280,14 +251,14 @@ const CourseCarousel = () => {
           >
             <div 
               className="carousel-container"
-              style={{ 
-                transform: `translateX(-${currentIndex * cardWidth}px)`,
-              }}
               /*style={{ 
+                transform: `translateX(-${currentIndex * cardWidth}px)`,
+              }}*/
+              style={{ 
                 transform: `translateX(-${currentIndex * cardWidth}px)`,
                 justifyContent: 'center',
                 display: 'flex'
-              }}*/
+              }}
             >
               {allCards.map((course, index) => (
                 <div className="carousel-item" key={course.id}>

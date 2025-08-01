@@ -2,8 +2,7 @@ import { API_CONFIG } from '../../utils/constants';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
-//import { useNavigate, useLocation } from 'react-router-dom';
-import {useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './CourseInfo.css';
 
 /**
@@ -24,7 +23,7 @@ const CourseInfo = ({
   const { t } = useTranslation();
   const { isDarkMode } = useTheme();
   const { getCourseScore } = useAuth();
-  //const navigate = useNavigate();
+  const navigate = useNavigate();
   const location = useLocation();
   
   const courseScore = getCourseScore(courseName);
@@ -37,8 +36,8 @@ const CourseInfo = ({
    * Handle navigation to course modules
    */
   const handleModulesClick = () => {
-    //navigate(`/course-modules?course=${encodeURIComponent(courseName)}`);
-    window.location.href = API_CONFIG.BACKTOK2;
+    navigate(`/course-modules?course=${encodeURIComponent(courseName)}`);
+    //window.location.href = API_CONFIG.BACKTOK2;
   };
 
   return (

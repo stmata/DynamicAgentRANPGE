@@ -4,7 +4,6 @@ import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, B
 import { useTheme } from '../../../contexts/ThemeContext';
 import { generateStudyGuidePDF } from '../../../utils/pdfGenerator';
 import { isFinalEvaluation } from '../../../utils/helpers.js';
-import { getK2ReturnUrl } from '../../../utils/constants.js';
 
 /**
  * Quiz dialogs component containing all Material-UI dialogs
@@ -325,21 +324,7 @@ const QuizDialogs = ({
           borderColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
           padding: '16px 24px'
         }}>
-          {isFinal ? (
-            <Button 
-              onClick={() => window.location.href = getK2ReturnUrl()}
-              variant="contained"
-              sx={{
-                backgroundColor: isDarkMode ? 'var(--primary)' : 'var(--primary)',
-                '&:hover': {
-                  backgroundColor: isDarkMode ? 'var(--primary-dark)' : 'var(--primary-dark)'
-                }
-              }}
-            >
-              {t('common.backToK2')}
-            </Button>
-          ) : (
-            <Button 
+          <Button 
               onClick={() => {
                 setSuccessDialogOpen(false);
                 if (onSuccessDialogClose) {
@@ -356,7 +341,6 @@ const QuizDialogs = ({
             >
               {t('common.ok')}
             </Button>
-          )}
         </DialogActions>
       </Dialog>
       

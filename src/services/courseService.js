@@ -18,11 +18,13 @@ export const transformApiCourseToCard = (courseData) => {
     },
     shortDescription: {
       en: `Learn ${courseData.course_name} fundamentals and advanced concepts.`,
-      fr: `Apprenez les fondamentaux et concepts avancés de ${courseData.course_name}.`
+      fr: `Apprenez les fondamentaux et concepts avancés de ${courseData.course_name}.`,
+      "pt-BR": `Aprenda os fundamentos e conceitos avançados de ${courseData.course_name}.`
     },
     fullDescription: {
       en: `Complete course covering all aspects of ${courseData.course_name}. Master the essential skills and knowledge needed in this field.`,
-      fr: `Cours complet couvrant tous les aspects de ${courseData.course_name}. Maîtrisez les compétences et connaissances essentielles dans ce domaine.`
+      fr: `Cours complet couvrant tous les aspects de ${courseData.course_name}. Maîtrisez les compétences et connaissances essentielles dans ce domaine.`,
+      "pt-BR": `Curso completo cobrindo todos os aspectos de ${courseData.course_name}. Domine as habilidades e conhecimentos essenciais nesta área.`
     },
     image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&h=300&fit=crop",
     modules: courseData.total_modules || 0,
@@ -46,11 +48,13 @@ export const createPositionnementCard = () => {
     title: { en: 'Positionnement', fr: 'Positionnement' },
     shortDescription: { 
       en: 'Assess your current level to get started.',
-      fr: 'Évaluez votre niveau pour commencer.'
+      fr: 'Évaluez votre niveau pour commencer.',
+      'pt-BR': 'Avalie seu nível atual para começar.'
     },
     fullDescription: { 
       en: "This initial assessment helps identify your current skills to tailor the learning path to your needs. It's the first step to ensure personalized and effective progress.",
-      fr: "Cette évaluation initiale permet d'identifier vos compétences actuelles afin d'adapter le parcours d'apprentissage à vos besoins. C'est une étape clé pour progresser efficacement."
+      fr: "Cette évaluation initiale permet d'identifier vos compétences actuelles afin d'adapter le parcours d'apprentissage à vos besoins. C'est une étape clé pour progresser efficacement.",
+      'pt-BR': "Esta avaliação inicial ajuda a identificar suas habilidades atuais para personalizar o caminho de aprendizagem conforme suas necessidades. É o primeiro passo para garantir um progresso eficaz e personalizado."
     },
     isActive: true,
     modules: i18n.t('courseModules.all')

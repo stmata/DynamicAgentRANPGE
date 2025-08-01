@@ -30,6 +30,35 @@ export const useAuth = () => {
   const lastActivityRef = useRef(Date.now());
 
   /**
+   * Hash user ID for security
+   */
+  const hashUserId = useCallback(async (userId) => {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(userId);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }, []);
+
+  /**
+   * Clear authentication state and storage
+   */
+  const clearAuthState = useCallback(() => {
+    setIsAuthenticated(false);
+    setUser(null);
+    storage.clearAll();
+  }, []);
+
+  /**
+   * Set authentication state with user data
+   */
+  const setAuthState = useCallback((userData) => {
+    setIsAuthenticated(true);
+    setUser(userData);
+    storage.setUserSessionWithTTL(userData);
+  }, []);
+
+  /**
    * Send verification code to email
    */
   const sendVerificationCode = useCallback(async (email) => {
@@ -66,7 +95,7 @@ export const useAuth = () => {
         );
         const userHash = await hashUserId(response.user_id);
         
-        const userData = {
+        let userData = {
           id: response.user_id,
           user_hash: userHash,
           username: email.split('@')[0],
@@ -96,7 +125,7 @@ export const useAuth = () => {
         }
         storage.setUserSessionWithTTL(userData, 24 * 60 * 60 * 1000);
         window.dispatchEvent(new CustomEvent('auth:login', { detail: userData }));
-        return true;
+        return response.status;
       } else {
         throw new Error('Invalid verification response');
       }
@@ -108,35 +137,6 @@ export const useAuth = () => {
     }
   }, [hashUserId, setAuthState]);
   
-
-  /**
-   * Clear authentication state and storage
-   */
-  const clearAuthState = useCallback(() => {
-    setIsAuthenticated(false);
-    setUser(null);
-    storage.clearAll();
-  }, []);
-
-  /**
-   * Set authentication state with user data
-   */
-  const setAuthState = useCallback((userData) => {
-    setIsAuthenticated(true);
-    setUser(userData);
-    storage.setUserSessionWithTTL(userData);
-  }, []);
-
-  /**
-   * Hash user ID for security
-   */
-  const hashUserId = useCallback(async (userId) => {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(userId);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  }, []);
 
    /**
    * Extract authentication tokens from URL parameters

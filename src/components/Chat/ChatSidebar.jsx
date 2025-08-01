@@ -1,5 +1,5 @@
 import React, { forwardRef } from 'react';
-//import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { Icons } from '../SharedChatComponents/SharedChatComponents';
 import { getConversationTitle, getConversationTime, normalizeConversation } from '../../utils/helpers';
@@ -37,9 +37,9 @@ const ChatSidebar = forwardRef(({
   onDeleteConversation,
   loading,
   translation,
-  floatingButton
+  //floatingButton
 }, ref) => {
-  //const navigate = useNavigate();
+  const navigate = useNavigate();
   const { isDarkMode } = useTheme();
 
   /**
@@ -87,7 +87,7 @@ const ChatSidebar = forwardRef(({
         className={`chat-sidebar ${!isOpen ? 'chat-sidebar-collapsed' : 'active'}`}
       >
         <div className="chat-sidebar-header">
-          <div className="chat-logo" /*onClick={() => navigate('/')}*/>
+          <div className="chat-logo" onClick={() => navigate('/')}>
             <img src={isDarkMode ? logo_dark : logo_light} alt="Logo" className="chat-logo-img" />
           </div>
           <button className="chat-sidebar-toggle" onClick={onToggle}>
@@ -131,7 +131,7 @@ const ChatSidebar = forwardRef(({
           )}
         </div>
         {/* FloatingChatButton for small screens */}
-        {floatingButton}
+        {/*floatingButton*/}
       </aside>
 
       {!isOpen && (
